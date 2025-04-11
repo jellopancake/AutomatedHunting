@@ -182,8 +182,7 @@ void loopDoubleJumpAttack(Key dir, int repeatCount){
    pressDownButton(dir);
    for (int i = 0; i < repeatCount; i++) {
       doubleJumpAttack(dir);
-      //delay(230); DW delay
-      delay(280);
+      delay(230);
    }
    resetButton(dir);
 }
@@ -200,8 +199,7 @@ void doubleJumpAttackOnce(Key dir){
 void doubleJumpAttack(Key dir){
    delay(100);
    pressButton(altJump);
-   //delay(125); DW Delay
-   delay(175); //Pally delay
+   delay(125);
    pressDownButton(jump);
    delay(100);
    pressButton(mainAttack);

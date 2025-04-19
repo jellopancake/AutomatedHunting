@@ -2,11 +2,13 @@
 #include <Servo.h>
 
 // Declare the Servo pin 
-int servo_down_right = 3;
-int servo_ctrl_left = 4;
-int servo_alt_space = 5;
-int servo_X_C = 6;
-int servo_alt_space_2 = 7;
+int servo_alt_space_2 = 3;
+int servo_F_G = 4;
+int servo_H_J = 5;
+int servo_alt_space = 6;
+int servo_colon_apostrophe = 7;
+int servo_ctrl_left = 8;
+int servo_down_right = 9;
 
 // Declare the start/stop button pin
 int button_start_stop = 2;
@@ -19,31 +21,36 @@ int start_stop_updated = 0;
 
 int stop_program = 0;
 
-enum Key{LEFT, RIGHT, DOWN, F, G, ALT, CTRL, SPACE, SPACE2};
+enum Key{LEFT, RIGHT, DOWN, F, G, H, J, COLON, APOS, ALT, CTRL, SPACE, SPACE2};
    Key left = LEFT;
    Key right = RIGHT;
    Key down = DOWN;
+   Key up = APOS;
    Key jump = SPACE;
    Key altJump = SPACE2;
    Key skill1 = CTRL;
+   Key skill2 = H;
+   Key skill3 = J;
+   Key skill4 = COLON;
    Key fountain = ALT;
    Key mainAttack = F;
    Key ropelift = G;
 
-
 // Create a servo object 
-Servo Servo1, Servo2, Servo3, Servo4, Servo5; 
+Servo Servo1, Servo2, Servo3, Servo4, Servo5, Servo6, Servo7;
 void setup() { 
    // open serial port at 9600 bps
    Serial.begin(9600);
    while(!Serial);
 
-   // We need to attach the servo to pins 3-7
+   // We need to attach the servo to pins 3-9
    Servo1.attach(servo_alt_space_2); 
-   Servo2.attach(servo_X_C); 
-   Servo3.attach(servo_alt_space); 
-   Servo4.attach(servo_ctrl_left); 
-   Servo5.attach(servo_down_right); 
+   Servo2.attach(servo_F_G); 
+   Servo3.attach(servo_H_J); 
+   Servo4.attach(servo_alt_space); 
+   Servo5.attach(servo_colon_apostrophe);
+   Servo6.attach(servo_ctrl_left); 
+   Servo7.attach(servo_down_right); 
 
    // Attach start/stop button to pin 2
    pinMode(button_start_stop, INPUT_PULLUP);
@@ -54,6 +61,8 @@ void setup() {
    Servo3.write(90);
    Servo4.write(90);
    Servo5.write(90);
+   Servo6.write(90);
+   Servo7.write(90);
 }
 
 void loop(){ 
@@ -336,37 +345,50 @@ void startProgram(){
 
 // Servo Legend for angles required to press keyboard keys //////////////////////////////////////////////////////////////////////////////////////////////////
 // Servo 1
-// Angle 40 press right
-// Angle 150 press down
-// Servo 2
-// Angle 40 press left
-// Angle 150 press ctrl
-// Servo 3
-// Angle 20 press alt
-// Angle 150 press space
-// Servo 4
-// Angle 40 press F
-// Angle 140 press G
-// Servo 5
 // Angle 30 press space
 // Angle 160 press alt
+// Servo 2
+// Angle 40 press F
+// Angle 130 press G
+// Servo 3
+// Angle 40 press H
+// Angle 130 press J
+// Servo 4
+// Angle 20 press alt
+// Angle 150 press space
+// Servo 5
+// Angle 40 press colon
+// Angle 130 press apostrophe
+// Servo 6
+// Angle 40 press left
+// Angle 150 press ctrl
+// Servo 7
+// Angle 40 press right
+// Angle 150 press down
+
 
 Servo keyToServo (Key key){
    checkStartStop();
-   if(key == RIGHT || key == DOWN){
+   if(key == SPACE){
       return Servo1;
    }
-   else if(key == CTRL || key == LEFT){
+   else if(key == F || key == G){
       return Servo2;
    }
-   else if(key == ALT || key == SPACE2){
+   else if(key == H || key == J){
       return Servo3;
    }
-   else if(key == F || key == G){
+   else if(key == ALT || key == SPACE2){
       return Servo4;
    }
-   else if(key == SPACE){
+   else if(key == COLON || key == APOS){
       return Servo5;
+   }
+   else if(key == CTRL || key == LEFT){
+      return Servo6;
+   }
+   else if(key == RIGHT || key == DOWN){
+      return Servo7;
    }
    else{
       Serial.println("No servo found");
@@ -388,11 +410,23 @@ int keyToAngle (Key key){
    else if(key == LEFT){
       return 40;
    }
+   else if(key == COLON){
+      return 40;
+   }
+   else if(key == APOS){
+      return 130;
+   }
    else if(key == F){
       return 40;
    }
    else if(key == G){
-      return 140;
+      return 130;
+   }
+   else if(key == H){
+      return 40;
+   }
+   else if(key == J){
+      return 130;
    }
    else if(key == ALT){
       return 20;

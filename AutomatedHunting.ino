@@ -99,17 +99,18 @@ void loop(){
       walk(right, 1.5);
       ropeLift();
       doubleJumpAttackOnce(left);
-      walk(left, 1.3);
+      walk(left, 1.4);
       downJump();
       delay(200);
       shortDoubleJumpAttack(left);
+      walk(right, 0.2);
       doubleJumpAttackOnce(left);
-      walk(left, 0.7);
+      walk(left, 0.5);
       downJump();
       walk(left, 0.9);
       shortDoubleJumpAttack(right);
       loopDoubleJumpAttack(right, 2);
-      walk(right, 1.1);
+      walk(right, 0.9);
       doubleJumpAttackOnce(right);
       walkAttack(left, 1);
       doubleJumpAttackOnce(right);
@@ -157,6 +158,7 @@ void flatMobbingRotation(Key dir, int repeatCount){
       }
       ropeLift();
       jumpAttack(left);
+      delay(100);
       shortDoubleJumpAttack(right);
       downJump();
       loopDoubleJumpAttack(dir, repeatCount-3);
@@ -191,7 +193,7 @@ void loopDoubleJumpAttack(Key dir, int repeatCount){
    pressDownButton(dir);
    for (int i = 0; i < repeatCount; i++) {
       doubleJumpAttack(dir);
-      delay(230);
+      delay(280);
    }
    resetButton(dir);
 }
@@ -208,7 +210,7 @@ void doubleJumpAttackOnce(Key dir){
 void doubleJumpAttack(Key dir){
    delay(100);
    pressButton(altJump);
-   delay(125);
+   delay(230);
    pressDownButton(jump);
    delay(100);
    pressButton(mainAttack);

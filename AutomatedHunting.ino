@@ -101,7 +101,7 @@ void loop(){
       doubleJumpAttackOnce(right);
       walkAttack(left, 1);
       doubleJumpAttackOnce(right);
-      customDelay(100);
+      customDelay(300);
 
       if(start_stop_updated == 1){
          stopProgram();
@@ -111,7 +111,7 @@ void loop(){
    }
 
    checkStartStop();
-   customDelay(500);
+   delay(500);
    if(start_stop_updated == 1){
       startProgram();
    }
@@ -127,11 +127,9 @@ void flatMobbingRotation(Key dir, int repeatCount){
    if(random(1, 100) >= 50){
       walk(dir, random(600, 700)/1000.0);
    } else{
-      walk(dir, random(300, 400)/1000.0);
-      customDelay(100);
       jumpAttack(dir);
-      customDelay(200);
       randomJump = 1;
+      customDelay(200);
    }
 
    customDelay(200);

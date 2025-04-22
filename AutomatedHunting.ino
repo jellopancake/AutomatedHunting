@@ -69,27 +69,15 @@ void loop(){
 
    while(stop_program == 0){
       
-
       // Mobbing Rotation
       for(int i = 0; i < 2; i++){
          flatMobbingRotation(left, 5);
-         
-         if(start_stop_updated == 1){
-            break;
-         }
          flatMobbingRotation(right, 5);
 
-         if(start_stop_updated == 1){
-            break;
-         }
-      }
-      if(start_stop_updated == 1){
-         stopProgram();
-         break;
       }
      
       // Loot rotation
-      delay(300);
+      customDelay(300);
       doubleJumpAttackOnce(left);
       ropeLift();
       pressButton(mainAttack);
@@ -101,7 +89,7 @@ void loop(){
       doubleJumpAttackOnce(left);
       walk(left, 1.3);
       downJump();
-      delay(200);
+      customDelay(200);
       shortDoubleJumpAttack(left);
       doubleJumpAttackOnce(left);
       walk(left, 0.7);
@@ -113,7 +101,7 @@ void loop(){
       doubleJumpAttackOnce(right);
       walkAttack(left, 1);
       doubleJumpAttackOnce(right);
-      delay(100);
+      customDelay(100);
 
       if(start_stop_updated == 1){
          stopProgram();
@@ -123,7 +111,7 @@ void loop(){
    }
 
    checkStartStop();
-   delay(500);
+   customDelay(500);
    if(start_stop_updated == 1){
       startProgram();
    }
@@ -140,13 +128,13 @@ void flatMobbingRotation(Key dir, int repeatCount){
       walk(dir, random(600, 700)/1000.0);
    } else{
       walk(dir, random(300, 400)/1000.0);
-      delay(100);
+      customDelay(100);
       jumpAttack(dir);
-      delay(200);
+      customDelay(200);
       randomJump = 1;
    }
 
-   delay(200);
+   customDelay(200);
 
    if(dir == left){
       if(randomJump == 0){
@@ -168,15 +156,15 @@ void flatMobbingRotation(Key dir, int repeatCount){
    }
    else{
       loopDoubleJumpAttack(dir, repeatCount);
-      delay(100);
+      customDelay(100);
    }
 }
 
 // Places down erda fountain
 void placeSummon(){
-   delay(500);
+   customDelay(500);
    pressButton(fountain);
-   delay(500);
+   customDelay(500);
 }
 
 // Walks in a given direction while attacking
@@ -186,12 +174,12 @@ void walkAttack(Key dir, float holdTime){
    holdButton(dir, holdTime/2);
 }
 
-// Loops flashjump attack with a given number of repeats and chosen delay
+// Loops flashjump attack with a given number of repeats and chosen customDelay
 void loopDoubleJumpAttack(Key dir, int repeatCount){
    pressDownButton(dir);
    for (int i = 0; i < repeatCount; i++) {
       doubleJumpAttack(dir);
-      delay(230);
+      customDelay(230);
    }
    resetButton(dir);
 }
@@ -201,43 +189,43 @@ void doubleJumpAttackOnce(Key dir){
    pressDownButton(dir);
    doubleJumpAttack(dir);
    resetButton(dir);
-   delay(200);
+   customDelay(200);
 }
 
 // Performs a flashjump in a given direction with an attack
 void doubleJumpAttack(Key dir){
-   delay(100);
+   customDelay(100);
    pressButton(altJump);
-   delay(125);
+   customDelay(125);
    pressDownButton(jump);
-   delay(100);
+   customDelay(100);
    pressButton(mainAttack);
    resetButton(jump);
-   delay(100);
+   customDelay(100);
 }
 
 // Performs a shorter flashjump in a given direction with an attack
 void shortDoubleJumpAttack(Key dir){
    pressDownButton(dir);
-   delay(400);
+   customDelay(400);
    pressButton(altJump);
-   delay(350);
+   customDelay(330);
    pressDownButton(jump);
-   delay(100);
+   customDelay(100);
    pressDownButton(mainAttack);
-   delay(350);
+   customDelay(350);
    resetButton(mainAttack);
    resetButton(jump);
    resetButton(dir);
-   delay(250);
+   customDelay(250);
 }
 
 // Performs a flashjump in a given direction
 void doubleJump(Key dir){
    pressButton(altJump);
-   delay(200);
+   customDelay(200);
    pressButton(jump);
-   delay(200);   
+   customDelay(200);   
 }
 
 // Walks in a given direction
@@ -248,7 +236,7 @@ void walk(Key dir, float holdTime){
 // Performs a jump in a given direction with an attack
 void jumpAttack(Key dir){
    pressDownButton(dir);
-   delay(200);
+   customDelay(200);
    pressButton(jump);
    pressButton(mainAttack);
    resetButton(dir);
@@ -257,62 +245,82 @@ void jumpAttack(Key dir){
 
 // Uses skill1
 void useSkill1(){
-   delay(500);
+   customDelay(500);
    pressButton(skill1);
-   delay(1000);
+   customDelay(1000);
 }
 
 // Performs ropelift to bring the character to the highest platform above it
 void ropeLift(){
-   delay(600);
+   customDelay(600);
    pressButton(ropelift);
-   delay(1300);
+   customDelay(1300);
 }
 
 // Performs a downjump to bring the character one platform below it
 void downJump(){
-   delay(200);
+   customDelay(200);
    pressDownButton(down);
-   delay(300);
+   customDelay(300);
    pressButton(jump);
-   delay(200);
+   customDelay(200);
    resetButton(down);
-   delay(300);
+   customDelay(300);
 }
 
 // Basic button input control //////////////////////////////////////////////////////////////////////////////////////////////////
 void pressButton(Key key){
-   int angle = keyToAngle(key);
-   Servo servo = keyToServo(key);
+   if(!program_stopped()){
+      int angle = keyToAngle(key);
+      Servo servo = keyToServo(key);
    
-   servo.write(angle);
-   delay(200);
-   servo.write(90);
+      servo.write(angle);
+      customDelay(200);
+      servo.write(90);
+   }
 }
 
 void holdButton(Key key, float holdTime){
-   int angle = keyToAngle(key);
-   Servo servo = keyToServo(key);
+   if(!program_stopped()){
+      int angle = keyToAngle(key);
+      Servo servo = keyToServo(key);
 
-   servo.write(angle);
-   delay(holdTime*1000);
-   servo.write(90);
+      servo.write(angle);
+      customDelay(holdTime*1000);
+      servo.write(90);
+   }
 }
 
 void pressDownButton(Key key){
-   int angle = keyToAngle(key);
-   Servo servo = keyToServo(key);
+   if(!program_stopped()){
+      int angle = keyToAngle(key);
+      Servo servo = keyToServo(key);
    
-   servo.write(angle);
+      servo.write(angle);
+   }
 }
 
 void resetButton(Key key){
-   Servo servo = keyToServo(key);
+   if(!program_stopped()){
+      Servo servo = keyToServo(key);
    
-   servo.write(90);
+      servo.write(90);
+   }
+}
+
+// Allows us to skip delays if the program has been stopped
+void customDelay(int time){
+   if(!program_stopped()){
+      delay(time);
+   }
 }
 
 // Start/Stop functionality ///////////////////////////////////////////////////////////////////////
+
+// Checks if the program has been stopped
+bool program_stopped(){
+   return start_stop_updated == 1;
+}
 
 // Checks if the start/stop button is pressed
 void checkStartStop(){
@@ -323,24 +331,28 @@ void checkStartStop(){
 
 // Stops the current mobbing rotation and resets servos to starting positions and fulfills the update required by the start/stop button
 void stopProgram(){
+   start_stop_updated = 0;
+   stop_program = 1;
+   
+   // reset servo positions
    Servo1.write(90);
    Servo2.write(90);
    Servo3.write(90);
    Servo4.write(90);
    Servo5.write(90);
    
-   start_stop_updated = 0;
-   stop_program = 1;
-   delay(1000);
+   delay(1200);
 }
 
 // Restarts the mobbing rotation and moves the character to the starting position and fulfills the update required by the start/stop button
 void startProgram(){
-   flatMobbingRotation(right, 5);
-
    start_stop_updated = 0;
    stop_program = 0;
-   delay(1000);
+   
+   delay(1200);
+
+   flatMobbingRotation(right, 5);
+   customDelay(1000);
 }
 
 // Servo Legend for angles required to press keyboard keys //////////////////////////////////////////////////////////////////////////////////////////////////

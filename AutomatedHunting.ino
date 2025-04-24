@@ -98,7 +98,7 @@ void loop(){
       walk(left, 0.9);
       shortDoubleJumpAttack(right);
       loopDoubleJumpAttack(right, 2);
-      walk(right, 0.9);
+      walk(right, 0.8);
       doubleJumpAttackOnce(right);
       walkAttack(left, 1);
       doubleJumpAttackOnce(right);

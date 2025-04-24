@@ -196,7 +196,7 @@ void doubleJumpAttackOnce(Key dir){
 void doubleJumpAttack(Key dir){
    customDelay(100);
    pressButton(altJump);
-   customDelay(230);
+   customDelay(210);
    pressDownButton(jump);
    customDelay(100);
    pressButton(mainAttack);

@@ -146,7 +146,7 @@ void flatMobbingRotation(Key dir, int repeatCount){
       shortDoubleJumpAttack(right);
       downJump();
       loopDoubleJumpAttack(dir, repeatCount-3);
-      walk(left, 0.7);
+      walk(left, 0.6);
       doubleJumpAttackOnce(dir);
       shortDoubleJumpAttack(dir);
       downJump();
@@ -338,6 +338,8 @@ void stopProgram(){
    Servo3.write(90);
    Servo4.write(90);
    Servo5.write(90);
+   Servo6.write(90);
+   Servo7.write(90);
    
    delay(1200);
 }

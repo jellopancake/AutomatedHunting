@@ -82,25 +82,26 @@ void loop(){
       ropeLift();
       pressButton(mainAttack);
       placeSummon();
-      useSkill1();
+      customDelay(200);
       jumpAttack(left);      
       walk(right, 1.5);
       ropeLift();
-      doubleJumpAttackOnce(left);
-      walk(left, 1.4);
-      downJump();
       customDelay(200);
-      walk(right, 0.3);
+      walk(left, 0.4);
+      doubleJumpAttackOnce(left);
+      walk(left, 1.7);
+      downJump();
+      useSkill1();
       shortDoubleJumpAttack(left);
       doubleJumpAttackOnce(left);
       walk(left, 0.5);
       downJump();
       walk(left, 0.9);
-      shortDoubleJumpAttack(right);
-      loopDoubleJumpAttack(right, 2);
-      walk(right, 0.8);
+      loopDoubleJumpAttack(right, 3);
+      walk(right, 1);
       doubleJumpAttackOnce(right);
       walkAttack(left, 1);
+      walk(right, 0.4);
       doubleJumpAttackOnce(right);
       customDelay(300);
 
@@ -148,15 +149,15 @@ void flatMobbingRotation(Key dir, int repeatCount){
       shortDoubleJumpAttack(right);
       downJump();
       loopDoubleJumpAttack(dir, repeatCount-3);
-      walk(left, 0.5);
+      walk(dir, 1.4);
       doubleJumpAttackOnce(dir);
       shortDoubleJumpAttack(dir);
       downJump();
       
    }
    else{
-      loopDoubleJumpAttack(dir, repeatCount);
-      customDelay(100);
+      customDelay(200);
+      loopDoubleJumpAttack(dir, repeatCount+1);
    }
 }
 
@@ -196,7 +197,7 @@ void doubleJumpAttackOnce(Key dir){
 void doubleJumpAttack(Key dir){
    customDelay(100);
    pressButton(altJump);
-   customDelay(210);
+   customDelay(180);
    pressDownButton(jump);
    customDelay(100);
    pressButton(mainAttack);
@@ -209,7 +210,7 @@ void shortDoubleJumpAttack(Key dir){
    pressDownButton(dir);
    customDelay(400);
    pressButton(altJump);
-   customDelay(340);
+   customDelay(280);
    pressDownButton(jump);
    customDelay(100);
    pressDownButton(mainAttack);

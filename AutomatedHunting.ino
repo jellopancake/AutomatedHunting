@@ -90,8 +90,8 @@ void loop(){
       walk(left, 1.4);
       downJump();
       customDelay(200);
+      walk(right, 0.3);
       shortDoubleJumpAttack(left);
-      walk(right, 0.2);
       doubleJumpAttackOnce(left);
       walk(left, 0.5);
       downJump();
@@ -148,7 +148,7 @@ void flatMobbingRotation(Key dir, int repeatCount){
       shortDoubleJumpAttack(right);
       downJump();
       loopDoubleJumpAttack(dir, repeatCount-3);
-      walk(left, 0.6);
+      walk(left, 0.5);
       doubleJumpAttackOnce(dir);
       shortDoubleJumpAttack(dir);
       downJump();
@@ -209,7 +209,7 @@ void shortDoubleJumpAttack(Key dir){
    pressDownButton(dir);
    customDelay(400);
    pressButton(altJump);
-   customDelay(330);
+   customDelay(340);
    pressDownButton(jump);
    customDelay(100);
    pressDownButton(mainAttack);

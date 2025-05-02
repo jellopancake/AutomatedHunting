@@ -77,7 +77,7 @@ void loop(){
       }
      
       // Loot rotation
-      customDelay(300);
+      customDelay(400);
       doubleJumpAttackOnce(left);
       ropeLift();
       pressButton(mainAttack);
@@ -89,6 +89,7 @@ void loop(){
       customDelay(200);
       walk(left, 0.4);
       doubleJumpAttackOnce(left);
+      useSkill2();
       walk(left, 1.7);
       downJump();
       useSkill1();
@@ -98,12 +99,12 @@ void loop(){
       downJump();
       walk(left, 0.9);
       loopDoubleJumpAttack(right, 3);
-      walk(right, 1);
+      walk(right, 1.1);
       doubleJumpAttackOnce(right);
       walkAttack(left, 1);
       walk(right, 0.4);
       doubleJumpAttackOnce(right);
-      customDelay(300);
+      customDelay(400);
 
       if(start_stop_updated == 1){
          stopProgram();
@@ -157,6 +158,8 @@ void flatMobbingRotation(Key dir, int repeatCount){
    }
    else{
       customDelay(200);
+      walk(left, 0.8);
+      customDelay(300);
       loopDoubleJumpAttack(dir, repeatCount+1);
    }
 }
@@ -249,6 +252,13 @@ void useSkill1(){
    customDelay(500);
    pressButton(skill1);
    customDelay(1000);
+}
+
+// Uses skill1
+void useSkill2(){
+   customDelay(500);
+   pressButton(skill2);
+   customDelay(500);
 }
 
 // Performs ropelift to bring the character to the highest platform above it
@@ -426,19 +436,19 @@ int keyToAngle (Key key){
       return 40;
    }
    else if(key == COLON){
-      return 40;
+      return 50;
    }
    else if(key == APOS){
       return 130;
    }
    else if(key == F){
-      return 40;
+      return 50;
    }
    else if(key == G){
       return 130;
    }
    else if(key == H){
-      return 40;
+      return 55;
    }
    else if(key == J){
       return 130;
@@ -447,10 +457,10 @@ int keyToAngle (Key key){
       return 20;
    }
    else if(key == SPACE){
-      return 40;
+      return 48;
    }
    else if(key == SPACE2){
-      return 140;
+      return 125;
    }
    else{
       Serial.println("No keys match");

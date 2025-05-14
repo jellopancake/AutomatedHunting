@@ -13,7 +13,6 @@ int servo_down_right = 9;
 // Declare the start/stop button pin
 int button_start_stop = 2;
 
-
 // Tracks whether an update has been made to start/stop the procedure following the reading that the start/stop button has been pressed
 // This allows the button to function as a toggle button
 // 0 is no update needed, 1 is button has been pressed waiting for update
@@ -463,7 +462,7 @@ int keyToAngle (Key key){
       return 48;
    }
    else if(key == SPACE2){
-      return 125;
+      return 130;
    }
    else{
       Serial.println("No keys match");

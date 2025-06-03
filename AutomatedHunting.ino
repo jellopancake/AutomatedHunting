@@ -167,6 +167,9 @@ void executeCommand(){
          else if (command == 'P'){
             walkOppositeIntoShortDoubleJump(param);
          }
+         else if(command == 'Q'){
+            walkShortDistance(param);
+         }
       }
       // Clear the buffer for the next command
       clearSerialBuffer();
@@ -204,6 +207,10 @@ void clearSerialBuffer(){
 
 // Preset inputs //////////////////////////////////////////////////////////////////////////////////////////////////
 
+void walkShortDistance(int param){
+   Key dir = selectDir(param);
+   walk(dir, 300);
+}
 
 void walkOppositeIntoDoubleJump(int param){
    Key oppositeDir = selectOppositeDir(param);

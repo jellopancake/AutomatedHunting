@@ -29,7 +29,8 @@ serial_key = {
 	"End Hold Attack": 'M',
 	"Reset Servos": 'N',
 	"Walk Opposite To Double Jump": 'O',
-	"Walk Opposite To Short Double Jump": 'P'
+	"Walk Opposite To Short Double Jump": 'P',
+	"Walk Short Distance": 'Q'
 }
 
 # Uses the serial key dictionary to convert a text command to an ASCII value
@@ -74,15 +75,105 @@ def run_rotation(rotation):
 		serialCommunication.write_to_serial(command, '+')
 
 def move_to_starting_location(rotation):
-	starting_position_x, starting_position_y = rotation.get("startingLocation")
+	starting_position = rotation.get("startingLocation", {})
+	starting_position_x = starting_position.get("x")
+	starting_position_y = starting_position.get("y")
+	computerVision.set_goal_location(starting_position_x, starting_position_y)
+
+	move_to_ground_floor(starting_position_y)
+	walk_to_point_on_ground_floor(starting_position_x)
+
+def walk_to_point_on_ground_floor(goal_x):
+	while True:
+		player_x, player_y = computerVision.get_player_location()
+		# Right is higher, left is lower
+		if (player_x > goal_x + 3):
+			x_difference = player_x - goal_x
+			hold_time = calculate_hold_time(x_difference)
+
+			if (hold_time > 2.2):
+				start_walk("Left")
+				double_jump_attack("Left")
+				end_walk("Left")
+			elif(hold_time > 0.5):
+				walk(hold_time, "Left")
+			else:
+				walk_short_distance("Left")
+
+		elif (player_x < goal_x - 3):
+			x_difference = goal_x - player_x
+			hold_time = calculate_hold_time(x_difference)
+
+			if (hold_time > 2.2):
+				start_walk("Right")
+				double_jump_attack("Right")
+				end_walk("Right")
+			elif(hold_time > 0.5):
+				walk(hold_time, "Right")
+			else:
+				walk_short_distance("Right")
+			
+
+def calculate_hold_time(difference):
+	walk_multiplier = 0.038
+	return difference * walk_multiplier
+
+def move_to_ground_floor(goal_y):
+	while True:
+		player_x, player_y = computerVision.get_player_location()
+		# Down is higher, up is lower
+		if(player_y < goal_y-5):
+			down_jump()
+		else:
+			break
+
+def command_to_serial(command_text, param, wait):
+	command = [
+		convert_command_to_key(command_text), param, wait
+	]
+	serialCommunication.write_to_serial(command, '+')
+
+def start_walk(direction):
+	direction_param = convert_direction_to_param(direction)
+	command_to_serial("Start Walk", direction_param, 0)
+
+def end_walk(direction):
+	direction_param = convert_direction_to_param(direction)
+	command_to_serial("End Walk", direction_param, 200)
+
+def double_jump_attack(direction):
+	direction_param = convert_direction_to_param(direction)
+	command_to_serial("Double Jump Attack", direction_param, 200)
+
+def walk_short_distance(direction):
+	direction_param = convert_direction_to_param(direction)
+	command_to_serial("Walk Short Distance", direction_param, 200)
+
+def down_jump():
+	command_to_serial("Down Jump", '0', 1200)
+
+def walk(hold_time, direction):
+	start_walk(direction)
+	time.sleep(hold_time)
+	end_walk(direction)
+
+def convert_direction_to_param(direction):
+	if (direction == "Left"):
+		return '0'
+	elif (direction == "Right"):
+		return '1'
+	else:
+		return "Incorrect input. Direction not found."
 
 def main():
 	rotation_A = rotations_data.get("Rotation A", {})
 	rotation_B = rotations_data.get("Rotation B", {})
 	rotation_C = rotations_data.get("Rotation C", {})
-
+	
 	run_setup()
-	run_rotation(rotation_A)
+	time.sleep(10)
+	move_to_starting_location(rotation_A)
+	#run_rotation(rotation_A)
 
 
 if __name__ == "__main__":

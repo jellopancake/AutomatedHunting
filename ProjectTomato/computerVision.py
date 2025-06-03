@@ -10,6 +10,9 @@ import jsonReader
 # Player location
 player_x, player_y = 0, 0
 
+# Goal location
+goal_x, goal_y = 0, 0
+
 def capture_external_screen():
     # 0 is capture card
     capture_index = 0 
@@ -32,12 +35,12 @@ def capture_external_screen():
             map_data = jsonReader.get_map_data()
             map_offset = map_data.get("mapOffset", {})
             map_bounds = map_data.get("mapBounds", {}) 
-            x = int(map_offset.get("x", 0))
-            y = int(map_offset.get("y", 0))
-            w = int(map_bounds.get("w", 0))
-            h = int(map_bounds.get("h", 0))
+            map_x = int(map_offset.get("x", 0))
+            map_y = int(map_offset.get("y", 0))
+            map_w = int(map_bounds.get("w", 0))
+            map_h = int(map_bounds.get("h", 0))
 
-            minimap_frame = frame[y:y+h, x:x+w]  # Crop the frame
+            minimap_frame = frame[map_y:map_y+map_h, map_x:map_x+map_w]  # Crop the frame
 
             # Convert frame to HSV color space
             hsv_minimap_frame = cv2.cvtColor(minimap_frame, cv2.COLOR_BGR2HSV)
@@ -64,6 +67,9 @@ def capture_external_screen():
                 global player_x, player_y 
                 player_x, player_y = x + w // 2, y + h // 2
 
+            # Add a red circle to denote the goal location, use map offset to draw on the minimap
+            cv2.circle(frame, (map_x + goal_x, map_y + goal_y), 3, (0, 0, 255), -1)
+
             # Show the original frame with the detected area
             cv2.imshow("Yellow Detection", minimap_frame)
 
@@ -77,6 +83,11 @@ def capture_external_screen():
 
 def get_player_location():
     return player_x, player_y
+
+def set_goal_location(x, y):
+    global goal_x, goal_y
+    goal_x = x
+    goal_y = y
 
 thread_computervision = threading.Thread(target=capture_external_screen)
 thread_computervision.start()

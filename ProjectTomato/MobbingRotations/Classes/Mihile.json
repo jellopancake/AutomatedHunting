@@ -7,7 +7,7 @@
     "Arteria": {
       "Top Deck 1": {       
         "Rotation A": {
-          "startingLocation": { "x": 0, "y": 55 },
+          "startingLocation": { "x": 50, "y": 77 },
           "commands": [
             {"command": "Start Walk", "parameter": 1, "wait": 200},
             {"command": "Double Jump", "parameter": 0, "wait": 200},
@@ -17,7 +17,7 @@
           ]
         },
         "Rotation B":{
-          "startingLocation": { "x": 0, "y": 55 },
+          "startingLocation": { "x": 50, "y": 77 },
           "commands": [
             {"command": "Start Walk", "parameter": 0, "wait": 200},
             {"command": "Double Jump", "parameter": 0, "wait": 200},
@@ -27,7 +27,7 @@
           ]
         },
         "Rotation C":{
-          "startingLocation": { "x": 0, "y": 55 },
+          "startingLocation": { "x": 50, "y": 77 },
           "commands": [
             {"command": "Up Jump Warrior", "parameter": 0, "wait": 200},
             {"command": "Down Jump", "parameter": 0, "wait": 200}

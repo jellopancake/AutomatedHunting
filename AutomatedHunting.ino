@@ -10,15 +10,13 @@ int servo_colon_apostrophe = 7;
 int servo_ctrl_left = 8;
 int servo_down_right = 9;
 
-// Declare the start/stop button pin
-int button_start_stop = 2;
+// Preset values based on class
+int doubleJumpDelay = 250;
+int shortDoubleJumpDelay = 350;
 
-// Tracks whether an update has been made to start/stop the procedure following the reading that the start/stop button has been pressed
-// This allows the button to function as a toggle button
-// 0 is no update needed, 1 is button has been pressed waiting for update
-int start_stop_updated = 0;
-
-int stop_program = 0;
+// Serial buffer for collecting incoming serial data
+// Use 255 as null case
+uint8_t serialBuffer[] = {255, 255, 255};
 
 enum Key{LEFT, RIGHT, DOWN, F, G, H, J, COLON, APOS, ALT, CTRL, SPACE, SPACE2};
    Key left = LEFT;
@@ -30,18 +28,14 @@ enum Key{LEFT, RIGHT, DOWN, F, G, H, J, COLON, APOS, ALT, CTRL, SPACE, SPACE2};
    Key skill1 = CTRL;
    Key skill2 = H;
    Key skill3 = J;
-   Key skill4 = COLON;
-   Key fountain = ALT;
+   Key skill4 = ALT;
+   Key swap = COLON;
    Key mainAttack = F;
-   Key ropelift = G;
+   Key skill0 = G; //Either an extra skill slot or warrior upjump
 
 // Create a servo object 
 Servo Servo1, Servo2, Servo3, Servo4, Servo5, Servo6, Servo7;
 void setup() { 
-   // open serial port at 9600 bps
-   Serial.begin(9600);
-   while(!Serial);
-
    // We need to attach the servo to pins 3-9
    Servo1.attach(servo_alt_space_2); 
    Servo2.attach(servo_F_G); 
@@ -50,10 +44,7 @@ void setup() {
    Servo5.attach(servo_colon_apostrophe);
    Servo6.attach(servo_ctrl_left); 
    Servo7.attach(servo_down_right); 
-
-   // Attach start/stop button to pin 2
-   pinMode(button_start_stop, INPUT_PULLUP);
-
+   
    // Initialize in horizontal position
    Servo1.write(90);
    Servo2.write(90);
@@ -62,340 +53,401 @@ void setup() {
    Servo5.write(90);
    Servo6.write(90);
    Servo7.write(90);
+
+   // Start open Serial port through USB
+   Serial.begin(9600);  
+   Serial.setTimeout(1);
+
+   // Clear any leftover memory variables from previous runtimes
+   clearSerialBuffer();
 }
 
-void loop(){ 
+void loop(){
+   // This is the main serial loop receiving commands from the PC
+   if (Serial) {  // Check if serial is still available
+      readSerialToBuffer();
+   } else {
+      reestablishSerialConnection();
+   }   
 
-   while(stop_program == 0){
-      
-      // Mobbing Rotation
-      for(int i = 0; i < 2; i++){
-         flatMobbingRotation(left, 5);
-         flatMobbingRotation(right, 5);
+   // If serial communication sends a command, this tries to execute the command
+   executeCommand();
+}
 
+// Resets serial connections
+void reestablishSerialConnection(){
+   Serial.end();
+   delay(1000);
+   Serial.begin(9600);
+}
+
+// Chooses the command to execute based off the instructions received through serial communication
+void executeCommand(){
+   // Once we have a full command in our serial buffer, start executing the command
+   if(serialBuffer[2] != 255){
+      // Running setup
+      if(serialBuffer[0] == 's'){
+         int delay1 = serialBuffer[1] - '0';
+         doubleJumpDelay = 200 + delay1*20;
+
+         int delay2 = serialBuffer[2] - '0';
+         shortDoubleJumpDelay = 300 + delay2*20;
       }
-     
-      // Loot rotation
-      customDelay(400);
-      doubleJumpAttackOnce(left);
-      ropeLift();
-      pressButton(mainAttack);
-      placeSummon();
-      customDelay(200);
-      useSkill1();
-      customDelay(200);
-      jumpAttack(left);      
-      walk(right, 1.5);
-      ropeLift();
-      customDelay(200);
-      walk(left, 0.4);
-      doubleJumpAttackOnce(left);
-      walk(left, 1.7);
-      downJump();
-      customDelay(200);
-      walk(right, 0.3);
-      customDelay(200);
-      shortDoubleJumpAttack(left);
-      doubleJumpAttackOnce(left);
-      walk(left, 0.5);
-      downJump();
-      walk(left, 0.9);
-      loopDoubleJumpAttack(right, 3);
-      walk(right, 1.1);
-      doubleJumpAttackOnce(right);
-      walkAttack(left, 1);
-      walk(right, 0.4);
-      doubleJumpAttackOnce(right);
-      customDelay(400);
 
-      if(start_stop_updated == 1){
-         stopProgram();
-         break;
+      // Running commands
+      if (serialBuffer[0] == '+'){
+         int command = serialBuffer[1];
+         int param = serialBuffer[2] - '0';
+
+         if (command == 'A'){
+            startWalk(param);
+
+         }
+         else if (command == 'B'){
+            endWalk(param);
+
+         }
+         else if (command == 'C'){
+            doubleJump();
+
+         }
+         else if (command == 'D'){
+            doubleJumpAttack();
+
+         }
+         else if (command == 'E'){
+            shortDoubleJumpAttack();
+
+         }
+         else if (command == 'F'){
+            upJump();
+
+         }
+         else if (command == 'G'){
+            upJumpWarrior();
+
+         }
+         else if (command == 'H'){
+            downJump();
+
+         }
+         else if (command == 'I'){            
+            useSkill(param);
+
+         }
+         else if (command == 'J'){
+            jumpSkill(param);
+
+         }
+         else if (command == 'K'){
+            swapKeyboardLayout();
+
+         }
+         else if (command == 'L'){
+            startHoldAttack(param);
+
+         }
+         else if(command == 'M'){
+            endHoldAttack(param);
+
+         }
+         else if(command == 'N'){
+            // Reset to horizontal position
+            Servo1.write(90);
+            Servo2.write(90);
+            Servo3.write(90);
+            Servo4.write(90);
+            Servo5.write(90);
+            Servo6.write(90);
+            Servo7.write(90);
+         }
+         else if(command == 'O'){
+            walkOppositeIntoDoubleJump(param);
+         }
+         else if (command == 'P'){
+            walkOppositeIntoShortDoubleJump(param);
+         }
       }
-      
+      // Clear the buffer for the next command
+      clearSerialBuffer();
    }
+}
 
-   checkStartStop();
-   delay(500);
-   if(start_stop_updated == 1){
-      startProgram();
+// Reads serial data to the buffer
+void readSerialToBuffer(){
+   if (Serial.available() >= 3){   
+      // Only start reading message if it starts with ack
+      if(Serial.peek() == '+' || Serial.peek() == '*'){
+         // Overwrite empty spaces in the serial buffer with the received serial data
+         for(int i = 0; i < sizeof(serialBuffer); i++){        
+            // Removes end line characters
+            if (Serial.peek() == '\n' || Serial.peek() == '\0'){
+               Serial.read();
+               break;
+            }
+
+            // Load message into serial buffer
+            serialBuffer[i] = Serial.read();
+         }
+      }
+      // If message does not start with ack, remove the byte from the buffer
+      Serial.read();
+
    }
+}
+
+
+// Clears the serial buffer
+void clearSerialBuffer(){
+   memset(serialBuffer, 255, sizeof(serialBuffer));
 }
 
 // Preset inputs //////////////////////////////////////////////////////////////////////////////////////////////////
 
-void flatMobbingRotation(Key dir, int repeatCount){
-   // Use a variable to check if we do the random single jump attack, 
-   // if so we compensate the extra distance gained by doing a short double jump
-   int randomJump = 0;
-   
-   if(random(1, 100) >= 50){
-      walk(dir, random(600, 700)/1000.0);
-   } else{
-      jumpAttack(dir);
-      randomJump = 1;
-      customDelay(200);
-   }
 
-   customDelay(200);
+void walkOppositeIntoDoubleJump(int param){
+   Key oppositeDir = selectOppositeDir(param);
+   Key dir = selectDir(param);
 
-   if(dir == left){
-      if(randomJump == 0){
-         doubleJumpAttackOnce(left);
-      }
-      else{
-         shortDoubleJumpAttack(left);
-      }
-      ropeLift();
-      jumpAttack(left);
-      delay(100);
-      shortDoubleJumpAttack(right);
-      downJump();
-      loopDoubleJumpAttack(dir, repeatCount-3);
-      walk(dir, 1.4);
-      doubleJumpAttackOnce(dir);
-      shortDoubleJumpAttack(dir);
-      downJump();
-      
-   }
-   else{
-      customDelay(200);
-      walk(left, 0.8);
-      customDelay(300);
-      loopDoubleJumpAttack(dir, repeatCount+1);
-   }
-}
-
-// Places down erda fountain
-void placeSummon(){
-   customDelay(500);
-   pressButton(fountain);
-   customDelay(500);
-}
-
-// Walks in a given direction while attacking
-void walkAttack(Key dir, float holdTime){
-   holdButton(dir, holdTime/2);
-   pressButton(mainAttack);
-   holdButton(dir, holdTime/2);
-}
-
-// Loops flashjump attack with a given number of repeats and chosen customDelay
-void loopDoubleJumpAttack(Key dir, int repeatCount){
+   walk(oppositeDir, 350);
+   delay(200);
    pressDownButton(dir);
-   for (int i = 0; i < repeatCount; i++) {
-      doubleJumpAttack(dir);
-      customDelay(280);
-   }
-   resetButton(dir);
+   delay(150);
+   doubleJumpAttack();
+   releaseButton(dir);
 }
 
-// Performs a single flashjump in a given direction with an attack, while specifically holding down a direction button
-void doubleJumpAttackOnce(Key dir){
+void walkOppositeIntoShortDoubleJump(int param){
+   Key oppositeDir = selectOppositeDir(param);
+   Key dir = selectDir(param);
+
+   walk(oppositeDir, 350);
+   delay(200);
    pressDownButton(dir);
-   doubleJumpAttack(dir);
-   resetButton(dir);
-   customDelay(200);
+   delay(150);
+   shortDoubleJumpAttack();
+   releaseButton(dir);
 }
 
-// Performs a flashjump in a given direction with an attack
-void doubleJumpAttack(Key dir){
-   customDelay(100);
+void walk(Key dir, int time){
+   pressDownButton(dir);
+   delay(time);
+   releaseButton(dir);
+}
+
+void startHoldAttack(int param){
+   Key skill = selectSkill(param);
+   pressDownButton(skill);
+}
+
+void endHoldAttack(int param){
+   Key skill = selectSkill(param);
+   releaseButton(skill);
+}
+
+void swapKeyboardLayout(){
+   delay(500);
+   pressButton(swap);
+   delay(500);
+}
+
+// Uses a skill, main attack, or fountain
+void useSkill(int param){
+   Key skill = selectSkill(param);
+
+   delay(500);
+   pressButton(skill);
+   delay(500);
+}
+
+// Jumps and uses a skill or main attack
+void jumpSkill(int param){
+   Key skill = selectSkill(param);
+
+   delay(200);
+   pressButton(jump);
+   pressButton(skill);
+}
+
+Key selectSkill(int param){
+   Key skill;
+   if (param == 0){
+      skill = skill0;
+   }
+   else if(param == 1){
+      skill = skill1;
+   }
+   else if(param == 2){
+      skill = skill2;
+   }
+   else if(param == 3){
+      skill = skill3;
+   }
+   else if(param == 4){
+      skill = skill4;
+   }
+   else if(param == 5){
+      skill = mainAttack;
+   }
+   return skill;
+}
+
+// Performs a flashjump with an attack
+void doubleJumpAttack(){
+   delay(100);
    pressButton(altJump);
-   customDelay(180);
+   delay(doubleJumpDelay);
    pressDownButton(jump);
-   customDelay(100);
+   delay(100);
    pressButton(mainAttack);
-   resetButton(jump);
-   customDelay(100);
+   releaseButton(jump);
+   delay(100);
 }
 
-// Performs a shorter flashjump in a given direction with an attack
-void shortDoubleJumpAttack(Key dir){
-   pressDownButton(dir);
-   customDelay(400);
+// Performs a shorter flashjump with an attack
+void shortDoubleJumpAttack(){
+   delay(400);
    pressButton(altJump);
-   customDelay(280);
+   delay(shortDoubleJumpDelay);
    pressDownButton(jump);
-   customDelay(100);
+   delay(100);
    pressDownButton(mainAttack);
-   customDelay(350);
-   resetButton(mainAttack);
-   resetButton(jump);
-   resetButton(dir);
-   customDelay(250);
+   delay(350);
+   releaseButton(mainAttack);
+   releaseButton(jump);
+   delay(250);
 }
 
-// Performs a flashjump in a given direction
-void doubleJump(Key dir){
+// Performs a flashjump
+void doubleJump(){
    pressButton(altJump);
-   customDelay(200);
+   delay(doubleJumpDelay);
    pressButton(jump);
-   customDelay(200);   
+   delay(200);   
 }
 
-// Walks in a given direction
-void walk(Key dir, float holdTime){
-   holdButton(dir, holdTime);
-}
-
-// Performs a jump in a given direction with an attack
-void jumpAttack(Key dir){
+// Starts walking in a given direction
+void startWalk(int param){
+   Key dir = selectDir(param);
    pressDownButton(dir);
-   customDelay(200);
+}
+
+// Stops walking in a given direction
+void endWalk(int param){
+   Key dir = selectDir(param);
+   releaseButton(dir);
+}
+
+Key selectDir(int param){
+   Key dir;
+   if (param == 0){
+      dir = left;
+   }
+   else if(param == 1){
+      dir = right;
+   }
+   return dir;
+}
+
+Key selectOppositeDir(int param){
+   Key dir;
+   if (param == 0){
+      dir = right;
+   }
+   else if(param == 1){
+      dir = left;
+   }
+   return dir;
+}
+
+// Performs an upjump by holding up and inputting two jumps quickly
+void upJump(){
+   pressDownButton(up);
+   pressButton(altJump);
+   delay(doubleJumpDelay);
    pressButton(jump);
-   pressButton(mainAttack);
-   resetButton(dir);
-
+   releaseButton(up);
+   delay(200); 
 }
 
-// Uses skill1
-void useSkill1(){
-   customDelay(500);
-   pressButton(skill1);
-   customDelay(1000);
-}
-
-// Uses skill1
-void useSkill2(){
-   customDelay(500);
-   pressButton(skill2);
-   customDelay(500);
-}
-
-// Performs ropelift to bring the character to the highest platform above it
-void ropeLift(){
-   customDelay(600);
-   pressButton(ropelift);
-   customDelay(1300);
+// Performs an upjump by pressing the upward charge skill for warrior classes
+void upJumpWarrior(){
+   delay(600);
+   pressButton(skill0);
+   delay(1300);
 }
 
 // Performs a downjump to bring the character one platform below it
 void downJump(){
-   customDelay(200);
+   delay(200);
    pressDownButton(down);
-   customDelay(300);
+   delay(300);
    pressButton(jump);
-   customDelay(200);
-   resetButton(down);
-   customDelay(300);
+   delay(200);
+   releaseButton(down);
+   delay(300);
 }
 
 // Basic button input control //////////////////////////////////////////////////////////////////////////////////////////////////
 void pressButton(Key key){
-   if(!program_stopped()){
-      int angle = keyToAngle(key);
-      Servo servo = keyToServo(key);
+   int angle = keyToAngle(key);
+   Servo servo = keyToServo(key);
    
-      servo.write(angle);
-      customDelay(200);
-      servo.write(90);
-   }
+   servo.write(angle);
+   delay(200);
+   servo.write(90);
 }
 
 void holdButton(Key key, float holdTime){
-   if(!program_stopped()){
-      int angle = keyToAngle(key);
-      Servo servo = keyToServo(key);
+   int angle = keyToAngle(key);
+   Servo servo = keyToServo(key);
 
-      servo.write(angle);
-      customDelay(holdTime*1000);
-      servo.write(90);
-   }
+   servo.write(angle);
+   delay(holdTime*1000);
+   servo.write(90);
 }
 
 void pressDownButton(Key key){
-   if(!program_stopped()){
-      int angle = keyToAngle(key);
-      Servo servo = keyToServo(key);
+   int angle = keyToAngle(key);
+   Servo servo = keyToServo(key);
    
-      servo.write(angle);
-   }
+   servo.write(angle);
+
 }
 
-void resetButton(Key key){
-   if(!program_stopped()){
-      Servo servo = keyToServo(key);
+void releaseButton(Key key){
+   Servo servo = keyToServo(key);
    
-      servo.write(90);
-   }
-}
-
-// Allows us to skip delays if the program has been stopped
-void customDelay(int time){
-   if(!program_stopped()){
-      delay(time);
-   }
+   servo.write(90);
 }
 
 // Start/Stop functionality ///////////////////////////////////////////////////////////////////////
-
-// Checks if the program has been stopped
-bool program_stopped(){
-   return start_stop_updated == 1;
-}
-
-// Checks if the start/stop button is pressed
-void checkStartStop(){
-   if(digitalRead(button_start_stop) == 0 && start_stop_updated == 0){
-      start_stop_updated = 1;
-   }
-}
-
-// Stops the current mobbing rotation and resets servos to starting positions and fulfills the update required by the start/stop button
-void stopProgram(){
-   start_stop_updated = 0;
-   stop_program = 1;
-   
-   // reset servo positions
-   Servo1.write(90);
-   Servo2.write(90);
-   Servo3.write(90);
-   Servo4.write(90);
-   Servo5.write(90);
-   Servo6.write(90);
-   Servo7.write(90);
-   
-   delay(1200);
-}
-
-// Restarts the mobbing rotation and moves the character to the starting position and fulfills the update required by the start/stop button
-void startProgram(){
-   start_stop_updated = 0;
-   stop_program = 0;
-   
-   delay(1200);
-
-   flatMobbingRotation(right, 5);
-   customDelay(1000);
-}
-
 // Servo Legend for angles required to press keyboard keys //////////////////////////////////////////////////////////////////////////////////////////////////
+// LOW 10-70, HIGH 100-170
 // Servo 1
-// Angle 30 press space
-// Angle 160 press alt
+// Angle LOW press space
+// Angle HIGH press alt
 // Servo 2
-// Angle 40 press F
-// Angle 130 press G
+// Angle LOW press F
+// Angle HIGH press G
 // Servo 3
-// Angle 40 press H
-// Angle 130 press J
+// Angle LOW press H
+// Angle HIGH press J
 // Servo 4
-// Angle 20 press alt
-// Angle 150 press space
+// Angle LOW press alt
+// Angle HIGH press space
 // Servo 5
-// Angle 40 press colon
-// Angle 130 press apostrophe
+// Angle LOW press colon
+// Angle HIGH press apostrophe
 // Servo 6
-// Angle 40 press left
-// Angle 150 press ctrl
+// Angle LOW press left
+// Angle HIGH press ctrl
 // Servo 7
-// Angle 40 press right
-// Angle 150 press down
+// Angle LOW press right
+// Angle HIGH press down
 
 
 Servo keyToServo (Key key){
-   checkStartStop();
    if(key == SPACE){
       return Servo1;
    }

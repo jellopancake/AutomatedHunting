@@ -1,0 +1,11 @@
+{"command": "Start Walk", "parameter": 0, "wait": 200},
+{"command": "End Walk", "parameter": 0, "wait": 200},
+{"command": "Double Jump", "parameter": 250, "wait": 200},
+{"command": "Double Jump Attack", "parameter": 250, "wait": 200},
+{"command": "Short Double Jump Attack", "parameter": 250, "wait": 200},
+{"command": "Up Jump Warrior", "parameter": 250, "wait": 200},
+{"command": "Down Jump", "parameter": 250, "wait": 200},
+{"command": "Use Skill", "parameter": 1, "wait": 200},
+{"command": "Jump Skill", "parameter": 1, "wait": 200},
+{"command": "Start Hold Attack", "parameter": 250, "wait": 200},
+{"command": "End Hold Attack", "parameter": 250, "wait": 200}

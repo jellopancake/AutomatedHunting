@@ -1,0 +1,19 @@
+{
+  "Carcion": {},
+  "Arteria": {
+    "Top Deck 1": {
+      "mapOffset": { "x": 0, "y": 55 },
+      "mapBounds": { "w": 180, "h": 105 },
+      "platformHeights": [77, 65, 52, 39]
+    },
+    "Bottom Deck 1": {
+      "mapOffset": { "x": 0, "y": 55 },
+      "mapBounds": { "w": 200, "h": 150 },
+      "platformHeights": [90, 77, 55, 33]
+    }
+  },
+  "Shangrila": {},
+  "Odium": {},
+  "Arcus": {},
+  "Cernium": {}
+}

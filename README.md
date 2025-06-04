@@ -11,3 +11,4 @@
 ![Keyboard](https://github.com/fernkong/AutomatedHunting/blob/main/ProjectTomato/TestFiles/20250404_214210_1.gif)
 
 # Arduino Setup
+![Arduino](https://github.com/fernkong/AutomatedHunting/blob/main/ProjectTomato/TestFiles/20250604_145646.jpg)

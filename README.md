@@ -7,6 +7,7 @@
  - Serial communication between the main PC and Arduino to send commands based on logic handling done by the main PC
  - Rotation data saved in JSON for ease of swapping between map and classes
 
-# Keyboard servos in action
+# Keyboard servos in action 
+![Keyboard](https://github.com/fernkong/AutomatedHunting/blob/main/ProjectTomato/TestFiles/20250404_214210_1.gif)
 
-/ProjectTomato/Testfiles/
+# Arduino Setup

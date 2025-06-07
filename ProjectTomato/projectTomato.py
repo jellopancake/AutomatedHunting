@@ -4,8 +4,9 @@ import computerVision
 import serialCommunication
 
 # Importing libraries
-import msvcrt
 import time
+import random
+import pdb
 
 # Importing variables from modules
 setup_info = jsonReader.get_setup_info()
@@ -28,8 +29,8 @@ serial_key = {
 	"Start Hold Attack": 'L',
 	"End Hold Attack": 'M',
 	"Reset Servos": 'N',
-	"Walk Opposite To Double Jump": 'O',
-	"Walk Opposite To Short Double Jump": 'P',
+	"Walk Opposite To Double Jump Attack": 'O',
+	"Walk Opposite To Short Double Jump Attack": 'P',
 	"Walk Short Distance": 'Q'
 }
 
@@ -67,12 +68,13 @@ def run_rotation(rotation):
 	# Pos 2 = Param (0 if not needed)
 	# Pos 3 = Wait time in ms
 	for item in commands:
-		command = [
-			convert_command_to_key(item.get("command")),
+		command_to_serial(item.get("command"),
 			str(item.get("parameter")),
-			int(item.get("wait"))
-		]
-		serialCommunication.write_to_serial(command, '+')
+			int(item.get("wait")))
+		
+		# Stop running commands if program is stopped
+		if(computerVision.get_is_stopped == True):
+			break
 
 def move_to_starting_location(rotation):
 	starting_position = rotation.get("startingLocation", {})
@@ -131,7 +133,10 @@ def command_to_serial(command_text, param, wait):
 	command = [
 		convert_command_to_key(command_text), param, wait
 	]
-	serialCommunication.write_to_serial(command, '+')
+
+	if computerVision.get_is_stopped == False:
+		serialCommunication.write_to_serial(command, '+')
+	
 
 def start_walk(direction):
 	direction_param = convert_direction_to_param(direction)
@@ -166,14 +171,34 @@ def convert_direction_to_param(direction):
 		return "Incorrect input. Direction not found."
 
 def main():
-	rotation_A = rotations_data.get("Rotation A", {})
-	rotation_B = rotations_data.get("Rotation B", {})
-	rotation_C = rotations_data.get("Rotation C", {})
-	
-	run_setup()
-	time.sleep(10)
-	move_to_starting_location(rotation_A)
-	#run_rotation(rotation_A)
+	rotation_start_right = rotations_data.get("Rotation Start Right 1", {})
+	rotation_start_left = [rotations_data.get("Rotation Start Left 1", {}), rotations_data.get("Rotation Start Left 2", {})]
+
+	#run_setup()
+	#time.sleep(10)
+
+	double_jump_attack("Left")
+
+	#rotation_num_right = 1
+	#rotation_num_left = 1
+	#move_to_starting_location(rotation_start_right)
+	#run_rotation(rotation_start_right)
+
+	# while True:
+	# 	while computerVision.get_is_stopped() == False:
+	# 		rotation_num_right = (rotation_num_right + 1) % 2
+	# 		move_to_starting_location(rotation_start_right[rotation_num_right])
+	# 		run_rotation(rotation_start_right[rotation_num_right])
+
+	# 		if(computerVision.get_is_stopped() == True):
+	# 			break
+			
+	# 		rotation_num_left = (rotation_num_left + 1) % 2
+	# 		move_to_starting_location(rotation_start_left[rotation_num_left])
+	# 		run_rotation(rotation_start_left[rotation_num_left])
+
+	# 		if(computerVision.get_is_stopped() == True):
+	# 			break
 
 
 if __name__ == "__main__":

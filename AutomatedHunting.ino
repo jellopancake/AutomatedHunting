@@ -22,14 +22,14 @@ enum Key{LEFT, RIGHT, DOWN, F, G, H, J, COLON, APOS, ALT, CTRL, SPACE, SPACE2};
    Key left = LEFT;
    Key right = RIGHT;
    Key down = DOWN;
-   Key up = APOS;
+   Key up = COLON;
    Key jump = SPACE;
    Key altJump = SPACE2;
    Key skill1 = CTRL;
    Key skill2 = H;
    Key skill3 = J;
    Key skill4 = ALT;
-   Key swap = COLON;
+   Key swap = APOS;
    Key mainAttack = F;
    Key skill0 = G; //Either an extra skill slot or warrior upjump
 
@@ -370,6 +370,7 @@ Key selectOppositeDir(int param){
 // Performs an upjump by holding up and inputting two jumps quickly
 void upJump(){
    pressDownButton(up);
+   delay(200);
    pressButton(altJump);
    delay(doubleJumpDelay);
    pressButton(jump);

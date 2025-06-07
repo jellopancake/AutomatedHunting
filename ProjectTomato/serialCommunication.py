@@ -6,9 +6,7 @@ import struct
 
 import pdb
 
-serial_buffer = [None, None]
-
-arduino = serial.Serial(port='COM5', baudrate=9600, timeout = 1) 
+arduino = serial.Serial(port='COM3', baudrate=9600, timeout = 1) 
 time.sleep(2)
 
 # Writes data to the arduino in 3 byte(char) messages
@@ -23,6 +21,3 @@ def write_to_serial(message, ack):
     time.sleep(message[2]/1000.0)
     time.sleep(0.8)
     
-def clear_serial_buffer():
-    global serial_buffer 
-    serial_buffer = [None, None]

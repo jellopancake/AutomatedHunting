@@ -25,7 +25,7 @@ map_file_path = ['mobbingRotations/Maps/Maps.json']
 
 with open("".join(map_file_path), 'r') as file:
     map_raw_data = json.load(file)  # Load JSON data into a Python dictionary
-
+ 
 # Select the map data that correlates to our rotation data
 map_raw_data = map_raw_data.get(area_choice, {})
 map_data = map_raw_data.get(map_choice, {})

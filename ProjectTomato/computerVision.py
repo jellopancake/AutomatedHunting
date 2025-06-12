@@ -181,7 +181,7 @@ def capture_external_screen():
             combined_frame = np.hstack((minimap_frame, cropped_frame_1, cropped_frame_2))
             cv2.imshow("Player Detection", combined_frame)
             
-            time.sleep(0.2)
+            time.sleep(0.05)
 
             # Press ']' to exit the loop
             if cv2.waitKey(1) & 0xFF == ord(']'):

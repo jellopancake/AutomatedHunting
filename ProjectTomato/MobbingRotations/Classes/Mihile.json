@@ -2,6 +2,7 @@
   "className": "Mihile",
   "doubleJumpDelay": 260,
   "shortDoubleJumpDelay": 360,
+  "walkMultiplier": 0.038,
   "mobbingRotations": {
     "Carcion": {},
     "Arteria": {

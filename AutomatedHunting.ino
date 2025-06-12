@@ -31,7 +31,7 @@ enum Key{LEFT, RIGHT, DOWN, F, G, H, J, COLON, APOS, ALT, CTRL, SPACE, SPACE2};
    Key skill4 = ALT;
    Key swap = APOS;
    Key mainAttack = F;
-   Key skill0 = G; //Either an extra skill slot or warrior upjump
+   Key skill0 = G; // Ropelift
 
 // Create a servo object 
 Servo Servo1, Servo2, Servo3, Servo4, Servo5, Servo6, Servo7;
@@ -86,7 +86,7 @@ void executeCommand(){
    // Once we have a full command in our serial buffer, start executing the command
    if(serialBuffer[2] != 255){
       // Running setup
-      if(serialBuffer[0] == 's'){
+      if(serialBuffer[0] == '*'){
          int delay1 = serialBuffer[1] - '0';
          doubleJumpDelay = 200 + delay1*20;
 
@@ -169,6 +169,9 @@ void executeCommand(){
          }
          else if(command == 'Q'){
             walkShortDistance(param);
+         }
+         else if(command == 'R'){
+            shortUpJump();
          }
       }
       // Clear the buffer for the next command
@@ -313,7 +316,7 @@ void doubleJumpAttack(){
 
 // Performs a shorter flashjump with an attack
 void shortDoubleJumpAttack(){
-   delay(400);
+   delay(200);
    pressButton(altJump);
    delay(shortDoubleJumpDelay);
    pressDownButton(jump);
@@ -372,28 +375,37 @@ void upJump(){
    pressDownButton(up);
    delay(200);
    pressButton(altJump);
-   delay(doubleJumpDelay);
+   delay(180);
    pressButton(jump);
    releaseButton(up);
-   delay(200); 
+   delay(100); 
+}
+
+// Performs an upjump by holding up and inputting two jumps quickly
+void shortUpJump(){
+   pressDownButton(up);
+   delay(200);
+   pressButton(altJump);
+   delay(250);
+   pressButton(jump);
+   releaseButton(up);
+   pressButton(mainAttack);
+   delay(100); 
 }
 
 // Performs an upjump by pressing the upward charge skill for warrior classes
 void upJumpWarrior(){
-   delay(600);
-   pressButton(skill0);
-   delay(1300);
+   pressButton(skill2);
 }
 
 // Performs a downjump to bring the character one platform below it
 void downJump(){
-   delay(200);
    pressDownButton(down);
-   delay(300);
+   delay(500);
    pressButton(jump);
    delay(200);
    releaseButton(down);
-   delay(300);
+   delay(100);
 }
 
 // Basic button input control //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -504,16 +516,16 @@ int keyToAngle (Key key){
       return 130;
    }
    else if(key == F){
-      return 50;
+      return 60;
    }
    else if(key == G){
-      return 130;
+      return 125;
    }
    else if(key == H){
       return 55;
    }
    else if(key == J){
-      return 130;
+      return 125;
    }
    else if(key == ALT){
       return 20;

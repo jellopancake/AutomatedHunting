@@ -1,8 +1,8 @@
 import json
 
-class_choice = "Mihile"
-area_choice = "Arteria"
-map_choice = "Top Deck 1"
+class_choice = "Hero"
+area_choice = "Cernium"
+map_choice = "Western City 4"
 
 # Class/Rotation Data #######################################################################
 # Create the filepath for the class we are choosing
@@ -12,7 +12,7 @@ with open("".join(class_file_path), 'r') as file:
     class_raw_data = json.load(file)  # Load JSON data into a Python dictionary
 
 # Retrieve setup info from class data
-setup_info = ({k: class_raw_data[k] for k in ["doubleJumpDelay", "shortDoubleJumpDelay"]})
+setup_info = ({k: class_raw_data[k] for k in ["doubleJumpDelay", "shortDoubleJumpDelay", "walkMultiplier"]})
 
 # Fills rotations with the rotations correlating to the correct area
 rotations_raw_data = class_raw_data.get("mobbingRotations", {})

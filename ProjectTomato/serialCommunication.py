@@ -19,5 +19,5 @@ def write_to_serial(message, ack):
 
     # Wait time given in the JSON file
     time.sleep(message[2]/1000.0)
-    time.sleep(0.8)
+    time.sleep(0.35)
     

@@ -125,12 +125,12 @@ def capture_external_screen():
                 player_x, player_y = x + w // 2, y + h // 2
 
                 # Show on the live feed the current position of the player
-                player_position_text = "X: " + str(player_x) + ", Y: " + str(player_y)
-                cv2.putText(minimap_frame, player_position_text, (2, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0, 255, 0), 1)
+                player_position_text = "Player X: " + str(player_x) + ", Y: " + str(player_y)
 
             # Goal Location ######################################################################################################
             # Add a red circle to denote the goal location, use map offset to draw on the minimap
             cv2.circle(frame, (map_x + goal_x, map_y + goal_y), 3, (0, 0, 255), -1)
+            goal_text = "Goal X: " + str(goal_x) + ", Y: " + str(goal_y)
             
             # Symbol detection for stop condition ################################################################################
             threshold = 0.95
@@ -147,11 +147,9 @@ def capture_external_screen():
 
             # Show on the live feed the current state of is_stopped
             if is_stopped == False:
-                is_stopped_text = "Running"
+                is_stopped_text = "Program Running"
             else:
-                is_stopped_text = "Paused"
-
-            cv2.putText(cropped_frame_1, is_stopped_text, (2, 7), cv2.FONT_HERSHEY_SIMPLEX, 0.2, (0, 255, 0), 1)
+                is_stopped_text = "Program Paused"
 
             # Symbol detection for checking if in correct keyboard setup ################################################################################
             threshold = 0.95
@@ -169,19 +167,31 @@ def capture_external_screen():
 
             # Show on the live feed the current state of is_keyboard_correct
             if is_keyboard_correct == True:
-                is_keyboard_correct_text = "Mobbing"
+                is_keyboard_correct_text = "Keyboard: Mobbing"
             else:
-                is_keyboard_correct_text = "Coupons"
-
-            cv2.putText(cropped_frame_2, is_keyboard_correct_text , (2, 9), cv2.FONT_HERSHEY_SIMPLEX, 0.25, (255, 0, 255), 1)
+                is_keyboard_correct_text = "Keyboard: Coupons"
 
             # Show the original frame with the detected area
             cropped_frame_1 = cv2.resize(cropped_frame_1, (minimap_frame.shape[0], minimap_frame.shape[0]))
             cropped_frame_2 = cv2.resize(cropped_frame_2, (minimap_frame.shape[0], minimap_frame.shape[0]))
             combined_frame = np.hstack((minimap_frame, cropped_frame_1, cropped_frame_2))
-            cv2.imshow("Player Detection", combined_frame)
+
+            # Create a black window to track parameters
+            height, width, _ = combined_frame.shape
+            text_bar_height = 70
+
+            black_bar = np.zeros((text_bar_height, width, 3), dtype=np.uint8)
+                        
+            cv2.putText(black_bar, player_position_text, (2, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+            cv2.putText(black_bar, goal_text, (2, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 1)
+            cv2.putText(black_bar, is_stopped_text, (2, 45), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+            cv2.putText(black_bar, is_keyboard_correct_text , (2, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 1)
             
-            time.sleep(0.05)
+            final_frame = np.vstack((combined_frame, black_bar))
+
+            cv2.imshow("Player Detection", final_frame)
+            
+            time.sleep(0.04)
 
             # Press ']' to exit the loop
             if cv2.waitKey(1) & 0xFF == ord(']'):

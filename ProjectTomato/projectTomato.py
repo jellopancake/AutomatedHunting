@@ -75,65 +75,85 @@ def move_to_starting_location(rotation):
 	starting_position = rotation.get("startingLocation", {})
 	starting_position_x = starting_position.get("x")
 	starting_position_y = starting_position.get("y")
+	starting_position_x_tolerance = starting_position.get("x tolerance")
+
 	computerVision.set_goal_location(starting_position_x, starting_position_y)
-
 	move_to_ground_floor(starting_position_y)
-	walk_to_point_on_ground_floor(starting_position_x)
+	walk_to_point_on_ground_floor(starting_position_x, starting_position_x_tolerance)
+	move_to_vertical_location(starting_position_y)
+	time.sleep(0.2)
 
-def walk_to_point_on_ground_floor(goal_x):
-	set_keyboard_to_mobbing()
+def walk_to_point_on_ground_floor(goal_x, tolerance):
 	while True:
 		player_x, player_y = computerVision.get_player_location()
 		# Right is higher, left is lower
 		if computerVision.get_is_stopped() == True:
 			reset_servos()
 			break
-		elif (player_x >= goal_x + 2):
-			x_difference = player_x - goal_x
-			hold_time = calculate_hold_time(x_difference)
 
-			if (hold_time > 1.9):
+		elif (player_x <= (goal_x + tolerance) and player_x >= (goal_x - tolerance)):
+			if goal_x >= 100:
+				walk_short_distance("Left")
+			else:
+				walk_short_distance("Right")
+			break
+
+		elif (player_x >= goal_x + tolerance):
+			x_difference = player_x - goal_x
+			
+			if (x_difference > 30):
 				start_walk("Left")
 				double_jump_attack("Left")
 				end_walk("Left")
-			elif(hold_time > 0.3):
+			elif(x_difference > 3):
+				hold_time = calculate_hold_time(x_difference)
 				walk(hold_time, "Left")
 			else:
 				walk_short_distance("Left")
 
-		elif (player_x <= goal_x - 2):
+		elif (player_x <= goal_x - tolerance):
 			x_difference = goal_x - player_x
-			hold_time = calculate_hold_time(x_difference)
-
-			if (hold_time > 1.9):
+			
+			if (x_difference > 30):
 				start_walk("Right")
 				double_jump_attack("Right")
 				end_walk("Right")
-			elif(hold_time > 0.3):
+			elif(x_difference > 3):
+				hold_time = calculate_hold_time(x_difference)
 				walk(hold_time, "Right")
 			else:
 				walk_short_distance("Right")
-		elif (player_x < goal_x + 2 and player_x > goal_x - 2):
-			break
-		time.sleep(0.1)
+
+		time.sleep(0.35)
 
 def calculate_hold_time(difference):
 	walk_multiplier = setup_info.get("walkMultiplier")
-	return difference * walk_multiplier
+	return (difference - 3.7) * walk_multiplier
 
 def move_to_ground_floor(goal_y):
-	set_keyboard_to_mobbing()
 	while True:
-		time.sleep(0.3)
+		time.sleep(0.2)
 		player_x, player_y = computerVision.get_player_location()
 		# Down is higher, up is lower
 		if computerVision.get_is_stopped() == True:
 			reset_servos()
 			break
-		elif(player_y < goal_y-2):
+		elif(player_y <= goal_y - 4):
 			down_jump()
 		else:
 			break
+
+def move_to_vertical_location(goal_y):
+	while True:
+		player_x, player_y = computerVision.get_player_location()
+		# Right is higher, left is lower
+		if computerVision.get_is_stopped() == True:
+			reset_servos()
+			break
+		elif (player_y <= (goal_y + 3) and player_y >= (goal_y - 3)):
+			break
+			
+
 
 def command_to_serial(command_text, param, wait):
 	command = [
@@ -160,7 +180,7 @@ def end_walk(direction):
 
 def double_jump_attack(direction):
 	direction_param = convert_direction_to_param(direction)
-	command_to_serial("Double Jump Attack", direction_param, 200)
+	command_to_serial("Double Jump Attack", direction_param, 300)
 
 def walk_short_distance(direction):
 	direction_param = convert_direction_to_param(direction)
@@ -168,6 +188,9 @@ def walk_short_distance(direction):
 
 def down_jump():
 	command_to_serial("Down Jump", '0', 1200)
+
+def end_hold_attack(param):
+	command_to_serial("End Hold Attack", param, 0)
 
 def walk(hold_time, direction):
 	start_walk(direction)
@@ -183,32 +206,19 @@ def convert_direction_to_param(direction):
 		return "Incorrect input. Direction not found."
 
 def set_keyboard_to_mobbing():
-	if computerVision.get_is_keyboard_correct() == False:
+	if computerVision.get_is_keyboard_correct() == False and False:
 		command_to_serial("Swap Keyboard Layout", '0', 1000)
 
 def save_current_time():
 	now = datetime.now()
-	with open("TestFiles/config.txt", "w") as file:
+	with open('TestFiles/config.txt', "w") as file:
 		file.write(now.isoformat())
 
 def get_saved_time():
-	with open("TestFiles/config.txt", "r") as file:
+	with open('TestFiles/config.txt', "r") as file:
 		saved_time_str = file.read()
 		saved_time = datetime.fromisoformat(saved_time_str)
 		return saved_time
-
-def use_thirty_minute_buffs():
-	if datetime.now() - get_saved_time() >= timedelta(minutes = 30, seconds = 30):
-		time.sleep(1000)
-		command_to_serial("Swap Keyboard Layout", '0', 1000)
-		command_to_serial("Use Skill", '0', 1000)
-		command_to_serial("Use Skill", '1', 1000)
-		command_to_serial("Use Skill", '2', 1000)
-		command_to_serial("Use Skill", '3', 1000)
-		command_to_serial("Use Skill", '4', 1000)
-		command_to_serial("Use Skill", '5', 1000)
-		command_to_serial("Swap Keyboard Layout", '0', 1000)		
-		save_current_time()
 
 def main():
 	rotation_start_right = [rotations_data.get("Rotation Start Right 1", {}), rotations_data.get("Rotation Start Right 2", {})]
@@ -220,7 +230,6 @@ def main():
 	rotation_num_right = 1
 	rotation_num_left = 1
 
-
 	while True:
 		while computerVision.get_is_stopped() == False:
 			rotation_num_right = (rotation_num_right + 1) % 2
@@ -229,9 +238,6 @@ def main():
 
 			if(computerVision.get_is_stopped() == True):
 				break
-			
-			time.sleep(0.2)
-			use_thirty_minute_buffs()
 
 			rotation_num_left = (rotation_num_left + 1) % 2
 			move_to_starting_location(rotation_start_left[rotation_num_left])
@@ -240,12 +246,11 @@ def main():
 			if(computerVision.get_is_stopped() == True):
 				break
 
-			time.sleep(0.2)
-			use_thirty_minute_buffs()
-			
 		time.sleep(0.3)
 		end_walk("Left")
 		end_walk("Right")
+		end_hold_attack('4')
+		end_hold_attack('5')
 		
 
 

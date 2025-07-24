@@ -1,8 +1,16 @@
 import json
 
+#class_choice = "Illium"
+#area_choice = "Cernium"
+#map_choice = "Western City 4"
+
 class_choice = "Hero"
-area_choice = "Cernium"
-map_choice = "Western City 4"
+area_choice = "Arcus"
+map_choice = "Train 1"
+
+#class_choice = "Mihile"
+#area_choice = "Arteria"
+#map_choice = "Top Deck 1"
 
 # Class/Rotation Data #######################################################################
 # Create the filepath for the class we are choosing

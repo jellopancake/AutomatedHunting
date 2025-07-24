@@ -14,7 +14,13 @@
   },
   "Shangrila": {},
   "Odium": {},
-  "Arcus": {},
+  "Arcus": {
+    "Train 1": {
+      "mapOffset": { "x": 0, "y": 55 },
+      "mapBounds": { "w": 208, "h": 95},
+      "platformHeights": [67, 52, 37, 22]
+    }
+  },
   "Cernium": {
     "Western City 4": {
       "mapOffset": { "x": 0, "y": 55 },

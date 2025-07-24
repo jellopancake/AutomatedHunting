@@ -173,6 +173,12 @@ void executeCommand(){
          else if(command == 'R'){
             shortUpJump();
          }
+         else if(command == 'S'){
+            startJumpGlide(param);
+         }
+         else if(command == 'T'){
+            endJumpGlide(param);
+         }
       }
       // Clear the buffer for the next command
       clearSerialBuffer();
@@ -210,11 +216,28 @@ void clearSerialBuffer(){
 
 // Preset inputs //////////////////////////////////////////////////////////////////////////////////////////////////
 
-void walkShortDistance(int param){
+// For demon classes, lets you jump into starting gliding in one direction
+void startJumpGlide(int param){
    Key dir = selectDir(param);
-   walk(dir, 300);
+   pressDownButton(dir);
+   delay(100);
+   pressButton(altJump);
+   delay(doubleJumpDelay);
+   pressDownButton(jump);
 }
 
+void endJumpGlide(int param){
+   Key dir = selectDir(param);
+   releaseButton(dir);
+   releaseButton(jump);
+}
+
+void walkShortDistance(int param){
+   Key dir = selectDir(param);
+   walk(dir, 200);
+}
+
+// Walks a short amount in one direction then does a double jump to the opposite direction
 void walkOppositeIntoDoubleJump(int param){
    Key oppositeDir = selectOppositeDir(param);
    Key dir = selectDir(param);
@@ -227,6 +250,7 @@ void walkOppositeIntoDoubleJump(int param){
    releaseButton(dir);
 }
 
+// Walks a short amount in one direction then does a short double jump to the opposite direction
 void walkOppositeIntoShortDoubleJump(int param){
    Key oppositeDir = selectOppositeDir(param);
    Key dir = selectDir(param);
@@ -275,7 +299,7 @@ void jumpSkill(int param){
    Key skill = selectSkill(param);
 
    delay(200);
-   pressButton(jump);
+   pressButton(altJump);
    pressButton(skill);
 }
 
@@ -375,7 +399,7 @@ void upJump(){
    pressDownButton(up);
    delay(200);
    pressButton(altJump);
-   delay(180);
+   delay(160);
    pressButton(jump);
    releaseButton(up);
    delay(100); 
@@ -501,7 +525,7 @@ int keyToAngle (Key key){
       return 40;
    }
    else if(key == DOWN){
-      return 150;
+      return 153;
    }
    else if(key == CTRL){
       return 150;
@@ -528,10 +552,10 @@ int keyToAngle (Key key){
       return 125;
    }
    else if(key == ALT){
-      return 20;
+      return 27;
    }
    else if(key == SPACE){
-      return 48;
+      return 40;
    }
    else if(key == SPACE2){
       return 130;

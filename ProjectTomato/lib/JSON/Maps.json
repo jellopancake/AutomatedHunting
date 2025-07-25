@@ -1,0 +1,32 @@
+{
+  "Carcion": {},
+  "Arteria": {
+    "Top Deck 1": {
+      "mapOffset": { "x": 7, "y": 68 },
+      "mapBounds": { "w": 171, "h": 93},
+      "ground": 87
+    }
+  },
+  "Shangrila": {},
+  "Odium": {
+    "Alley 3": {
+      "mapOffset": { "x": 7, "y": 68 },
+      "mapBounds": { "w": 202, "h": 82},
+      "ground": 77
+    }
+  },
+  "Arcus": {
+    "Train 1": {
+      "mapOffset": { "x": 7, "y": 68 },
+      "mapBounds": { "w": 197, "h": 86},
+      "ground": 81
+    }
+  },
+  "Burning Cernium": {
+    "Western City 4": {
+      "mapOffset": { "x": 7, "y": 68 },
+      "mapBounds": { "w": 233, "h": 82},
+      "ground": 77
+    }
+  }
+}

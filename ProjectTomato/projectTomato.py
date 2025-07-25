@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 
 # Importing variables from modules
 setup_info = jsonReader.get_setup_info()
-rotations_data = jsonReader.get_rotations_data()
+rotation_data = jsonReader.get_rotation_data()
 map_data = jsonReader.get_map_data()
 
 # This is used to convert commands to ASCII for serial communication for arduino
@@ -36,6 +36,18 @@ serial_key = {
 	"Short Up Jump": 'R'
 }
 
+def update_rotation_data():
+	global rotation_data
+	rotation_data = jsonReader.get_rotation_data()
+
+def update_map_data():
+	global map_data
+	map_data = jsonReader.get_map_data()
+
+def update_setup_info():
+	global setup_info
+	setup_info = jsonReader.get_setup_info()
+
 # Uses the serial key dictionary to convert a text command to an ASCII value
 def convert_command_to_key(command):
 	return serial_key.get(command, {})
@@ -46,6 +58,8 @@ def run_setup():
 	# Pos 1 = Double jump delay multiplier, x | 200 + x * 20
 	# Pos 2 = Short double jump delay multiplier, x | 300 + x * 20
 	# Pos 3 = Wait time in ms
+
+	update_setup_info()
 	double_jump_delay = (setup_info.get("doubleJumpDelay")-200)//20
 	short_double_jump_delay = (setup_info.get("shortDoubleJumpDelay")-300)//20
 	setup = [
@@ -58,7 +72,6 @@ def run_setup():
 	reset_servos()
 
 def run_rotation(rotation):
-	set_keyboard_to_mobbing()
 	commands = rotation.get("commands")
 	
 	# Pos 1 = Command in ASCII
@@ -153,8 +166,6 @@ def move_to_vertical_location(goal_y):
 		elif (player_y <= (goal_y + 3) and player_y >= (goal_y - 3)):
 			break
 			
-
-
 def command_to_serial(command_text, param, wait):
 	command = [
 		convert_command_to_key(command_text), param, wait
@@ -205,10 +216,6 @@ def convert_direction_to_param(direction):
 	else:
 		return "Incorrect input. Direction not found."
 
-def set_keyboard_to_mobbing():
-	if computerVision.get_is_keyboard_correct() == False and False:
-		command_to_serial("Swap Keyboard Layout", '0', 1000)
-
 def save_current_time():
 	now = datetime.now()
 	with open('TestFiles/config.txt', "w") as file:
@@ -220,39 +227,46 @@ def get_saved_time():
 		saved_time = datetime.fromisoformat(saved_time_str)
 		return saved_time
 
+def load_rotation_data():
+	update_rotation_data()
+	update_map_data()
+	num_rotations = rotation_data.get("Steps", 4)
+	rotation = []
+
+	index = 1
+	while index < num_rotations + 1:
+		rotation_text = " ".join(["Rotation", str(index)])
+		rotation.append(rotation_data.get(rotation_text, {}))
+		index = index + 1
+
+	return rotation
+
 def main():
-	rotation_start_right = [rotations_data.get("Rotation Start Right 1", {}), rotations_data.get("Rotation Start Right 2", {})]
-	rotation_start_left = [rotations_data.get("Rotation Start Left 1", {}), rotations_data.get("Rotation Start Left 2", {})]
-
+	while not jsonReader.get_rotation_data():
+		time.sleep(1)
+		
+	rotation = load_rotation_data()
 	run_setup()
-	time.sleep(12)
-
-	rotation_num_right = 1
-	rotation_num_left = 1
+	
+	rotation_num = 0
+	iterations_elapsed = 0
 
 	while True:
 		while computerVision.get_is_stopped() == False:
-			rotation_num_right = (rotation_num_right + 1) % 2
-			move_to_starting_location(rotation_start_right[rotation_num_right])
-			run_rotation(rotation_start_right[rotation_num_right])
+			move_to_starting_location(rotation[rotation_num])
+			run_rotation(rotation[rotation_num])
+			rotation_num = (rotation_num + 1) % 4
 
 			if(computerVision.get_is_stopped() == True):
 				break
-
-			rotation_num_left = (rotation_num_left + 1) % 2
-			move_to_starting_location(rotation_start_left[rotation_num_left])
-			run_rotation(rotation_start_left[rotation_num_left])
-
-			if(computerVision.get_is_stopped() == True):
-				break
-
-		time.sleep(0.3)
-		end_walk("Left")
-		end_walk("Right")
-		end_hold_attack('4')
-		end_hold_attack('5')
 		
-
+		time.sleep(0.3)
+		iterations_elapsed = (iterations_elapsed + 1) % 30
+		if iterations_elapsed == 0:
+			reset_servos()
+			rotation = load_rotation_data()
+		elif iterations_elapsed == 10 or iterations_elapsed == 20:
+			reset_servos()
 
 if __name__ == "__main__":
 	main()

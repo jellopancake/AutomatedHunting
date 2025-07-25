@@ -4,7 +4,9 @@
   "shortDoubleJumpDelay": 360,
   "walkMultiplier": 0.068,
   "mobbingRotations": {
-    "Carcion": {},
+    "Carcion": {
+      
+    },
     "Arteria": {
       "Top Deck 1": {       
         "Rotation Start Right 1": {

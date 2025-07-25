@@ -18,9 +18,25 @@ goal_x, goal_y = 0, 0
 is_stopped = False
 last_time_is_stopped = time.time()
 
-# Correct keyboard condition
-is_keyboard_correct = True
-last_time_is_keyboard_correct = time.time()
+current_area = 'Cernium'
+area_list = ['Cernium', 
+                    'Burning Cernium', 
+                    'Arcus', 
+                    'Odium', 
+                    'Shangrila', 
+                    'Arteria', 
+                    'Carcion']
+
+current_class = 'Mihile'
+class_list = ['Buccaneer', 
+                    'Dawn Warrior', 
+                    'Hero', 
+                    'Illium', 
+                    'Marksman', 
+                    'Mechanic', 
+                    'Mihile',
+                    'Nightwalker', 
+                    'Paladin']
 
 def set_is_stopped(value):
     global is_stopped
@@ -28,13 +44,6 @@ def set_is_stopped(value):
 
 def get_is_stopped():
     return is_stopped
-
-def set_is_keyboard_correct(value):
-    global is_keyboard_correct
-    is_keyboard_correct = value
-
-def get_is_keyboard_correct():
-    return is_keyboard_correct
 
 # Updates a value only if x seconds has elapsed since it last changed
 def update_sticky_value(new_value, current_value, last_change_time, delay):
@@ -55,8 +64,8 @@ def set_goal_location(x, y):
     goal_x = x
     goal_y = y
 
-def match_image(cropped_frame, template, threshold):
-     # Convert frame to grayscale
+def match_image(cropped_frame, template, threshold):   
+    # Convert frame to grayscale
     gray_frame = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2GRAY)
 
     # Apply template matching
@@ -69,9 +78,22 @@ def match_image(cropped_frame, template, threshold):
     else:
         return False
 
+def compare_image_to_list(frame, name, list):
+    image_path = "".join(['lib/Images/', name, ".jpg"])
+    threshold = 0.95
+    template = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+
+    if not(match_image(frame, template, 0.95)):
+        for item in list:
+            path = "".join(['lib/Images/', item, ".jpg"])
+            template = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+            if match_image(frame, template, 0.95):
+                return item
+    return name
+
 def capture_external_screen():
     # 0 is capture card
-    capture_index = 0 
+    capture_index = 0
 
     # Open the video capture device
     cap = cv2.VideoCapture(capture_index, apiPreference=cv2.CAP_ANY, params=[
@@ -87,60 +109,53 @@ def capture_external_screen():
                 print("Failed to grab frame.")
                 break
             
-            # Define the cropping region (x, y, width, height)
-            map_data = jsonReader.get_map_data()
-            map_offset = map_data.get("mapOffset", {})
-            map_bounds = map_data.get("mapBounds", {}) 
-            map_x = int(map_offset.get("x", 0))
-            map_y = int(map_offset.get("y", 0))
-            map_w = int(map_bounds.get("w", 0))
-            map_h = int(map_bounds.get("h", 0))
-
-            minimap_frame = frame[map_y:map_y+map_h, map_x:map_x+map_w]  # Crop the frame
-
-            # Convert frame to HSV color space
-            hsv_minimap_frame = cv2.cvtColor(minimap_frame, cv2.COLOR_BGR2HSV)
-
-            # Player Location ###################################################################################################
-            # Define yellow color range
-            lower_yellow = np.array([25, 150, 200])  # Lower bound for yellow
-            upper_yellow = np.array([35, 220, 255])  # Upper bound for yellow
-
-            # Create a mask for yellow pixels
-            yellow_mask = cv2.inRange(hsv_minimap_frame, lower_yellow, upper_yellow)
-
-            # Find contours in the yellow mask
-            contours, _ = cv2.findContours(yellow_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-            if contours:
-                # Find the largest contour (biggest mass of yellow pixels)
-                largest_contour = max(contours, key=cv2.contourArea)
-                x, y, w, h = cv2.boundingRect(largest_contour)
-
-                # Draw a rectangle around the largest yellow area
-                cv2.rectangle(minimap_frame, (x, y), (x + w, y + h), (0, 255, 0), 2)  # Green box
-
-                # Save the location of the largest yellow area (center point)
-                global player_x, player_y 
-                player_x, player_y = x + w // 2, y + h // 2
-
-                # Show on the live feed the current position of the player
-                player_position_text = "Player X: " + str(player_x) + ", Y: " + str(player_y)
-
-            # Goal Location ######################################################################################################
-            # Add a red circle to denote the goal location, use map offset to draw on the minimap
-            cv2.circle(frame, (map_x + goal_x, map_y + goal_y), 3, (0, 0, 255), -1)
-            goal_text = "Goal X: " + str(goal_x) + ", Y: " + str(goal_y)
+            # Show the original frame with the detected area
+            view_frame_height = 200
+            view_frame_width = 250
+            view_frame = frame[0:view_frame_height, 0:view_frame_width]
             
+            global current_area
+            global current_class
+
+            # Region for comparing class image
+            frame_height, frame_width = frame.shape[:2]
+
+            class_frame_y1 = frame_height-83
+            class_frame_x1 = frame_width-38
+            class_frame_y2 = frame_height-45
+            class_frame_x2 = frame_width
+            class_frame = frame[class_frame_y1:class_frame_y2, class_frame_x1:class_frame_x2]
+
+            prev_class = current_class
+            current_class = compare_image_to_list(class_frame, current_class, class_list)
+
+            if prev_class != current_class:
+                jsonReader.load_map(current_area)
+                jsonReader.load_class(current_class, current_area)
+
+            # Region for comparing area image
+            area_frame_y1 = 26
+            area_frame_x1 = 4
+            area_frame_y2 = 66
+            area_frame_x2 = 44
+            area_frame = frame[area_frame_y1:area_frame_y2, area_frame_x1:area_frame_x2]
+
+            prev_area = current_area
+            current_area = compare_image_to_list(area_frame, current_area, area_list)
+
+            if prev_area != current_area:
+                jsonReader.load_map(current_area)
+                jsonReader.load_class(current_class, current_area)
+
             # Symbol detection for stop condition ################################################################################
             threshold = 0.95
-            cropped_frame_1 = frame[map_y + map_h:map_y + map_h + 40, map_x : map_x + 40]
-            template_1 = cv2.imread('TestFiles/sacred_symbol.jpg', cv2.IMREAD_GRAYSCALE)
+            stop_frame = frame[view_frame_height-50 : view_frame_height, 0 : 40]
+            stop_template = cv2.imread('lib/Images/Sacred Symbol.jpg', cv2.IMREAD_GRAYSCALE)
 
             global is_stopped
             global last_time_is_stopped
 
-            if match_image(cropped_frame_1, template_1, threshold) is True:
+            if match_image(stop_frame, stop_template, threshold) is True:
                 is_stopped, last_time_is_stopped = update_sticky_value(False, is_stopped, last_time_is_stopped, 3)
             else:
                 is_stopped, last_time_is_stopped = update_sticky_value(True, is_stopped, last_time_is_stopped, 3)
@@ -151,46 +166,71 @@ def capture_external_screen():
             else:
                 is_stopped_text = "Program Paused"
 
-            # Symbol detection for checking if in correct keyboard setup ################################################################################
-            threshold = 0.95
-            frame_height, frame_width = frame.shape[:2]
-            cropped_frame_2 = frame[frame_height-50:frame_height, frame_width-50:frame_width]
-            template_2 = cv2.imread('TestFiles/healing_fountain_pgdn.jpg', cv2.IMREAD_GRAYSCALE)
-            
-            global is_keyboard_correct
-            global last_time_is_keyboard_correct
+            if not is_stopped:
+                # Define the cropping region (x, y, width, height)
+                map_data = jsonReader.get_map_data()
+                map_offset = map_data.get("mapOffset", {})
+                map_bounds = map_data.get("mapBounds", {}) 
+                map_x = int(map_offset.get("x", 0))
+                map_y = int(map_offset.get("y", 0))
+                map_w = int(map_bounds.get("w", 0))
+                map_h = int(map_bounds.get("h", 0))
 
-            if match_image(cropped_frame_2, template_2, threshold) is True:
-                is_keyboard_correct, last_time_is_keyboard_correct = update_sticky_value(True, is_keyboard_correct, last_time_is_keyboard_correct, 1)
-            else:
-                is_keyboard_correct, last_time_is_keyboard_correct = update_sticky_value(False, is_keyboard_correct, last_time_is_keyboard_correct, 1)
+                minimap_frame = frame[map_y:map_y+map_h, map_x:map_x+map_w]  # Crop the frame
 
-            # Show on the live feed the current state of is_keyboard_correct
-            if is_keyboard_correct == True:
-                is_keyboard_correct_text = "Keyboard: Mobbing"
-            else:
-                is_keyboard_correct_text = "Keyboard: Coupons"
+                # Draw a rectangle around the minimap
+                cv2.rectangle(frame, (map_x, map_y), (map_x + map_w, map_y + map_h), (0, 255, 0), 2)  # Green box
 
-            # Show the original frame with the detected area
-            cropped_frame_1 = cv2.resize(cropped_frame_1, (minimap_frame.shape[0], minimap_frame.shape[0]))
-            cropped_frame_2 = cv2.resize(cropped_frame_2, (minimap_frame.shape[0], minimap_frame.shape[0]))
-            combined_frame = np.hstack((minimap_frame, cropped_frame_1, cropped_frame_2))
+                # Convert frame to HSV color space
+                hsv_minimap_frame = cv2.cvtColor(minimap_frame, cv2.COLOR_BGR2HSV)
+
+                # Player Location ###################################################################################################
+                # Define yellow color range
+                lower_yellow = np.array([25, 150, 200])  # Lower bound for yellow
+                upper_yellow = np.array([35, 220, 255])  # Upper bound for yellow
+
+                # Create a mask for yellow pixels
+                yellow_mask = cv2.inRange(hsv_minimap_frame, lower_yellow, upper_yellow)
+
+                # Find contours in the yellow mask
+                contours, _ = cv2.findContours(yellow_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+                if contours:
+                    # Find the largest contour (biggest mass of yellow pixels)
+                    largest_contour = max(contours, key=cv2.contourArea)
+                    x, y, w, h = cv2.boundingRect(largest_contour)
+
+                    # Draw a rectangle around the largest yellow area
+                    cv2.rectangle(minimap_frame, (x, y), (x + w, y + h), (0, 255, 0), 2)  # Green box
+
+                    # Save the location of the largest yellow area (center point)
+                    global player_x, player_y 
+                    player_x, player_y = x + w // 2, y + h // 2
+
+                # Goal Location ######################################################################################################
+                # Add a red circle to denote the goal location, use map offset to draw on the minimap
+                cv2.circle(frame, (map_x + goal_x, map_y + goal_y), 3, (0, 0, 255), -1)
+                
+            # Display the current position of the player and the goal
+            player_position_text = "Player X: " + str(player_x) + ", Y: " + str(player_y)
+            goal_text = "Goal X: " + str(goal_x) + ", Y: " + str(goal_y)
 
             # Create a black window to track parameters
-            height, width, _ = combined_frame.shape
-            text_bar_height = 70
+            height, width, _ = view_frame.shape
+            text_bar_height = 85
 
             black_bar = np.zeros((text_bar_height, width, 3), dtype=np.uint8)
-                        
-            cv2.putText(black_bar, player_position_text, (2, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-            cv2.putText(black_bar, goal_text, (2, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 1)
-            cv2.putText(black_bar, is_stopped_text, (2, 45), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-            cv2.putText(black_bar, is_keyboard_correct_text , (2, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 1)
-            
-            final_frame = np.vstack((combined_frame, black_bar))
 
-            cv2.imshow("Player Detection", final_frame)
+            cv2.putText(black_bar, current_area, (2, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)    
+            cv2.putText(black_bar, current_class, (2, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)              
+            cv2.putText(black_bar, player_position_text, (2, 45), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+            cv2.putText(black_bar, goal_text, (2, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 1)
+            cv2.putText(black_bar, is_stopped_text, (2, 75), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
             
+            combined_frame = np.vstack((view_frame, black_bar))
+
+            cv2.imshow("Player Detection", combined_frame)
+
             time.sleep(0.04)
 
             # Press ']' to exit the loop

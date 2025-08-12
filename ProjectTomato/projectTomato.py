@@ -19,31 +19,7 @@ step_count = 0
 is_rotation_changed = False
 
 # This is used to convert commands to ASCII for serial communication for arduino
-serial_key = {
-	"Start Walk" : 'A',
-	"End Walk" : 'B',
-	"Double Jump": 'C',
-	"Double Jump Attack": 'D',
-	"Short Double Jump Attack": 'E',
-	"Up Jump" : 'F',
-	"Up Jump Warrior": 'G',
-	"Down Jump": 'H',
-	"Use Skill": 'I',
-	"Jump Skill": 'J',
-	"Swap Keyboard Layout": 'K',
-	"Start Hold Attack": 'L',
-	"End Hold Attack": 'M',
-	"Reset Servos": 'N',
-	"Walk Opposite To Double Jump Attack": 'O',
-	"Walk Opposite To Short Double Jump Attack": 'P',
-	"Walk Short Distance": 'Q',
-	"Short Up Jump": 'R',
-	"Start Hold Glide": 'S',
-	"End Hold Glide": 'T',
-	"Up Teleport": 'U',
-	"Down Teleport": 'V',
-	"Down Jump Flashjump": 'W'
-}
+serial_key = serialCommunication.serial_key
 
 def update_rotation_data():
 	global rotation_data
@@ -77,8 +53,8 @@ def run_setup():
 	# Pos 3 = Wait time in ms
 
 	update_setup_info()
-	double_jump_delay = (setup_info.get("doubleJumpDelay")-200)//20
-	short_double_jump_delay = (setup_info.get("shortDoubleJumpDelay")-300)//20
+	double_jump_delay = (setup_info.get("doubleJumpDelay")-160)//20
+	short_double_jump_delay = (setup_info.get("shortDoubleJumpDelay")-260)//20
 	setup = [
 		str(double_jump_delay),
 		str(short_double_jump_delay),
@@ -225,30 +201,30 @@ def start_walk(direction):
 
 def end_walk(direction):
 	direction_param = convert_direction_to_param(direction)
-	command_to_serial("End Walk", direction_param, 200)
+	command_to_serial("End Walk", direction_param, 0)
 
 def double_jump_attack(direction):
 	direction_param = convert_direction_to_param(direction)
-	command_to_serial("Double Jump Attack", direction_param, 300)
+	command_to_serial("Double Jump Attack", direction_param, 600)
 
 def walk_short_distance(direction):
 	direction_param = convert_direction_to_param(direction)
-	command_to_serial("Walk Short Distance", direction_param, 200)
+	command_to_serial("Walk Short Distance", direction_param, 0)
 
 def up_teleport():
-	command_to_serial("Up Teleport", '0', 700)
+	command_to_serial("Up Teleport", '0', 1000)
 
 def teleport():
-	command_to_serial("Use Skill", '2', 200)
+	command_to_serial("Use Skill", '2', 500)
 
 def up_jump_warrior():
-	command_to_serial("Up Jump Warrior", '0', 1200)
+	command_to_serial("Up Jump Warrior", '0', 1500)
 
 def up_jump():
-	command_to_serial("Up Jump", '0', 1200)
+	command_to_serial("Up Jump", '0', 1500)
 
 def down_jump():
-	command_to_serial("Down Jump", '0', 1200)
+	command_to_serial("Down Jump", '0', 1500)
 
 def end_hold_attack(param):
 	command_to_serial("End Hold Attack", param, 0)

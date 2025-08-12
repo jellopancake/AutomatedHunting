@@ -297,6 +297,7 @@ void endJumpGlide(int param){
 void walkShortDistance(int param){
    Key dir = selectDir(param);
    walk(dir, 200);
+   delay(200);
 }
 
 // Walks a short amount in one direction then does a double jump to the opposite direction
@@ -329,6 +330,7 @@ void walk(Key dir, int time){
    pressDownButton(dir);
    delay(time);
    releaseButton(dir);
+   delay(200);
 }
 
 void startHoldAttack(int param){

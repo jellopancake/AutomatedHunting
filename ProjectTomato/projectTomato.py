@@ -124,9 +124,9 @@ def walk_to_point_on_ground_floor(goal_x, tolerance):
 				glide_offset = 1
 				hold_time = calculate_hold_time(x_difference, glide_multiplier, glide_offset)
 				glide(hold_time, direction)
-			elif x_difference >= 4:
+			elif x_difference >= 3:
 				walk_multiplier = setup_info.get("walkMultiplier")
-				walk_offset = 3.7
+				walk_offset = 0.0557
 				hold_time = calculate_hold_time(x_difference, walk_multiplier, walk_offset)
 				walk(hold_time, direction)
 			else:
@@ -150,7 +150,7 @@ def move_to_ground_floor(goal_y):
 			down_jump()
 		else:
 			break
-		time.sleep(0.8)
+		time.sleep(0.6)
 
 def move_to_vertical_location(goal_y):
 	vertical_movement_type = setup_info.get("verticalMovement")
@@ -178,7 +178,7 @@ def move_to_vertical_location(goal_y):
 		else:
 			rope_lift()
 			time.sleep(1.4)
-		time.sleep(1)
+		time.sleep(0.6)
 			
 def command_to_serial(command_text, param, wait):
 	command = [
@@ -224,6 +224,7 @@ def up_jump():
 	command_to_serial("Up Jump", '0', 1500)
 
 def down_jump():
+	time.sleep(0.2)
 	command_to_serial("Down Jump", '0', 1500)
 
 def end_hold_attack(param):

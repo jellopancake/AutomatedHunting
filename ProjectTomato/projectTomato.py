@@ -13,6 +13,10 @@ from datetime import datetime, timedelta
 setup_info = jsonReader.get_setup_info()
 rotation_data = jsonReader.get_rotation_data()
 map_data = jsonReader.get_map_data()
+class_key = jsonReader.get_class_key()
+area_key = jsonReader.get_area_key()
+step_count = 0
+is_rotation_changed = False
 
 # This is used to convert commands to ASCII for serial communication for arduino
 serial_key = {
@@ -33,7 +37,12 @@ serial_key = {
 	"Walk Opposite To Double Jump Attack": 'O',
 	"Walk Opposite To Short Double Jump Attack": 'P',
 	"Walk Short Distance": 'Q',
-	"Short Up Jump": 'R'
+	"Short Up Jump": 'R',
+	"Start Hold Glide": 'S',
+	"End Hold Glide": 'T',
+	"Up Teleport": 'U',
+	"Down Teleport": 'V',
+	"Down Jump Flashjump": 'W'
 }
 
 def update_rotation_data():
@@ -47,6 +56,14 @@ def update_map_data():
 def update_setup_info():
 	global setup_info
 	setup_info = jsonReader.get_setup_info()
+
+def update_class_key():
+	global class_key
+	class_key = jsonReader.get_class_key()
+
+def update_area_key():
+	global area_key
+	area_key = jsonReader.get_area_key()
 
 # Uses the serial key dictionary to convert a text command to an ASCII value
 def convert_command_to_key(command):
@@ -90,81 +107,102 @@ def move_to_starting_location(rotation):
 	starting_position_y = starting_position.get("y")
 	starting_position_x_tolerance = starting_position.get("x tolerance")
 
-	computerVision.set_goal_location(starting_position_x, starting_position_y)
-	move_to_ground_floor(starting_position_y)
-	walk_to_point_on_ground_floor(starting_position_x, starting_position_x_tolerance)
-	move_to_vertical_location(starting_position_y)
+	if starting_position_x != -1 and starting_position_y != -1:
+		computerVision.set_goal_location(starting_position_x, starting_position_y)
+		move_to_ground_floor(starting_position_y)
+		walk_to_point_on_ground_floor(starting_position_x, starting_position_x_tolerance)
+		move_to_vertical_location(starting_position_y)
 	time.sleep(0.2)
 
 def walk_to_point_on_ground_floor(goal_x, tolerance):
+	horizontal_movement_type = setup_info.get("horizontalMovement")
 	while True:
 		player_x, player_y = computerVision.get_player_location()
+		x_difference = abs(goal_x - player_x)
 		# Right is higher, left is lower
 		if computerVision.get_is_stopped() == True:
 			reset_servos()
 			break
-
-		elif (player_x <= (goal_x + tolerance) and player_x >= (goal_x - tolerance)):
+		elif x_difference <= tolerance:
 			if goal_x >= 100:
 				walk_short_distance("Left")
 			else:
 				walk_short_distance("Right")
 			break
-
-		elif (player_x >= goal_x + tolerance):
-			x_difference = player_x - goal_x
+		else:
+			if goal_x - player_x > 0:
+				direction = "Right"
+			elif goal_x - player_x < 0:
+				direction = "Left"
 			
-			if (x_difference > 30):
-				start_walk("Left")
-				double_jump_attack("Left")
-				end_walk("Left")
-			elif(x_difference > 3):
-				hold_time = calculate_hold_time(x_difference)
-				walk(hold_time, "Left")
-			else:
-				walk_short_distance("Left")
-
-		elif (player_x <= goal_x - tolerance):
-			x_difference = goal_x - player_x
-			
-			if (x_difference > 30):
-				start_walk("Right")
-				double_jump_attack("Right")
-				end_walk("Right")
-			elif(x_difference > 3):
-				hold_time = calculate_hold_time(x_difference)
-				walk(hold_time, "Right")
+			if x_difference >= 30 and horizontal_movement_type == "Flashjump":
+				start_walk(direction)
+				double_jump_attack(direction)
+				end_walk(direction)
+			elif x_difference >= 24 and horizontal_movement_type == "Teleport":
+				start_walk(direction)
+				teleport()
+				end_walk(direction)
+			elif x_difference >= 10 and horizontal_movement_type == "Glide":
+				glide_multiplier = 1
+				glide_offset = 1
+				hold_time = calculate_hold_time(x_difference, glide_multiplier, glide_offset)
+				glide(hold_time, direction)
+			elif x_difference >= 4:
+				walk_multiplier = setup_info.get("walkMultiplier")
+				walk_offset = 3.7
+				hold_time = calculate_hold_time(x_difference, walk_multiplier, walk_offset)
+				walk(hold_time, direction)
 			else:
 				walk_short_distance("Right")
 
 		time.sleep(0.35)
 
-def calculate_hold_time(difference):
-	walk_multiplier = setup_info.get("walkMultiplier")
-	return (difference - 3.7) * walk_multiplier
+def calculate_hold_time(difference, multiplier, offset):
+	return (difference - offset) * multiplier
 
 def move_to_ground_floor(goal_y):
 	while True:
 		time.sleep(0.2)
 		player_x, player_y = computerVision.get_player_location()
+		y_difference = goal_y - player_y
 		# Down is higher, up is lower
 		if computerVision.get_is_stopped() == True:
 			reset_servos()
 			break
-		elif(player_y <= goal_y - 4):
+		elif(y_difference >= 4):
 			down_jump()
 		else:
 			break
+		time.sleep(0.8)
 
 def move_to_vertical_location(goal_y):
+	vertical_movement_type = setup_info.get("verticalMovement")
 	while True:
 		player_x, player_y = computerVision.get_player_location()
-		# Right is higher, left is lower
+		y_difference = goal_y - player_y
+		# Down is higher, up is lower
 		if computerVision.get_is_stopped() == True:
 			reset_servos()
 			break
-		elif (player_y <= (goal_y + 3) and player_y >= (goal_y - 3)):
+		elif y_difference <= 3 and y_difference >= -3:
 			break
+		elif y_difference >= 4:
+			down_jump()
+		elif y_difference >= -18:
+			if vertical_movement_type == "Warrior Upjump":
+				up_jump_warrior()
+			elif vertical_movement_type == "Teleport":
+				up_teleport()
+			elif vertical_movement_type == "Glide":
+				rope_lift()
+				time.sleep(0.8)
+			else:
+				up_jump()
+		else:
+			rope_lift()
+			time.sleep(1.4)
+		time.sleep(1)
 			
 def command_to_serial(command_text, param, wait):
 	command = [
@@ -177,7 +215,7 @@ def command_to_serial(command_text, param, wait):
 		serialCommunication.write_to_serial(command, '+')
 	else:
 		print("Program is stopped")
-	
+			
 def reset_servos():
 	command_to_serial("Reset Servos", '0', 500)
 
@@ -197,16 +235,42 @@ def walk_short_distance(direction):
 	direction_param = convert_direction_to_param(direction)
 	command_to_serial("Walk Short Distance", direction_param, 200)
 
+def up_teleport():
+	command_to_serial("Up Teleport", '0', 700)
+
+def teleport():
+	command_to_serial("Use Skill", '2', 200)
+
+def up_jump_warrior():
+	command_to_serial("Up Jump Warrior", '0', 1200)
+
+def up_jump():
+	command_to_serial("Up Jump", '0', 1200)
+
 def down_jump():
 	command_to_serial("Down Jump", '0', 1200)
 
 def end_hold_attack(param):
 	command_to_serial("End Hold Attack", param, 0)
 
+def start_glide(param):
+	command_to_serial("Start Hold Glide", param, 200)
+
+def end_glide(param):
+	command_to_serial("End Hold Glide", param, 0)
+
+def glide(hold_time, direction):
+	start_glide(direction)
+	time.sleep(hold_time)
+	end_glide(direction)
+
 def walk(hold_time, direction):
 	start_walk(direction)
 	time.sleep(hold_time)
 	end_walk(direction)
+
+def rope_lift():
+	command_to_serial("Use Skill", '0', 1400)
 
 def convert_direction_to_param(direction):
 	if (direction == "Left"):
@@ -216,36 +280,36 @@ def convert_direction_to_param(direction):
 	else:
 		return "Incorrect input. Direction not found."
 
-def save_current_time():
-	now = datetime.now()
-	with open('TestFiles/config.txt', "w") as file:
-		file.write(now.isoformat())
+def load_rotation_data(old_rotation):
+	if class_key != jsonReader.get_class_key() or area_key != jsonReader.get_area_key():
+		update_rotation_data()
+		update_map_data()
+		update_setup_info()
+		update_class_key()
+		update_area_key()
 
-def get_saved_time():
-	with open('TestFiles/config.txt', "r") as file:
-		saved_time_str = file.read()
-		saved_time = datetime.fromisoformat(saved_time_str)
-		return saved_time
+		num_rotations = rotation_data.get("Steps", 1)
+		global step_count 
+		step_count = num_rotations
+		rotation = []
 
-def load_rotation_data():
-	update_rotation_data()
-	update_map_data()
-	num_rotations = rotation_data.get("Steps", 4)
-	rotation = []
-
-	index = 1
-	while index < num_rotations + 1:
-		rotation_text = " ".join(["Rotation", str(index)])
-		rotation.append(rotation_data.get(rotation_text, {}))
-		index = index + 1
-
-	return rotation
+		index = 1
+		while index < num_rotations + 1:
+			rotation_text = " ".join(["Rotation", str(index)])
+			rotation.append(rotation_data.get(rotation_text, {}))
+			index = index + 1
+		
+		global is_rotation_changed
+		is_rotation_changed = True
+		return rotation
+	return old_rotation
 
 def main():
 	while not jsonReader.get_rotation_data():
 		time.sleep(1)
-		
-	rotation = load_rotation_data()
+	
+	rotation = {}
+	rotation = load_rotation_data(rotation)
 	run_setup()
 	
 	rotation_num = 0
@@ -253,20 +317,25 @@ def main():
 
 	while True:
 		while computerVision.get_is_stopped() == False:
-			move_to_starting_location(rotation[rotation_num])
-			run_rotation(rotation[rotation_num])
-			rotation_num = (rotation_num + 1) % 4
+			# Only run if we have a rotation loaded
+			if rotation:
+				move_to_starting_location(rotation[rotation_num])
+				run_rotation(rotation[rotation_num])
+				rotation_num = (rotation_num + 1) % step_count
+				iterations_elapsed = 0
 
-			if(computerVision.get_is_stopped() == True):
-				break
-		
-		time.sleep(0.3)
-		iterations_elapsed = (iterations_elapsed + 1) % 30
 		if iterations_elapsed == 0:
 			reset_servos()
-			rotation = load_rotation_data()
-		elif iterations_elapsed == 10 or iterations_elapsed == 20:
-			reset_servos()
+			rotation = load_rotation_data(rotation)
+			global is_rotation_changed
+			if is_rotation_changed == True:
+				rotation_num = 0
+				is_rotation_changed = False
+		iterations_elapsed = (iterations_elapsed + 1) % 10
+
+		time.sleep(0.3)
+
+
 
 if __name__ == "__main__":
 	main()

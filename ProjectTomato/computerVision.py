@@ -4,6 +4,8 @@ import numpy as np
 import threading
 import time
 import pdb
+from playsound import playsound
+
 
 # Importing modules
 import jsonReader
@@ -17,6 +19,9 @@ goal_x, goal_y = 0, 0
 # Stop condition
 is_stopped = False
 last_time_is_stopped = time.time()
+
+# Tracks the previous time a rune was detected
+prev_rune_time = 0
 
 current_area = 'Cernium'
 area_list = ['Cernium', 
@@ -36,7 +41,8 @@ class_list = ['Buccaneer',
                     'Mechanic', 
                     'Mihile',
                     'Nightwalker', 
-                    'Paladin']
+                    'Paladin',
+                    'Demon Slayer']
 
 def set_is_stopped(value):
     global is_stopped
@@ -64,6 +70,7 @@ def set_goal_location(x, y):
     goal_x = x
     goal_y = y
 
+# Compares two images and matches them to a certain percentage threshold
 def match_image(cropped_frame, template, threshold):   
     # Convert frame to grayscale
     gray_frame = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2GRAY)
@@ -78,14 +85,16 @@ def match_image(cropped_frame, template, threshold):
     else:
         return False
 
+# Compares an image to a list of potential class/area images
 def compare_image_to_list(frame, name, list):
-    image_path = "".join(['lib/Images/', name, ".jpg"])
+    # First compare to the current image to see if its even changed
+    image_path = "".join(['lib/Images/', name, ".png"])
     threshold = 0.95
     template = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-
     if not(match_image(frame, template, 0.95)):
+        # Compare to list of images
         for item in list:
-            path = "".join(['lib/Images/', item, ".jpg"])
+            path = "".join(['lib/Images/', item, ".png"])
             template = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
             if match_image(frame, template, 0.95):
                 return item
@@ -108,7 +117,7 @@ def capture_external_screen():
             if not ret:
                 print("Failed to grab frame.")
                 break
-            
+             
             # Show the original frame with the detected area
             view_frame_height = 200
             view_frame_width = 250
@@ -129,6 +138,7 @@ def capture_external_screen():
             prev_class = current_class
             current_class = compare_image_to_list(class_frame, current_class, class_list)
 
+            # If class has changed, load new JSON information
             if prev_class != current_class:
                 jsonReader.load_map(current_area)
                 jsonReader.load_class(current_class, current_area)
@@ -140,6 +150,7 @@ def capture_external_screen():
             area_frame_x2 = 44
             area_frame = frame[area_frame_y1:area_frame_y2, area_frame_x1:area_frame_x2]
 
+            # If area has changed, load new JSON information
             prev_area = current_area
             current_area = compare_image_to_list(area_frame, current_area, area_list)
 
@@ -150,7 +161,7 @@ def capture_external_screen():
             # Symbol detection for stop condition ################################################################################
             threshold = 0.95
             stop_frame = frame[view_frame_height-50 : view_frame_height, 0 : 40]
-            stop_template = cv2.imread('lib/Images/Sacred Symbol.jpg', cv2.IMREAD_GRAYSCALE)
+            stop_template = cv2.imread('lib/Images/Sacred Symbol.png', cv2.IMREAD_GRAYSCALE)
 
             global is_stopped
             global last_time_is_stopped
@@ -165,6 +176,8 @@ def capture_external_screen():
                 is_stopped_text = "Program Running"
             else:
                 is_stopped_text = "Program Paused"
+
+            contours_rune_size = 0
 
             if not is_stopped:
                 # Define the cropping region (x, y, width, height)
@@ -193,11 +206,11 @@ def capture_external_screen():
                 yellow_mask = cv2.inRange(hsv_minimap_frame, lower_yellow, upper_yellow)
 
                 # Find contours in the yellow mask
-                contours, _ = cv2.findContours(yellow_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                contours_player, _ = cv2.findContours(yellow_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-                if contours:
+                if contours_player:
                     # Find the largest contour (biggest mass of yellow pixels)
-                    largest_contour = max(contours, key=cv2.contourArea)
+                    largest_contour = max(contours_player, key=cv2.contourArea)
                     x, y, w, h = cv2.boundingRect(largest_contour)
 
                     # Draw a rectangle around the largest yellow area
@@ -207,25 +220,59 @@ def capture_external_screen():
                     global player_x, player_y 
                     player_x, player_y = x + w // 2, y + h // 2
 
+                # Rune Location ###################################################################################################
+                # Define pink color range
+                lower_pink = np.array([143, 100, 200])  # Lower bound for pink
+                upper_pink = np.array([153, 200, 255])  # Upper bound for pink
+
+                # Create a mask for pink pixels
+                pink_mask = cv2.inRange(hsv_minimap_frame, lower_pink, upper_pink)
+
+                # Find contours in the pink mask
+                contours_rune, _ = cv2.findContours(pink_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+                if contours_rune:
+                    # Find the largest contour (biggest mass of pink pixels)
+                    largest_contour = max(contours_rune, key=cv2.contourArea)
+                    x, y, w, h = cv2.boundingRect(largest_contour)
+
+                    # Draw a rectangle around the largest pink area
+                    cv2.rectangle(minimap_frame, (x, y), (x + w, y + h), (0, 255, 0), 2)  # Green box
+                    contours_rune_size = w*h
+
                 # Goal Location ######################################################################################################
                 # Add a red circle to denote the goal location, use map offset to draw on the minimap
-                cv2.circle(frame, (map_x + goal_x, map_y + goal_y), 3, (0, 0, 255), -1)
-                
+                if(goal_x != None and goal_y != None):
+                    cv2.circle(frame, (map_x + goal_x, map_y + goal_y), 3, (0, 0, 255), -1)
+
+            # If there are enough pink pixels to represent a rune, show rune as available    
+            if (contours_rune_size > 15):
+                # Pings the user if rune is available, 10 minute cooldown to avoid spam
+                global prev_rune_time
+                elapsed_time = time.time() - prev_rune_time
+                if (elapsed_time > 600):
+                    playsound("lib/Sounds/Alarm.wav")
+                    prev_rune_time = time.time()
+                rune_text = "Rune: Available"
+            else:
+                rune_text = "Rune: Unavailable"
+
             # Display the current position of the player and the goal
             player_position_text = "Player X: " + str(player_x) + ", Y: " + str(player_y)
             goal_text = "Goal X: " + str(goal_x) + ", Y: " + str(goal_y)
 
             # Create a black window to track parameters
             height, width, _ = view_frame.shape
-            text_bar_height = 85
+            text_bar_height = 100
 
             black_bar = np.zeros((text_bar_height, width, 3), dtype=np.uint8)
 
             cv2.putText(black_bar, current_area, (2, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)    
             cv2.putText(black_bar, current_class, (2, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)              
-            cv2.putText(black_bar, player_position_text, (2, 45), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+            cv2.putText(black_bar, player_position_text, (2, 45), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 1)
             cv2.putText(black_bar, goal_text, (2, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 1)
             cv2.putText(black_bar, is_stopped_text, (2, 75), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+            cv2.putText(black_bar, rune_text, (2, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
             
             combined_frame = np.vstack((view_frame, black_bar))
 

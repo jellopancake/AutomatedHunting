@@ -178,6 +178,15 @@ void executeCommand(){
          }
          else if(command == 'T'){
             endJumpGlide(param);
+         } 
+         else if(command == 'U'){
+            upTeleport();
+         }
+         else if(command == 'V'){
+            downTeleport();
+         }
+         else if(command == 'W'){
+            downJumpFlashjump();
          }
       }
       // Clear the buffer for the next command
@@ -215,6 +224,37 @@ void clearSerialBuffer(){
 }
 
 // Preset inputs //////////////////////////////////////////////////////////////////////////////////////////////////
+
+void downJumpFlashjump(){
+   pressDownButton(down);
+   delay(400);
+   pressButton(jump);
+   releaseButton(down);
+   delay(250);
+   pressButton(altJump);
+   delay(150);
+   pressButton(jump);
+   delay(100);
+}
+
+// For mages with teleport
+void upTeleport(){
+   pressDownButton(up);
+   delay(500);
+   pressButton(skill2);
+   delay(200);
+   releaseButton(up);
+   delay(100);
+}
+
+void downTeleport(){
+   pressDownButton(down);
+   delay(500);
+   pressButton(skill2);
+   delay(200);
+   releaseButton(down);
+   delay(100);
+}
 
 // For demon classes, lets you jump into starting gliding in one direction
 void startJumpGlide(int param){
@@ -323,6 +363,12 @@ Key selectSkill(int param){
    else if(param == 5){
       skill = mainAttack;
    }
+   else if(param == 6){
+      skill = up;
+   } 
+   else if(param == 7){
+      skill = down;
+   }
    return skill;
 }
 
@@ -425,7 +471,7 @@ void upJumpWarrior(){
 // Performs a downjump to bring the character one platform below it
 void downJump(){
    pressDownButton(down);
-   delay(500);
+   delay(400);
    pressButton(jump);
    delay(200);
    releaseButton(down);

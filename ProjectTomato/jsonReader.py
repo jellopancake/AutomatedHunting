@@ -4,12 +4,14 @@ import pdb
 map_data = {}
 rotation_data = {}
 setup_info = {}
-    
+class_key = "Mihile"
+area_key = "Cernium"   
+
 #Favourite maps
 favourite_map_key = {
 	"Cernium" : 'Library 1',
 	"Burning Cernium" : 'Western City 4',
-	"Arcus": 'Train 1',
+	"Arcus": 'Train 3',
 	"Odium": 'Alley 3',
 	"Shangrila": 'Summer 5',
 	"Arteria" : 'Top Deck 1',
@@ -30,6 +32,9 @@ def load_map(area_choice):
     global map_data
     map_data = map_data_area.get(favourite_map_key.get(area_choice), {})
 
+    global area_key
+    area_key = area_choice
+
 # Class/Rotation Data #######################################################################
 def load_class(class_choice, area_choice):
     map_choice = favourite_map_key.get(area_choice)
@@ -40,9 +45,12 @@ def load_class(class_choice, area_choice):
     with open("".join(class_file_path), 'r') as file:
         class_raw_data = json.load(file)  # Load JSON data into a Python dictionary
 
+    global class_key
+    class_key = class_raw_data.get("className")
+
     # Retrieve setup info from class data
     global setup_info
-    setup_info = ({k: class_raw_data[k] for k in ["doubleJumpDelay", "shortDoubleJumpDelay", "walkMultiplier"]})
+    setup_info = ({k: class_raw_data[k] for k in ["doubleJumpDelay", "shortDoubleJumpDelay", "walkMultiplier", "horizontalMovement", "verticalMovement"]})
 
     # Fills rotations with the rotations correlating to the correct area
     global rotation_data
@@ -60,5 +68,11 @@ def get_rotation_data():
 def get_setup_info():
     return setup_info
 
-load_map('Cernium')
-load_class('Mihile', 'Cernium')
+def get_class_key():
+    return class_key
+
+def get_area_key():
+    return area_key
+
+load_map(area_key)
+load_class(class_key, area_key)

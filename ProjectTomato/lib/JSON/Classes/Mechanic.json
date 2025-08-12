@@ -1,7 +1,7 @@
 {
-  "className": "DW",
+  "className": "Mechanic",
   "doubleJumpDelay": 200,
-  "shortDoubleJumpDelay": 320,
+  "shortDoubleJumpDelay": 300,
   "walkMultiplier": 0.068,
   "horizontalMovement": "Flashjump",
   "verticalMovement": "Upjump",
@@ -15,21 +15,23 @@
         "Rotation 1": {
           "startingLocation": { "x": 34, "y": 66, "x tolerance": 2},
           "commands": [
-            {"command": "Use Skill", "parameter": 0, "wait": 2000},
-            {"command": "Start Walk", "parameter": 1, "wait": 400},
-            {"command": "Double Jump Attack", "parameter": 0, "wait": 1000},
-            {"command": "Short Double Jump Attack", "parameter": 0, "wait": 1400},
-            {"command": "Double Jump Attack", "parameter": 0, "wait": 1800},
+            {"command": "Use Skill", "parameter": 0, "wait": 2700},
+            {"command": "Start Walk", "parameter": 1, "wait": 600},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 1200},
+            {"command": "Short Double Jump Attack", "parameter": 0, "wait": 1850},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 2200},
             {"command": "End Walk", "parameter": 1, "wait": 0}
           ]
         },
         "Rotation 2":{
           "startingLocation": { "x": 170, "y": 38, "x tolerance": 3},
           "commands": [
+            {"command": "Use Skill", "parameter": 1, "wait": 1100},
             {"command": "Use Skill", "parameter": 4, "wait": 900},
             {"command": "Start Walk", "parameter": 0, "wait": 0},
-            {"command": "Short Double Jump Attack", "parameter": 0, "wait": 1000},
-            {"command": "Short Double Jump Attack", "parameter": 0, "wait": 1000},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 1100},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 800},
+            {"command": "Use Skill", "parameter": 3, "wait": 900},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 1000},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 1000},
             {"command": "End Walk", "parameter": 0, "wait": 0}
@@ -39,20 +41,24 @@
           "startingLocation": { "x": 21, "y": 53, "x tolerance": 4},
           "commands": [
             {"command": "Start Walk", "parameter": 1, "wait": 0},
-            {"command": "Short Double Jump Attack", "parameter": 0, "wait": 1000},
-            {"command": "Short Double Jump Attack", "parameter": 0, "wait": 1400},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 1000},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 1400},
             {"command": "End Walk", "parameter": 1, "wait": 0},
-            {"command": "Use Skill", "parameter": 1, "wait": 700},
-            {"command": "Use Skill", "parameter": 2, "wait": 1200},
+            {"command": "Swap Keyboard Layout", "parameter": 0, "wait": 900},
             {"command": "Start Walk", "parameter": 1, "wait": 900},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 1400},
+            {"command": "Short Double Jump Attack", "parameter": 0, "wait": 1100},
             {"command": "End Walk", "parameter": 1, "wait": 0}
           ]
         },
         "Rotation 4":{
           "startingLocation": { "x": 172, "y": 66, "x tolerance": 4},
           "commands": [
+            {"command": "Start Hold Attack", "parameter": 7, "wait": 0},
+            {"command": "Use Skill", "parameter": 2, "wait": 900},
+            {"command": "End Hold Attack", "parameter": 7, "wait": 0},
             {"command": "Start Walk", "parameter": 0, "wait": 200},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 1000},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 1000},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 1000},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 1000},
@@ -60,8 +66,10 @@
             {"command": "Start Walk", "parameter": 1, "wait": 200},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 1000},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 1000},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 1000},
             {"command": "End Walk", "parameter": 1, "wait": 0},
             {"command": "Start Walk", "parameter": 0, "wait": 200},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 1000},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 1000},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 1000},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 1000},
@@ -71,25 +79,27 @@
       }
     },
     "Arcus": {
-      "Train 1": {     
-        "Steps" : 4,    
+      "Train 1": {  
+        "Steps" : 4,     
         "Rotation 1": {
           "startingLocation": { "x": 146, "y": 68, "x tolerance": 2},
           "commands": [
             {"command": "Use Skill", "parameter": 0, "wait": 1300},
-            {"command": "Start Walk", "parameter": 0, "wait": 1200},
+            {"command": "Start Walk", "parameter": 0, "wait": 1400},
             {"command": "End Walk", "parameter": 0, "wait": 0},
-            {"command": "Use Skill", "parameter": 1, "wait": 900},
+            {"command": "Use Skill", "parameter": 5, "wait": 1000},
+            {"command": "Use Skill", "parameter": 1, "wait": 1000},
             {"command": "Use Skill", "parameter": 4, "wait": 900},
-            {"command": "Short Up Jump", "parameter": 0, "wait": 1700},
-            {"command": "Start Walk", "parameter": 0, "wait": 900},
-            {"command": "Double Jump Attack", "parameter": 0, "wait": 1100},
-            {"command": "End Walk", "parameter": 0, "wait": 0},
-            {"command": "Down Jump", "parameter": 0, "wait": 900},
-            {"command": "Use Skill", "parameter": 2, "wait": 900},
+            {"command": "Up Jump", "parameter": 0, "wait": 1600},
+            {"command": "Swap Keyboard Layout", "parameter": 0, "wait": 900},
             {"command": "Start Walk", "parameter": 0, "wait": 1100},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 1400},
             {"command": "End Walk", "parameter": 0, "wait": 0},
-            {"command": "Start Walk", "parameter": 1, "wait": 600},
+            {"command": "Down Jump", "parameter": 0, "wait": 1100},
+            {"command": "Use Skill", "parameter": 3, "wait": 900},
+            {"command": "Start Walk", "parameter": 0, "wait": 1000},
+            {"command": "End Walk", "parameter": 0, "wait": 0},
+            {"command": "Start Walk", "parameter": 1, "wait": 900},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 900},
             {"command": "End Walk", "parameter": 1, "wait": 500},
             {"command": "Down Jump", "parameter": 0, "wait": 800},
@@ -99,28 +109,34 @@
         "Rotation 2":{
           "startingLocation": { "x": 138, "y": 68, "x tolerance": 4},
           "commands": [
+            {"command": "Start Hold Attack", "parameter": 7, "wait": 0},
+            {"command": "Use Skill", "parameter": 2, "wait": 900},
+            {"command": "End Hold Attack", "parameter": 7, "wait": 0},
             {"command": "Start Walk", "parameter": 0, "wait": 200},
-            {"command": "Double Jump Attack", "parameter": 0, "wait": 1200},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 900},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 900},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 900},
             {"command": "End Walk", "parameter": 0, "wait": 0},
             {"command": "Start Walk", "parameter": 1, "wait": 200},
-            {"command": "Double Jump Attack", "parameter": 0, "wait": 1200},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 900},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 900},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 900},
             {"command": "End Walk", "parameter": 1, "wait": 0},
             {"command": "Start Walk", "parameter": 0, "wait": 200},
-            {"command": "Double Jump Attack", "parameter": 0, "wait": 1200},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 900},
-            {"command": "End Walk", "parameter": 0, "wait": 0}   
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 900},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 900},
+            {"command": "End Walk", "parameter": 0, "wait": 0}
           ]
         },
         "Rotation 3":{
           "startingLocation": { "x": 44, "y": 68, "x tolerance": 2},
           "commands": [
-            {"command": "Walk Short Distance", "parameter": 1, "wait": 200},
-            {"command": "Short Up Jump", "parameter": 0, "wait": 1600},
-            {"command": "Start Walk", "parameter": 1, "wait": 400},
-            {"command": "Double Jump Attack", "parameter": 0, "wait": 1700},
-            {"command": "Double Jump Attack", "parameter": 0, "wait": 1300},
+            {"command": "Short Up Jump", "parameter": 0, "wait": 900},
+            {"command": "Use Skill", "parameter": 1, "wait": 900},
+            {"command": "Start Walk", "parameter": 1, "wait": 700},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 1800},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 1200},
             {"command": "End Walk", "parameter": 1, "wait": 400}          
           ]
         },
@@ -128,45 +144,54 @@
           "startingLocation": { "x": 138, "y": 68, "x tolerance": 4},
           "commands": [
             {"command": "Start Walk", "parameter": 0, "wait": 200},
-            {"command": "Double Jump Attack", "parameter": 0, "wait": 1200},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 900},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 900},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 900},
             {"command": "End Walk", "parameter": 0, "wait": 0},
             {"command": "Start Walk", "parameter": 1, "wait": 200},
-            {"command": "Double Jump Attack", "parameter": 0, "wait": 1200},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 900},
-            {"command": "End Walk", "parameter": 1, "wait": 0} 
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 900},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 900},
+            {"command": "End Walk", "parameter": 1, "wait": 0}  
           ]
         }
       }
     },
     "Burning Cernium": {
       "Western City 4": {    
-        "Steps" : 4,     
+        "Steps" : 4,   
         "Rotation 1": {
           "startingLocation": { "x": 166, "y": 64, "x tolerance": 2},
           "commands": [
-            {"command": "Use Skill", "parameter": 0, "wait": 1300},
-            {"command": "Use Skill", "parameter": 1, "wait": 900},
+            {"command": "Use Skill", "parameter": 0, "wait": 1200},
+            {"command": "Use Skill", "parameter": 1, "wait": 1000},
             {"command": "Use Skill", "parameter": 4, "wait": 900},
-            {"command": "Walk Short Distance", "parameter": 1, "wait": 0},
+            {"command": "Start Walk", "parameter": 1, "wait": 0},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 800},
+            {"command": "End Walk", "parameter": 1, "wait": 0},
             {"command": "Start Walk", "parameter": 0, "wait": 200},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 1500},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 900},
             {"command": "Short Double Jump Attack", "parameter": 0, "wait": 1200},
-            {"command": "Double Jump Attack", "parameter": 0, "wait": 2400},
-            {"command": "Double Jump Attack", "parameter": 0, "wait": 1300},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 1700},
             {"command": "End Walk", "parameter": 0, "wait": 0},
             {"command": "Down Jump", "parameter": 0, "wait": 800},
-            {"command": "Short Double Jump Attack", "parameter": 0, "wait": 900}
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 900}
+            
           ]
         },
         "Rotation 2":{
           "startingLocation": { "x": 39, "y": 64, "x tolerance": 4},
           "commands": [
+            {"command": "Start Hold Attack", "parameter": 7, "wait": 0},
+            {"command": "Use Skill", "parameter": 2, "wait": 900},
+            {"command": "End Hold Attack", "parameter": 7, "wait": 0},
             {"command": "Start Walk", "parameter": 1, "wait": 200},
-            {"command": "Double Jump Attack", "parameter": 0, "wait": 900},
-            {"command": "Double Jump Attack", "parameter": 0, "wait": 900},
-            {"command": "Double Jump Attack", "parameter": 0, "wait": 900},
-            {"command": "Double Jump Attack", "parameter": 0, "wait": 900},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 1000},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 1000},
+            {"command": "Swap Keyboard Layout", "parameter": 0, "wait": 900},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 1000},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 1000},
             {"command": "End Walk", "parameter": 1, "wait": 0}
           ]
         },
@@ -178,25 +203,26 @@
             {"command": "Start Walk", "parameter": 1, "wait": 0},
             {"command": "Short Up Jump", "parameter": 0, "wait": 1000},
             {"command": "End Walk", "parameter": 1, "wait": 0},
-            {"command": "Start Walk", "parameter": 0, "wait": 900},
-            {"command": "Double Jump Attack", "parameter": 0, "wait": 1900},
-            {"command": "End Walk", "parameter": 0, "wait": 0},
-            {"command": "Down Jump", "parameter": 0, "wait": 800},
             {"command": "Start Walk", "parameter": 0, "wait": 1400},
-            {"command": "Double Jump Attack", "parameter": 0, "wait": 1500},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 2050},
+            {"command": "End Walk", "parameter": 0, "wait": 0},
+            {"command": "Down Jump", "parameter": 0, "wait": 900},
+            {"command": "Use Skill", "parameter": 3, "wait": 900},
+            {"command": "Start Walk", "parameter": 0, "wait": 1900},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 1300},
             {"command": "End Walk", "parameter": 0, "wait": 0},
             {"command": "Down Jump", "parameter": 0, "wait": 800},
-            {"command": "Short Double Jump Attack", "parameter": 0, "wait": 900}
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 900}
           ]
         },
         "Rotation 4":{
           "startingLocation": { "x": 38, "y": 49, "x tolerance": 2},
           "commands": [
-            {"command": "Start Walk", "parameter": 1, "wait": 100},
-            {"command": "Short Double Jump Attack", "parameter": 0, "wait": 1100},
+            {"command": "Start Walk", "parameter": 1, "wait": 0},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 1000},
-            {"command": "Use Skill", "parameter": 2, "wait": 2400},
-            {"command": "Double Jump Attack", "parameter": 0, "wait": 900},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 1500},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 1900},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 1100},
             {"command": "End Walk", "parameter": 1, "wait": 0}
           ]
         }

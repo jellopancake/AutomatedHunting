@@ -1,13 +1,25 @@
 {
-  "Carcion": {},
+  "Carcion": {
+    "Calm Beach 1": {
+      "mapOffset": { "x": 7, "y": 68 },
+      "mapBounds": { "w": 193, "h": 88},
+      "ground": 74
+    }
+  },
   "Arteria": {
     "Top Deck 1": {
       "mapOffset": { "x": 7, "y": 68 },
       "mapBounds": { "w": 171, "h": 93},
-      "ground": 87
+      "ground": 74
     }
   },
-  "Shangrila": {},
+  "Shangrila": {
+    "Summer 5": {
+      "mapOffset": { "x": 7, "y": 68 },
+      "mapBounds": { "w": 204, "h": 80},
+      "ground": 77
+    }
+  },
   "Odium": {
     "Alley 3": {
       "mapOffset": { "x": 7, "y": 68 },
@@ -20,6 +32,11 @@
       "mapOffset": { "x": 7, "y": 68 },
       "mapBounds": { "w": 197, "h": 86},
       "ground": 81
+    },
+    "Train 3": {
+      "mapOffset": { "x": 7, "y": 68 },
+      "mapBounds": { "w": 208, "h": 86},
+      "ground": 81
     }
   },
   "Burning Cernium": {
@@ -28,5 +45,13 @@
       "mapBounds": { "w": 233, "h": 82},
       "ground": 77
     }
+  },
+  "Cernium": {
+    "Library 1": {
+      "mapOffset": { "x": 7, "y": 68 },
+      "mapBounds": { "w": 174, "h": 73},
+      "ground": 77
+    }
   }
+
 }

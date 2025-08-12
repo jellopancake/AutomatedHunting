@@ -18,6 +18,8 @@ int shortDoubleJumpDelay = 350;
 // Use 255 as null case
 uint8_t serialBuffer[] = {255, 255, 255};
 
+bool handshakeDone = false;
+
 enum Key{LEFT, RIGHT, DOWN, F, G, H, J, COLON, APOS, ALT, CTRL, SPACE, SPACE2};
    Key left = LEFT;
    Key right = RIGHT;
@@ -88,10 +90,10 @@ void executeCommand(){
       // Running setup
       if(serialBuffer[0] == '*'){
          int delay1 = serialBuffer[1] - '0';
-         doubleJumpDelay = 200 + delay1*20;
+         doubleJumpDelay = 160 + delay1*20;
 
          int delay2 = serialBuffer[2] - '0';
-         shortDoubleJumpDelay = 300 + delay2*20;
+         shortDoubleJumpDelay = 260 + delay2*20;
       }
 
       // Running commands
@@ -196,24 +198,25 @@ void executeCommand(){
 
 // Reads serial data to the buffer
 void readSerialToBuffer(){
-   if (Serial.available() >= 3){   
-      // Only start reading message if it starts with ack
-      if(Serial.peek() == '+' || Serial.peek() == '*'){
-         // Overwrite empty spaces in the serial buffer with the received serial data
-         for(int i = 0; i < sizeof(serialBuffer); i++){        
-            // Removes end line characters
-            if (Serial.peek() == '\n' || Serial.peek() == '\0'){
-               Serial.read();
-               break;
-            }
+   // Handshake to check if arduino is available
+   if (!handshakeDone && Serial.available()) {
+      String input = Serial.readStringUntil('\n');
+      input.trim();  // Remove whitespace/newlines
 
-            // Load message into serial buffer
+      if (input == "SYN") {
+         Serial.println("SYN-ACK");
+      } else if (input == "ACK") {
+         Serial.println("READY");
+         handshakeDone = true;
+    }
+   }
+   
+   if (handshakeDone) {
+      if (Serial.available() >= 3){   
+         for(int i = 0; i < sizeof(serialBuffer); i++){        
             serialBuffer[i] = Serial.read();
          }
-      }
-      // If message does not start with ack, remove the byte from the buffer
-      Serial.read();
-
+         handshakeDone = false;
    }
 }
 

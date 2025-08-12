@@ -20,6 +20,14 @@ uint8_t serialBuffer[] = {255, 255, 255};
 
 bool handshakeDone = false;
 
+// Declare the move to rune button pin
+int move_to_rune_button = 2;
+
+// Debounce variables
+bool lastButtonState = LOW;
+unsigned long lastDebounceTime = 0;
+const unsigned long debounceDelay = 50;  // 50 ms debounce delay
+
 enum Key{LEFT, RIGHT, DOWN, F, G, H, J, COLON, APOS, ALT, CTRL, SPACE, SPACE2};
    Key left = LEFT;
    Key right = RIGHT;
@@ -55,6 +63,9 @@ void setup() {
    Servo5.write(90);
    Servo6.write(90);
    Servo7.write(90);
+
+   // Attach move to rune button to pin 2
+   pinMode(move_to_rune_button, INPUT_PULLUP);
 
    // Start open Serial port through USB
    Serial.begin(9600);  
@@ -217,6 +228,12 @@ void readSerialToBuffer(){
             serialBuffer[i] = Serial.read();
          }
          handshakeDone = false;
+   }
+
+   if (!handshakeDone) {
+      if (runeButtonPressed()){
+         
+      }
    }
 }
 
@@ -515,6 +532,22 @@ void releaseButton(Key key){
 }
 
 // Start/Stop functionality ///////////////////////////////////////////////////////////////////////
+// Checks if the start/stop button is pressed
+bool runeButtonPressed(){
+   reading = digitalRead(move_to_rune_button);
+   if (reading != lastButtonState) {
+      lastDebounceTime = millis();  // reset debounce timer
+   }
+   if ((millis() - lastDebounceTime) > debounceDelay) {
+      if (reading == HIGH && !buttonPressed) {
+        // Valid press detected
+        return True;
+      } else if (reading == LOW && buttonPressed) {
+        return False;
+      }
+    }
+}
+
 // Servo Legend for angles required to press keyboard keys //////////////////////////////////////////////////////////////////////////////////////////////////
 // LOW 10-70, HIGH 100-170
 // Servo 1

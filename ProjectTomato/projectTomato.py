@@ -135,11 +135,11 @@ def walk_to_point_on_ground_floor(goal_x, tolerance, align):
 						teleport()
 					count += 1
 				end_walk(direction)
-			elif x_difference >= 12 and horizontal_movement_type == "Glide":
-				glide_multiplier = 0.035
+			elif x_difference >= 20 and horizontal_movement_type == "Glide":
+				glide_multiplier = 0.030
 				glide_offset = 1.1
 				hold_time = calculate_hold_time(x_difference, glide_multiplier, glide_offset)
-				glide_max_time = 2.2
+				glide_max_time = 1.8
 				if hold_time < glide_max_time:
 					glide(hold_time, direction)
 				else:

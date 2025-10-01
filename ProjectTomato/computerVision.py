@@ -4,8 +4,9 @@ import numpy as np
 import threading
 import time
 import pdb
+import math
 from playsound import playsound
-
+from collections import deque
 
 # Importing modules
 import jsonReader
@@ -20,8 +21,14 @@ goal_x, goal_y = 0, 0
 is_stopped = False
 last_time_is_stopped = time.time()
 
+# Image recognition condition
+is_identifying_image = False
+
 # Tracks the previous time a rune was detected
 prev_rune_time = 0
+
+player_positions_tracked = 8
+last_player_position_list = deque([(0, 0) for _ in range(player_positions_tracked)], maxlen = player_positions_tracked)
 
 current_area = 'Cernium'
 area_list = ['Cernium', 
@@ -42,7 +49,10 @@ class_list = ['Buccaneer',
                     'Mihile',
                     'Nightwalker', 
                     'Paladin',
-                    'Demon Slayer']
+                    'Demon Slayer',
+                    'Shadower',
+                    'Wind Archer',
+                    'Demon Avenger']
 
 def set_is_stopped(value):
     global is_stopped
@@ -50,6 +60,9 @@ def set_is_stopped(value):
 
 def get_is_stopped():
     return is_stopped
+
+def get_is_identifying_image():
+    return is_identifying_image
 
 # Updates a value only if x seconds has elapsed since it last changed
 def update_sticky_value(new_value, current_value, last_change_time, delay):
@@ -70,6 +83,26 @@ def set_goal_location(x, y):
     goal_x = x
     goal_y = y
 
+def update_player_position_list(x, y):
+    global last_player_position_list
+    position = (x, y)
+    last_player_position_list.append(position)
+
+def check_is_moving():
+    if last_player_position_list:
+        most_recent_position = last_player_position_list[-1]
+        most_recent_position_x = most_recent_position[0]
+        most_recent_position_y = most_recent_position[1]
+
+        # Check if player is moving
+        for position in last_player_position_list:
+            position_x = position[0]
+            position_y = position[1]
+            
+            if abs(position_x - most_recent_position_x) > 1 or abs(position_y - most_recent_position_y) > 1:
+                return True
+    return False
+        
 # Compares two images and matches them to a certain percentage threshold
 def match_image(cropped_frame, template, threshold):   
     # Convert frame to grayscale
@@ -89,16 +122,36 @@ def match_image(cropped_frame, template, threshold):
 def compare_image_to_list(frame, name, list):
     # First compare to the current image to see if its even changed
     image_path = "".join(['lib/Images/', name, ".png"])
-    threshold = 0.95
+    threshold = 0.90
     template = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-    if not(match_image(frame, template, 0.95)):
+    if not(match_image(frame, template, 0.90)):
+        global is_identifying_image
+        is_identifying_image = True
         # Compare to list of images
         for item in list:
             path = "".join(['lib/Images/', item, ".png"])
             template = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
-            if match_image(frame, template, 0.95):
+            if match_image(frame, template, 0.90):
+                is_identifying_image = False
                 return item
+        is_identifying_image = False
     return name
+
+def resize_frame(frame, target_size):
+    return cv2.resize(frame, target_size)
+
+def divide_width(width, divisor):
+    remainder = width%divisor
+    divided_width = math.floor(width/divisor)
+    widths = []
+    count = 0
+    while count < divisor-1:
+        widths.append(divided_width)
+        count += 1
+    widths.append(divided_width+remainder)
+    
+    return widths
+
 
 def capture_external_screen():
     # 0 is capture card
@@ -157,6 +210,9 @@ def capture_external_screen():
             if prev_area != current_area:
                 jsonReader.load_map(current_area)
                 jsonReader.load_class(current_class, current_area)
+
+            json_class_text = "Loaded Class: " + str(jsonReader.get_setup_info().get("className", {}))
+            json_map_text = "Loaded Map: " + str(jsonReader.get_loaded_map())
 
             # Symbol detection for stop condition ################################################################################
             threshold = 0.95
@@ -219,6 +275,7 @@ def capture_external_screen():
                     # Save the location of the largest yellow area (center point)
                     global player_x, player_y 
                     player_x, player_y = x + w // 2, y + h // 2
+                    update_player_position_list(player_x, player_y)
 
                 # Rune Location ###################################################################################################
                 # Define pink color range
@@ -245,6 +302,10 @@ def capture_external_screen():
                 if(goal_x != None and goal_y != None):
                     cv2.circle(frame, (map_x + goal_x, map_y + goal_y), 3, (0, 0, 255), -1)
 
+            is_moving_text = "Stationary"
+            if check_is_moving() and not is_stopped:
+                is_moving_text = "Moving"
+
             # If there are enough pink pixels to represent a rune, show rune as available    
             if (contours_rune_size > 15):
                 # Pings the user if rune is available, 10 minute cooldown to avoid spam
@@ -263,7 +324,7 @@ def capture_external_screen():
 
             # Create a black window to track parameters
             height, width, _ = view_frame.shape
-            text_bar_height = 100
+            text_bar_height = 150
 
             black_bar = np.zeros((text_bar_height, width, 3), dtype=np.uint8)
 
@@ -273,8 +334,19 @@ def capture_external_screen():
             cv2.putText(black_bar, goal_text, (2, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 1)
             cv2.putText(black_bar, is_stopped_text, (2, 75), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
             cv2.putText(black_bar, rune_text, (2, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+            cv2.putText(black_bar, is_moving_text, (2, 105), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+            cv2.putText(black_bar, json_class_text, (2, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+            cv2.putText(black_bar, json_map_text, (2, 135), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
             
-            combined_frame = np.vstack((view_frame, black_bar))
+            width1, width2, width3 = divide_width(width, 3)
+
+            resized_area_frame = resize_frame(area_frame, (width1, width1))
+            resized_class_frame = resize_frame(class_frame, (width2, width1))
+            resized_stop_frame = resize_frame(stop_frame, (width3, width1))
+            
+            detection_frame = np.hstack((resized_area_frame, resized_class_frame, resized_stop_frame))
+            
+            combined_frame = np.vstack((view_frame, detection_frame, black_bar))
 
             cv2.imshow("Player Detection", combined_frame)
 

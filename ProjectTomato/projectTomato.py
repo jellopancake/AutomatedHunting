@@ -8,6 +8,7 @@ import time
 import random
 import pdb
 from datetime import datetime, timedelta
+import math
 
 # Importing variables from modules
 setup_info = jsonReader.get_setup_info()
@@ -82,16 +83,24 @@ def move_to_starting_location(rotation):
 	starting_position_x = starting_position.get("x")
 	starting_position_y = starting_position.get("y")
 	starting_position_x_tolerance = starting_position.get("x tolerance")
+	start_position_align = starting_position.get("align direction")
 
 	if starting_position_x != -1 and starting_position_y != -1:
 		computerVision.set_goal_location(starting_position_x, starting_position_y)
+		wait_until_stop_moving()
 		move_to_ground_floor(starting_position_y)
-		walk_to_point_on_ground_floor(starting_position_x, starting_position_x_tolerance)
+		walk_to_point_on_ground_floor(starting_position_x, starting_position_x_tolerance, start_position_align)
 		move_to_vertical_location(starting_position_y)
-	time.sleep(0.2)
 
-def walk_to_point_on_ground_floor(goal_x, tolerance):
+def wait_until_stop_moving():
+	time.sleep(0.2)
+	while computerVision.check_is_moving():
+		time.sleep(0.1)
+		# Do nothing
+
+def walk_to_point_on_ground_floor(goal_x, tolerance, align):
 	horizontal_movement_type = setup_info.get("horizontalMovement")
+	horizontal_movement_distance = setup_info.get("horizontalMovementDistance")
 	while True:
 		player_x, player_y = computerVision.get_player_location()
 		x_difference = abs(goal_x - player_x)
@@ -100,10 +109,14 @@ def walk_to_point_on_ground_floor(goal_x, tolerance):
 			reset_servos()
 			break
 		elif x_difference <= tolerance:
-			if goal_x >= 100:
-				walk_short_distance("Left")
-			else:
-				walk_short_distance("Right")
+			bounds = map_data.get("mapBounds", {}) 
+			width = int(bounds.get("w", 0))
+			halfway_point = round(width/2)
+			if align == "yes":
+				if goal_x >= halfway_point:
+					walk_short_distance("Left")
+				else:
+					walk_short_distance("Right")
 			break
 		else:
 			if goal_x - player_x > 0:
@@ -111,46 +124,60 @@ def walk_to_point_on_ground_floor(goal_x, tolerance):
 			elif goal_x - player_x < 0:
 				direction = "Left"
 			
-			if x_difference >= 30 and horizontal_movement_type == "Flashjump":
+			if x_difference >= 0.75*horizontal_movement_distance and (horizontal_movement_type == "Flashjump" or horizontal_movement_type == "Teleport"):
+				num_repeats = round((x_difference+0.25*horizontal_movement_distance)/horizontal_movement_distance)
 				start_walk(direction)
-				double_jump_attack(direction)
+				count = 0
+				while(count < num_repeats):
+					if horizontal_movement_type == "Flashjump":
+						double_jump_attack(direction)
+					elif horizontal_movement_type == "Teleport":
+						teleport()
+					count += 1
 				end_walk(direction)
-			elif x_difference >= 24 and horizontal_movement_type == "Teleport":
-				start_walk(direction)
-				teleport()
-				end_walk(direction)
-			elif x_difference >= 10 and horizontal_movement_type == "Glide":
-				glide_multiplier = 1
-				glide_offset = 1
+			elif x_difference >= 12 and horizontal_movement_type == "Glide":
+				glide_multiplier = 0.035
+				glide_offset = 1.1
 				hold_time = calculate_hold_time(x_difference, glide_multiplier, glide_offset)
-				glide(hold_time, direction)
-			elif x_difference >= 3:
+				glide_max_time = 2.2
+				if hold_time < glide_max_time:
+					glide(hold_time, direction)
+				else:
+					while hold_time > glide_max_time:
+						glide(glide_max_time, direction)
+						hold_time = hold_time - glide_max_time
+					glide(hold_time, direction)
+			elif x_difference >= 5:
 				walk_multiplier = setup_info.get("walkMultiplier")
-				walk_offset = 0.0557
+				walk_offset = 0.82
 				hold_time = calculate_hold_time(x_difference, walk_multiplier, walk_offset)
 				walk(hold_time, direction)
+				time.sleep(0.7)
 			else:
-				walk_short_distance("Right")
-
-		time.sleep(0.35)
-
+				walk_short_distance(direction)
+				time.sleep(0.7)
+		wait_until_stop_moving()
+	
 def calculate_hold_time(difference, multiplier, offset):
 	return (difference - offset) * multiplier
 
 def move_to_ground_floor(goal_y):
 	while True:
-		time.sleep(0.2)
 		player_x, player_y = computerVision.get_player_location()
 		y_difference = goal_y - player_y
 		# Down is higher, up is lower
 		if computerVision.get_is_stopped() == True:
 			reset_servos()
 			break
-		elif(y_difference >= 4):
+		elif y_difference >= -9 and y_difference <= -2:
+			move_up()
+		elif y_difference <= 9 and y_difference >= 2:
+			move_down()
+		elif y_difference >= 10:
 			down_jump()
 		else:
 			break
-		time.sleep(0.6)
+		wait_until_stop_moving()
 
 def move_to_vertical_location(goal_y):
 	vertical_movement_type = setup_info.get("verticalMovement")
@@ -161,11 +188,15 @@ def move_to_vertical_location(goal_y):
 		if computerVision.get_is_stopped() == True:
 			reset_servos()
 			break
-		elif y_difference <= 3 and y_difference >= -3:
+		elif y_difference <= 1 and y_difference >= -1:
 			break
-		elif y_difference >= 4:
+		elif y_difference <= 9 and y_difference >= 2:
+			move_down()
+		elif y_difference >= 10:
 			down_jump()
-		elif y_difference >= -18:
+		elif y_difference >= -9 and y_difference <= -2:
+			move_up()
+		elif y_difference >= -20:
 			if vertical_movement_type == "Warrior Upjump":
 				up_jump_warrior()
 			elif vertical_movement_type == "Teleport":
@@ -177,8 +208,8 @@ def move_to_vertical_location(goal_y):
 				up_jump()
 		else:
 			rope_lift()
-			time.sleep(1.4)
-		time.sleep(0.6)
+			time.sleep(0.8)
+		wait_until_stop_moving()
 			
 def command_to_serial(command_text, param, wait):
 	command = [
@@ -205,7 +236,7 @@ def end_walk(direction):
 
 def double_jump_attack(direction):
 	direction_param = convert_direction_to_param(direction)
-	command_to_serial("Double Jump Attack", direction_param, 600)
+	command_to_serial("Double Jump Attack", direction_param, 1200)
 
 def walk_short_distance(direction):
 	direction_param = convert_direction_to_param(direction)
@@ -230,16 +261,29 @@ def down_jump():
 def end_hold_attack(param):
 	command_to_serial("End Hold Attack", param, 0)
 
-def start_glide(param):
-	command_to_serial("Start Hold Glide", param, 200)
+def start_glide(direction):
+	direction_param = convert_direction_to_param(direction)
+	command_to_serial("Start Hold Glide", direction_param, 200)
 
-def end_glide(param):
-	command_to_serial("End Hold Glide", param, 0)
+def end_glide(direction):
+	direction_param = convert_direction_to_param(direction)
+	command_to_serial("End Hold Glide", direction_param, 0)
+
+def move_down():
+	command_to_serial("Start Hold Attack", '7', 0)
+	time.sleep(1)
+	command_to_serial("End Hold Attack", '7', 0)
+
+def move_up():
+	command_to_serial("Start Hold Attack", '6', 0)
+	time.sleep(1)
+	command_to_serial("End Hold Attack", '6', 0)
 
 def glide(hold_time, direction):
 	start_glide(direction)
 	time.sleep(hold_time)
 	end_glide(direction)
+	time.sleep(0.35)
 
 def walk(hold_time, direction):
 	start_walk(direction)
@@ -266,6 +310,7 @@ def load_rotation_data(old_rotation):
 		update_area_key()
 
 		num_rotations = rotation_data.get("Steps", 1)
+		
 		global step_count 
 		step_count = num_rotations
 		rotation = []
@@ -289,27 +334,38 @@ def main():
 	rotation = load_rotation_data(rotation)
 	run_setup()
 	
+	
 	rotation_num = 0
 	iterations_elapsed = 0
 
 	while True:
+		check_for_map_change_first_3_seconds = True
+
 		while computerVision.get_is_stopped() == False:
+			# Only run once
+			if (check_for_map_change_first_3_seconds == True):
+				time.sleep(1.5)
+				while computerVision.get_is_identifying_image() == True:
+					time.sleep(0.5)
+				time.sleep(1)
+				rotation = load_rotation_data(rotation)
+				global is_rotation_changed
+				if is_rotation_changed == True:
+					rotation_num = 0
+					is_rotation_changed = False
+				check_for_map_change_first_3_seconds = False
+			
 			# Only run if we have a rotation loaded
-			if rotation:
+			if rotation and rotation[rotation_num].get("startingLocation", {}):
 				move_to_starting_location(rotation[rotation_num])
 				run_rotation(rotation[rotation_num])
 				rotation_num = (rotation_num + 1) % step_count
 				iterations_elapsed = 0
+			time.sleep(0.1)
 
 		if iterations_elapsed == 0:
 			reset_servos()
-			rotation = load_rotation_data(rotation)
-			global is_rotation_changed
-			if is_rotation_changed == True:
-				rotation_num = 0
-				is_rotation_changed = False
 		iterations_elapsed = (iterations_elapsed + 1) % 10
-
 		time.sleep(0.3)
 
 

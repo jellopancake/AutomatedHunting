@@ -1,7 +1,8 @@
 {
-  "className": "DS",
+  "className": "Demon Slayer",
   "doubleJumpDelay": 200,
   "shortDoubleJumpDelay": 300,
+  "horizontalMovementDistance": 31,
   "walkMultiplier": 0.068,
   "horizontalMovement": "Glide",
   "verticalMovement": "Glide",
@@ -9,21 +10,21 @@
     "Carcion": {},
     "Arteria": {},
     "Shangrila": {
-      "Summer 5": { 
+      "Spring 2": { 
         "Steps" : 2,      
         "Rotation 1": {
           "startingLocation": { "x": -1, "y": -1, "x tolerance": 2},
           "commands": [
-            {"command": "Start Hold Attack", "parameter": 5, "wait": 1000},
+            {"command": "Start Hold Attack", "parameter": 5, "wait": 1300},
             {"command": "End Hold Attack", "parameter": 5, "wait": 0},
-            {"command": "Use Skill", "parameter": 3, "wait": 800},
-            {"command": "Use Skill", "parameter": 2, "wait": 1000}
+            {"command": "Use Skill", "parameter": 3, "wait": 1100},
+            {"command": "Use Skill", "parameter": 2, "wait": 1300}
           ]
         },
         "Rotation 2":{
           "startingLocation": { "x": -1, "y": -1, "x tolerance": 2},
           "commands": [
-            {"command": "Start Hold Attack", "parameter": 4, "wait": 50000},
+            {"command": "Start Hold Attack", "parameter": 4, "wait": 35000},
             {"command": "End Hold Attack", "parameter": 4, "wait": 300}
           ]
         }
@@ -35,16 +36,16 @@
         "Rotation 1": {
           "startingLocation": { "x": -1, "y": -1, "x tolerance": 2},
           "commands": [
-            {"command": "Start Hold Attack", "parameter": 5, "wait": 1000},
+            {"command": "Start Hold Attack", "parameter": 5, "wait": 1300},
             {"command": "End Hold Attack", "parameter": 5, "wait": 0},
-            {"command": "Use Skill", "parameter": 3, "wait": 800},
-            {"command": "Use Skill", "parameter": 2, "wait": 1000}
+            {"command": "Use Skill", "parameter": 3, "wait": 1100},
+            {"command": "Use Skill", "parameter": 2, "wait": 1300}
           ]
         },
         "Rotation 2":{
           "startingLocation": { "x": -1, "y": -1, "x tolerance": 2},
           "commands": [
-            {"command": "Start Hold Attack", "parameter": 4, "wait": 50000},
+            {"command": "Start Hold Attack", "parameter": 4, "wait": 35000},
             {"command": "End Hold Attack", "parameter": 4, "wait": 300}
           ]
         }
@@ -56,16 +57,16 @@
         "Rotation 1": {
           "startingLocation": { "x": -1, "y": -1, "x tolerance": 2},
           "commands": [
-            {"command": "Start Hold Attack", "parameter": 5, "wait": 1000},
+            {"command": "Start Hold Attack", "parameter": 5, "wait": 1300},
             {"command": "End Hold Attack", "parameter": 5, "wait": 0},
-            {"command": "Use Skill", "parameter": 3, "wait": 800},
-            {"command": "Use Skill", "parameter": 2, "wait": 1000}
+            {"command": "Use Skill", "parameter": 3, "wait": 1100},
+            {"command": "Use Skill", "parameter": 2, "wait": 1300}
           ]
         },
         "Rotation 2":{
           "startingLocation": { "x": -1, "y": -1, "x tolerance": 2},
           "commands": [
-            {"command": "Start Hold Attack", "parameter": 4, "wait": 50000},
+            {"command": "Start Hold Attack", "parameter": 4, "wait": 35000},
             {"command": "End Hold Attack", "parameter": 4, "wait": 300}
           ]
         }
@@ -77,16 +78,16 @@
         "Rotation 1": {
           "startingLocation": { "x": -1, "y": -1, "x tolerance": 2},
           "commands": [
-            {"command": "Start Hold Attack", "parameter": 5, "wait": 1000},
+            {"command": "Start Hold Attack", "parameter": 5, "wait": 1300},
             {"command": "End Hold Attack", "parameter": 5, "wait": 0},
-            {"command": "Use Skill", "parameter": 3, "wait": 800},
-            {"command": "Use Skill", "parameter": 2, "wait": 1000}
+            {"command": "Use Skill", "parameter": 3, "wait": 1100},
+            {"command": "Use Skill", "parameter": 2, "wait": 1300}
           ]
         },
         "Rotation 2":{
           "startingLocation": { "x": -1, "y": -1, "x tolerance": 2},
           "commands": [
-            {"command": "Start Hold Attack", "parameter": 4, "wait": 50000},
+            {"command": "Start Hold Attack", "parameter": 4, "wait": 35000},
             {"command": "End Hold Attack", "parameter": 4, "wait": 300}
           ]
         }

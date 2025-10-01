@@ -18,12 +18,22 @@
       "mapOffset": { "x": 7, "y": 68 },
       "mapBounds": { "w": 204, "h": 80},
       "ground": 77
+    },
+    "Spring 2": {
+      "mapOffset": { "x": 7, "y": 68 },
+      "mapBounds": { "w": 192, "h": 75},
+      "ground": 77
     }
   },
   "Odium": {
     "Alley 3": {
       "mapOffset": { "x": 7, "y": 68 },
       "mapBounds": { "w": 202, "h": 82},
+      "ground": 77
+    },
+    "Gate 3": {
+      "mapOffset": { "x": 7, "y": 68 },
+      "mapBounds": { "w": 210, "h": 82},
       "ground": 77
     }
   },

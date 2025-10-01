@@ -79,13 +79,13 @@ def send_and_wait(expect, send_data=None):
             print(f"[Python] Unexpected response: {response}")
 
 # Handle incoming data (button press response)
-def listen_to_arduino():
-    while True:
-        if arduino.in_waiting >= 14:
-            data = arduino.read(arduino.in_waiting)
-            if data:
-                print(f"[Python] Received from Arduino: {data}")
+#def listen_to_arduino():
+#    while True:
+#       if arduino.in_waiting >= 14:
+#            data = arduino.read(arduino.in_waiting)
+#            if data:
+#                print(f"[Python] Received from Arduino: {data}")
 
 # Start listening thread
-listener_thread = threading.Thread(target=listen_to_arduino, daemon=True)
-listener_thread.start()
+#listener_thread = threading.Thread(target=listen_to_arduino, daemon=True)
+#listener_thread.start()

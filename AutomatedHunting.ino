@@ -11,8 +11,8 @@ int servo_ctrl_left = 8;
 int servo_down_right = 9;
 
 // Preset values based on class
-int doubleJumpDelay = 250;
-int shortDoubleJumpDelay = 350;
+int doubleJumpDelay = 200;
+int shortDoubleJumpDelay = 300;
 
 // Serial buffer for collecting incoming serial data
 // Use 255 as null case
@@ -614,7 +614,7 @@ int keyToAngle (Key key){
       return 40;
    }
    else if(key == DOWN){
-      return 153;
+      return 131;
    }
    else if(key == CTRL){
       return 150;
@@ -623,31 +623,31 @@ int keyToAngle (Key key){
       return 40;
    }
    else if(key == COLON){
-      return 50;
+      return 48;
    }
    else if(key == APOS){
-      return 130;
+      return 134;
    }
    else if(key == F){
-      return 60;
+      return 47;
    }
    else if(key == G){
-      return 125;
+      return 135;
    }
    else if(key == H){
-      return 55;
+      return 50;
    }
    else if(key == J){
-      return 125;
+      return 132;
    }
    else if(key == ALT){
       return 27;
    }
    else if(key == SPACE){
-      return 40;
+      return 56;
    }
    else if(key == SPACE2){
-      return 130;
+      return 121;
    }
    else{
       Serial.println("No keys match");

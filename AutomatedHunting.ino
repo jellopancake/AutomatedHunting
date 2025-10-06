@@ -626,13 +626,13 @@ int keyToAngle (Key key){
       return 48;
    }
    else if(key == APOS){
-      return 134;
+      return 132;
    }
    else if(key == F){
       return 47;
    }
    else if(key == G){
-      return 135;
+      return 132;
    }
    else if(key == H){
       return 50;
@@ -641,13 +641,13 @@ int keyToAngle (Key key){
       return 132;
    }
    else if(key == ALT){
-      return 27;
+      return 34;
    }
    else if(key == SPACE){
       return 56;
    }
    else if(key == SPACE2){
-      return 121;
+      return 125;
    }
    else{
       Serial.println("No keys match");

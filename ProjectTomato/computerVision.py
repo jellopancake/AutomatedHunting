@@ -172,7 +172,7 @@ def capture_external_screen():
                 break
              
             # Show the original frame with the detected area
-            view_frame_height = 200
+            view_frame_height = 220
             view_frame_width = 250
             view_frame = frame[0:view_frame_height, 0:view_frame_width]
             
@@ -216,7 +216,7 @@ def capture_external_screen():
 
             # Symbol detection for stop condition ################################################################################
             threshold = 0.95
-            stop_frame = frame[view_frame_height-50 : view_frame_height, 0 : 40]
+            stop_frame = frame[view_frame_height-70 : view_frame_height, 0 : 40]
             stop_template = cv2.imread('lib/Images/Sacred Symbol.png', cv2.IMREAD_GRAYSCALE)
 
             global is_stopped
@@ -250,32 +250,58 @@ def capture_external_screen():
                 # Draw a rectangle around the minimap
                 cv2.rectangle(frame, (map_x, map_y), (map_x + map_w, map_y + map_h), (0, 255, 0), 2)  # Green box
 
-                # Convert frame to HSV color space
-                hsv_minimap_frame = cv2.cvtColor(minimap_frame, cv2.COLOR_BGR2HSV)
+                minimap_frame_hsv = cv2.cvtColor(minimap_frame, cv2.COLOR_BGR2HSV)
 
                 # Player Location ###################################################################################################
-                # Define yellow color range
-                lower_yellow = np.array([25, 150, 200])  # Lower bound for yellow
-                upper_yellow = np.array([35, 220, 255])  # Upper bound for yellow
+                player_template = cv2.imread('lib/Images/player.png', cv2.IMREAD_UNCHANGED)
+                
+                # Split into BGR and Alpha
+                player_template_bgr = player_template[:, :, :3]
+                player_alpha_mask = player_template[:, :, 3]
 
-                # Create a mask for yellow pixels
-                yellow_mask = cv2.inRange(hsv_minimap_frame, lower_yellow, upper_yellow)
+                # Create binary mask: 255 where opaque, 0 where transparent
+                mask = cv2.threshold(player_alpha_mask, 1, 255, cv2.THRESH_BINARY)[1]
 
-                # Find contours in the yellow mask
-                contours_player, _ = cv2.findContours(yellow_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                # Convert to gray color space for matching
+                player_template_gray = cv2.cvtColor(player_template, cv2.COLOR_BGR2GRAY)
+                minimap_frame_gray = cv2.cvtColor(minimap_frame, cv2.COLOR_BGR2GRAY)
 
-                if contours_player:
-                    # Find the largest contour (biggest mass of yellow pixels)
-                    largest_contour = max(contours_player, key=cv2.contourArea)
-                    x, y, w, h = cv2.boundingRect(largest_contour)
+                result = cv2.matchTemplate(minimap_frame_gray, player_template_gray, cv2.TM_CCOEFF_NORMED, mask = mask)
+                threshold = 0.95  # Adjust this based on accuracy needs
+                locations = np.where(result >= threshold)
 
-                    # Draw a rectangle around the largest yellow area
-                    cv2.rectangle(minimap_frame, (x, y), (x + w, y + h), (0, 255, 0), 2)  # Green box
+                for pt in zip(*locations[::-1]):
+                    x, y = pt
+                    h, w = player_template_gray.shape
 
-                    # Save the location of the largest yellow area (center point)
-                    global player_x, player_y 
-                    player_x, player_y = x + w // 2, y + h // 2
-                    update_player_position_list(player_x, player_y)
+                    # Extract region from frame
+                    region = minimap_frame[y:y+h, x:x+w]
+
+                    # Resize mask and template if needed
+                    mask_resized = cv2.resize(mask, (w, h))
+                    template_resized = cv2.resize(player_template_bgr, (w, h))
+
+                    # Apply mask to both
+                    region_visible = cv2.bitwise_and(region, region, mask=mask_resized)
+                    template_visible = cv2.bitwise_and(template_resized, template_resized, mask=mask_resized)
+
+                    # Compare color
+                    diff = cv2.absdiff(region_visible, template_visible)
+                    mean_diff = np.mean(diff[mask_resized == 255])
+
+                    # Draw result
+                    #color = (0, 255, 0) if mean_diff < 10 else (0, 0, 255)
+                    #cv2.rectangle(minimap_frame, pt, (pt[0]+w, pt[1]+h), color, 2)
+                    #cv2.putText(minimap_frame, f"Diff: {mean_diff:.1f}", (pt[0], pt[1]-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
+
+                    if mean_diff < 40:
+                        # Draw a rectangle around the largest yellow area
+                        cv2.rectangle(minimap_frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+                        # Save the location of the largest yellow area (center point)
+                        global player_x, player_y 
+                        player_x, player_y = x + w // 2, y + h // 2
+                        update_player_position_list(player_x, player_y)
 
                 # Rune Location ###################################################################################################
                 # Define pink color range
@@ -283,7 +309,7 @@ def capture_external_screen():
                 upper_pink = np.array([153, 200, 255])  # Upper bound for pink
 
                 # Create a mask for pink pixels
-                pink_mask = cv2.inRange(hsv_minimap_frame, lower_pink, upper_pink)
+                pink_mask = cv2.inRange(minimap_frame_hsv, lower_pink, upper_pink)
 
                 # Find contours in the pink mask
                 contours_rune, _ = cv2.findContours(pink_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -322,9 +348,11 @@ def capture_external_screen():
             player_position_text = "Player X: " + str(player_x) + ", Y: " + str(player_y)
             goal_text = "Goal X: " + str(goal_x) + ", Y: " + str(goal_y)
 
+            image_recognition_state_text = "Identifying image: " + str(is_identifying_image)
+
             # Create a black window to track parameters
             height, width, _ = view_frame.shape
-            text_bar_height = 150
+            text_bar_height = 165
 
             black_bar = np.zeros((text_bar_height, width, 3), dtype=np.uint8)
 
@@ -337,6 +365,8 @@ def capture_external_screen():
             cv2.putText(black_bar, is_moving_text, (2, 105), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
             cv2.putText(black_bar, json_class_text, (2, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
             cv2.putText(black_bar, json_map_text, (2, 135), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+            cv2.putText(black_bar, image_recognition_state_text, (2, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+
             
             width1, width2, width3 = divide_width(width, 3)
 
@@ -350,7 +380,7 @@ def capture_external_screen():
 
             cv2.imshow("Player Detection", combined_frame)
 
-            time.sleep(0.04)
+            time.sleep(0.05)
 
             # Press ']' to exit the loop
             if cv2.waitKey(1) & 0xFF == ord(']'):

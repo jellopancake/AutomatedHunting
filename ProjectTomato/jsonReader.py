@@ -16,7 +16,7 @@ favourite_map_key = {
 	"Odium": 'Alley 3',
 	"Shangrila": 'Spring 2',
 	"Arteria" : 'Top Deck 1',
-	"Carcion": 'Calm Beach 1'
+	"Carcion": 'Enfolding 1'
 }
 
 # Map Data #################################################################################

@@ -4,6 +4,11 @@
       "mapOffset": { "x": 7, "y": 68 },
       "mapBounds": { "w": 193, "h": 88},
       "ground": 74
+    },
+    "Enfolding 1": {
+      "mapOffset": { "x": 7, "y": 68 },
+      "mapBounds": { "w": 172, "h": 102},
+      "ground": 74
     }
   },
   "Arteria": {

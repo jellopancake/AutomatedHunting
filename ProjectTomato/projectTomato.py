@@ -137,7 +137,7 @@ def walk_to_point_on_ground_floor(goal_x, tolerance, align):
 				end_walk(direction)
 			elif x_difference >= 20 and horizontal_movement_type == "Glide":
 				glide_multiplier = 0.030
-				glide_offset = 1.1
+				glide_offset = 1.2
 				hold_time = calculate_hold_time(x_difference, glide_multiplier, glide_offset)
 				glide_max_time = 1.8
 				if hold_time < glide_max_time:
@@ -147,7 +147,7 @@ def walk_to_point_on_ground_floor(goal_x, tolerance, align):
 						glide(glide_max_time, direction)
 						hold_time = hold_time - glide_max_time
 					glide(hold_time, direction)
-			elif x_difference >= 5:
+			elif x_difference >= 4:
 				walk_multiplier = setup_info.get("walkMultiplier")
 				walk_offset = 0.82
 				hold_time = calculate_hold_time(x_difference, walk_multiplier, walk_offset)
@@ -169,10 +169,13 @@ def move_to_ground_floor(goal_y):
 		if computerVision.get_is_stopped() == True:
 			reset_servos()
 			break
-		elif y_difference >= -9 and y_difference <= -2:
-			move_up()
-		elif y_difference <= 9 and y_difference >= 2:
-			move_down()
+		elif (y_difference >= -9 and y_difference <= -2) or (y_difference <= 9 and y_difference >= 2):
+			if player_x < 80:
+				direction = "Right"
+			else:
+				direction = "Left"
+			double_jump_attack(direction)
+			time.sleep(0.5)
 		elif y_difference >= 10:
 			down_jump()
 		else:

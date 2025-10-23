@@ -53,9 +53,21 @@ def run_setup():
 	# Pos 2 = Short double jump delay multiplier, x | 300 + x * 20
 	# Pos 3 = Wait time in ms
 
-	update_setup_info()
-	double_jump_delay = (setup_info.get("doubleJumpDelay")-160)//20
-	short_double_jump_delay = (setup_info.get("shortDoubleJumpDelay")-260)//20
+	update_setup_info()	
+	double_jump_delay = (setup_info.get("doubleJumpDelay"))//20
+	short_double_jump_delay = (setup_info.get("shortDoubleJumpDelay")
+	)//20
+
+	if double_jump_delay > 9:
+		double_jump_delay = 9
+	elif double_jump_delay < 0:
+		double_jump_delay = 0
+
+	if short_double_jump_delay > 9:
+		short_double_jump_delay = 9
+	elif short_double_jump_delay < 0:
+		short_double_jump_delay = 0
+
 	setup = [
 		str(double_jump_delay),
 		str(short_double_jump_delay),
@@ -125,7 +137,7 @@ def walk_to_point_on_ground_floor(goal_x, tolerance, align):
 				direction = "Left"
 			
 			if x_difference >= 0.75*horizontal_movement_distance and (horizontal_movement_type == "Flashjump" or horizontal_movement_type == "Teleport"):
-				num_repeats = round((x_difference+0.25*horizontal_movement_distance)/horizontal_movement_distance)
+				num_repeats = round((x_difference+	.15*horizontal_movement_distance)/horizontal_movement_distance)
 				start_walk(direction)
 				count = 0
 				while(count < num_repeats):
@@ -135,9 +147,9 @@ def walk_to_point_on_ground_floor(goal_x, tolerance, align):
 						teleport()
 					count += 1
 				end_walk(direction)
-			elif x_difference >= 20 and horizontal_movement_type == "Glide":
+			elif x_difference >= 25 and horizontal_movement_type == "Glide":
 				glide_multiplier = 0.030
-				glide_offset = 1.2
+				glide_offset = 0.6				
 				hold_time = calculate_hold_time(x_difference, glide_multiplier, glide_offset)
 				glide_max_time = 1.8
 				if hold_time < glide_max_time:
@@ -147,7 +159,7 @@ def walk_to_point_on_ground_floor(goal_x, tolerance, align):
 						glide(glide_max_time, direction)
 						hold_time = hold_time - glide_max_time
 					glide(hold_time, direction)
-			elif x_difference >= 4:
+			elif x_difference >= 5:
 				walk_multiplier = setup_info.get("walkMultiplier")
 				walk_offset = 0.82
 				hold_time = calculate_hold_time(x_difference, walk_multiplier, walk_offset)
@@ -174,7 +186,10 @@ def move_to_ground_floor(goal_y):
 				direction = "Right"
 			else:
 				direction = "Left"
-			double_jump_attack(direction)
+			start_walk(direction)
+			time.sleep(0.4)
+			jump()
+			end_walk(direction)
 			time.sleep(0.5)
 		elif y_difference >= 10:
 			down_jump()
@@ -229,6 +244,9 @@ def command_to_serial(command_text, param, wait):
 def reset_servos():
 	command_to_serial("Reset Servos", '0', 500)
 
+def jump():
+	command_to_serial("Jump Skill", '5', 1400)
+
 def start_walk(direction):
 	direction_param = convert_direction_to_param(direction)
 	command_to_serial("Start Walk", direction_param, 0)
@@ -239,7 +257,7 @@ def end_walk(direction):
 
 def double_jump_attack(direction):
 	direction_param = convert_direction_to_param(direction)
-	command_to_serial("Double Jump Attack", direction_param, 1200)
+	command_to_serial("Double Jump Attack", direction_param, 1500)
 
 def walk_short_distance(direction):
 	direction_param = convert_direction_to_param(direction)

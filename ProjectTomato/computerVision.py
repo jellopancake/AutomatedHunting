@@ -259,49 +259,62 @@ def capture_external_screen():
                 player_template_bgr = player_template[:, :, :3]
                 player_alpha_mask = player_template[:, :, 3]
 
+
+
+                w = 8
+                h = 8
+                template_8x8 = cv2.resize(player_template_bgr, (w, h), interpolation=cv2.INTER_AREA)
+
                 # Create binary mask: 255 where opaque, 0 where transparent
                 mask = cv2.threshold(player_alpha_mask, 1, 255, cv2.THRESH_BINARY)[1]
 
                 # Convert to gray color space for matching
-                player_template_gray = cv2.cvtColor(player_template, cv2.COLOR_BGR2GRAY)
-                minimap_frame_gray = cv2.cvtColor(minimap_frame, cv2.COLOR_BGR2GRAY)
+                #player_template_gray = cv2.cvtColor(player_template, cv2.COLOR_BGR2GRAY)
+                #minimap_frame_gray = cv2.cvtColor(minimap_frame, cv2.COLOR_BGR2GRAY)
 
-                result = cv2.matchTemplate(minimap_frame_gray, player_template_gray, cv2.TM_CCOEFF_NORMED, mask = mask)
-                threshold = 0.95  # Adjust this based on accuracy needs
-                locations = np.where(result >= threshold)
+                result = cv2.matchTemplate(minimap_frame, template_8x8, cv2.TM_SQDIFF_NORMED)
+                min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
 
-                for pt in zip(*locations[::-1]):
-                    x, y = pt
-                    h, w = player_template_gray.shape
+                #result = cv2.matchTemplate(minimap_frame_gray, player_template_gray, cv2.TM_CCOEFF_NORMED, mask = mask)
+                #threshold = 0.95  # Adjust this based on accuracy needs
+                #locations = np.where(result >= threshold)
 
-                    # Extract region from frame
-                    region = minimap_frame[y:y+h, x:x+w]
+                #for pt in zip(*locations[::-1]):
+                    #x, y = pt
+                    #h, w = player_template_gray.shape
+
+                    
 
                     # Resize mask and template if needed
-                    mask_resized = cv2.resize(mask, (w, h))
-                    template_resized = cv2.resize(player_template_bgr, (w, h))
+                    #mask_resized = cv2.resize(mask, (w, h))
+                    #template_resized = cv2.resize(player_template_bgr, (w, h))
 
                     # Apply mask to both
-                    region_visible = cv2.bitwise_and(region, region, mask=mask_resized)
-                    template_visible = cv2.bitwise_and(template_resized, template_resized, mask=mask_resized)
+                    #region_visible = cv2.bitwise_and(region, region, mask=mask_resized)
+                    #template_visible = cv2.bitwise_and(template_resized, template_resized, mask=mask_resized)
 
-                    # Compare color
-                    diff = cv2.absdiff(region_visible, template_visible)
-                    mean_diff = np.mean(diff[mask_resized == 255])
+                # Extract region from frame
+                #region = minimap_frame[y:y+h, x:x+w]
+                x, y = min_loc
+                region = minimap_frame[y:y+h, x:x+w]
+
+                # Compare color
+                #diff = cv2.absdiff(region, template_8x8)
+                #mean_diff = np.mean(diff[mask == 255])
 
                     # Draw result
                     #color = (0, 255, 0) if mean_diff < 10 else (0, 0, 255)
                     #cv2.rectangle(minimap_frame, pt, (pt[0]+w, pt[1]+h), color, 2)
                     #cv2.putText(minimap_frame, f"Diff: {mean_diff:.1f}", (pt[0], pt[1]-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
 
-                    if mean_diff < 40:
-                        # Draw a rectangle around the largest yellow area
-                        cv2.rectangle(minimap_frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                #if mean_diff < 40:               
+                    # Draw a rectangle around the largest yellow area
+                cv2.rectangle(minimap_frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
-                        # Save the location of the largest yellow area (center point)
-                        global player_x, player_y 
-                        player_x, player_y = x + w // 2, y + h // 2
-                        update_player_position_list(player_x, player_y)
+                    # Save the location of the largest yellow area (center point)
+                global player_x, player_y 
+                player_x, player_y = x + w // 2, y + h // 2
+                update_player_position_list(player_x, player_y)
 
                 # Rune Location ###################################################################################################
                 # Define pink color range

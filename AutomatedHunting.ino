@@ -102,10 +102,10 @@ void executeCommand(){
       // Running setup
       if(serialBuffer[0] == '*'){
          int delay1 = serialBuffer[1] - '0';
-         doubleJumpDelay = 160 + delay1*20;
+         doubleJumpDelay = delay1*20;
 
          int delay2 = serialBuffer[2] - '0';
-         shortDoubleJumpDelay = 260 + delay2*20;
+         shortDoubleJumpDelay = delay2*20;
       }
 
       // Running commands
@@ -282,7 +282,7 @@ void downTeleport(){
 void startJumpGlide(int param){
    Key dir = selectDir(param);
    pressDownButton(dir);
-   delay(100);
+   delay(200);
    pressButton(altJump);
    delay(doubleJumpDelay);
    pressDownButton(jump);
@@ -508,7 +508,7 @@ void pressButton(Key key){
    Servo servo = keyToServo(key);
    
    servo.write(angle);
-   delay(200);
+   delay(320);
    servo.write(90);
 }
 
@@ -617,19 +617,19 @@ int keyToAngle (Key key){
       return 131;
    }
    else if(key == CTRL){
-      return 150;
+      return 143;
    }
    else if(key == LEFT){
-      return 40;
+      return 51;
    }
    else if(key == COLON){
-      return 48;
+      return 50;
    }
    else if(key == APOS){
       return 132;
    }
    else if(key == F){
-      return 47;
+      return 48;
    }
    else if(key == G){
       return 132;
@@ -641,13 +641,13 @@ int keyToAngle (Key key){
       return 132;
    }
    else if(key == ALT){
-      return 34;
+      return 37;
    }
    else if(key == SPACE){
-      return 56;
+      return 59;
    }
    else if(key == SPACE2){
-      return 125;
+      return 115;
    }
    else{
       Serial.println("No keys match");

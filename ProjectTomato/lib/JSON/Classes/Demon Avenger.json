@@ -10,8 +10,63 @@
     "Carcion": {},
     "Arteria": {},
     "Shangrila": {},
-    "Odium": {},
+    "Odium": {
+      "Area Name": "Odium",
+      "Gate 2": {    
+        "Steps" : 3,    
+        "Rotation 1": {
+          "startingLocation": { "x": 150, "y": 54, "x tolerance": 2, "align direction": "yes"},
+          "commands": [
+            {"command": "Use Skill", "parameter": 5, "wait": 900},
+            {"command": "Use Skill", "parameter": 0, "wait": 0},
+            {"command": "Start Walk", "parameter": 1, "wait": 1100},
+            {"command": "End Walk", "parameter": 1, "wait": 200},
+            {"command": "Start Hold Glide", "parameter": 0, "wait": 1500},
+            {"command": "End Hold Glide", "parameter": 0, "wait": 500},
+            {"command": "Start Hold Glide", "parameter": 0, "wait": 1000},
+            {"command": "End Hold Glide", "parameter": 0, "wait": 500},
+            {"command": "Start Hold Glide", "parameter": 0, "wait": 1200},
+            {"command": "End Hold Glide", "parameter": 0, "wait": 500},
+            {"command": "Start Hold Glide", "parameter": 1, "wait": 1100},
+            {"command": "End Hold Glide", "parameter": 1, "wait": 500},
+            {"command": "Down Jump", "parameter": 0, "wait": 1200}
+          ]
+        },
+        "Rotation 2":{
+          "startingLocation": { "x": 98, "y": 54, "x tolerance": 2, "align direction": "yes"},
+          "commands": [    
+            {"command": "Start Hold Attack", "parameter": 3, "wait": 4000},
+            {"command": "End Hold Attack", "parameter": 3, "wait": 0},
+            {"command": "Use Skill", "parameter": 5, "wait": 800},
+            {"command": "Start Hold Attack", "parameter": 3, "wait": 4000},
+            {"command": "End Hold Attack", "parameter": 3, "wait": 0},
+            {"command": "Use Skill", "parameter": 5, "wait": 800},
+            {"command": "Start Hold Attack", "parameter": 3, "wait": 4000},
+            {"command": "End Hold Attack", "parameter": 3, "wait": 0},
+            {"command": "Use Skill", "parameter": 5, "wait": 800},
+            {"command": "Start Hold Attack", "parameter": 3, "wait": 4000},
+            {"command": "End Hold Attack", "parameter": 3, "wait": 0},
+            {"command": "Use Skill", "parameter": 5, "wait": 800},
+            {"command": "Start Hold Glide", "parameter": 0, "wait": 1400},
+            {"command": "End Hold Glide", "parameter": 0, "wait": 400},
+            {"command": "Walk Short Distance", "parameter": 1, "wait": 300},
+            {"command": "Use Skill", "parameter": 4, "wait": 1200}
+          ]
+        },
+        "Rotation 3":{
+          "startingLocation": { "x": 49, "y": 67, "x tolerance": 2, "align direction": "yes"},
+          "commands": [
+            {"command": "Start Hold Glide", "parameter": 1, "wait": 1500},
+            {"command": "End Hold Glide", "parameter": 1, "wait": 500},
+            {"command": "Jump Skill", "parameter": 2, "wait": 1500},
+            {"command": "Start Hold Glide", "parameter": 1, "wait": 1500},
+            {"command": "End Hold Glide", "parameter": 1, "wait": 500}
+          ]
+        }
+      }
+    },
     "Arcus": {
+      "Area Name": "Arcus",
       "Train 1": {  
         "Steps" : 4,     
         "Rotation 1": {
@@ -100,6 +155,7 @@
       }
     },
     "Burning Cernium": {
+      "Area Name": "Burning Cernium",
       "Western City 4": {    
         "Steps" : 4,   
         "Rotation 1": {

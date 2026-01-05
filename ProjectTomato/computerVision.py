@@ -21,14 +21,21 @@ goal_x, goal_y = 0, 0
 is_stopped = False
 last_time_is_stopped = time.time()
 
-# Image recognition condition
-is_identifying_image = False
-
 # Tracks the previous time a rune was detected
 prev_rune_time = 0
 
+# Variable to check if CV is on
+CV_is_started = False
+
+# Variable to ensure that after stopping the program CV is allowed to run first to identify if the class/map has changed
+# run_once matches the last state of is_stopped
+# If run_once is True and is_stopped is False, means the program was stopped and is now resuming
+run_once = True
+
 player_positions_tracked = 8
 last_player_position_list = deque([(0, 0) for _ in range(player_positions_tracked)], maxlen = player_positions_tracked)
+
+CV_lock = threading.Lock()
 
 current_area = 'Cernium'
 area_list = ['Cernium', 
@@ -52,17 +59,37 @@ class_list = ['Buccaneer',
                     'Demon Slayer',
                     'Shadower',
                     'Wind Archer',
-                    'Demon Avenger']
+                    'Demon Avenger',
+                    'Kanna',
+                    'Battle Mage',
+                    'Aran',
+                    'Blaze Wizard',
+                    'Blaster',
+                    'Lynn',
+                    'Moxuan',
+                    'Xenon',
+                    'Zero']
+
+def set_run_once_after_stopping(value):
+    with CV_lock:    
+        global run_once
+        run_once = value
+
+def CV_has_run_once():
+    with CV_lock:
+        if run_once == True and is_stopped == False:
+            return False
+        else:
+            return True
 
 def set_is_stopped(value):
-    global is_stopped
-    is_stopped = value
+    with CV_lock:    
+        global is_stopped
+        is_stopped = value
 
 def get_is_stopped():
-    return is_stopped
-
-def get_is_identifying_image():
-    return is_identifying_image
+    with CV_lock:
+        return is_stopped
 
 # Updates a value only if x seconds has elapsed since it last changed
 def update_sticky_value(new_value, current_value, last_change_time, delay):
@@ -125,16 +152,13 @@ def compare_image_to_list(frame, name, list):
     threshold = 0.90
     template = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
     if not(match_image(frame, template, 0.90)):
-        global is_identifying_image
-        is_identifying_image = True
         # Compare to list of images
         for item in list:
             path = "".join(['lib/Images/', item, ".png"])
             template = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
             if match_image(frame, template, 0.90):
-                is_identifying_image = False
                 return item
-        is_identifying_image = False
+
     return name
 
 def resize_frame(frame, target_size):
@@ -152,6 +176,11 @@ def divide_width(width, divisor):
     
     return widths
 
+def verify_class_and_area_loaded():
+    with CV_lock:
+        if current_area == jsonReader.get_area_key() and current_class == jsonReader.get_class_key():
+            return True
+        return False
 
 def capture_external_screen():
     # 0 is capture card
@@ -188,14 +217,6 @@ def capture_external_screen():
             class_frame_x2 = frame_width
             class_frame = frame[class_frame_y1:class_frame_y2, class_frame_x1:class_frame_x2]
 
-            prev_class = current_class
-            current_class = compare_image_to_list(class_frame, current_class, class_list)
-
-            # If class has changed, load new JSON information
-            if prev_class != current_class:
-                jsonReader.load_map(current_area)
-                jsonReader.load_class(current_class, current_area)
-
             # Region for comparing area image
             area_frame_y1 = 26
             area_frame_x1 = 4
@@ -203,39 +224,33 @@ def capture_external_screen():
             area_frame_x2 = 44
             area_frame = frame[area_frame_y1:area_frame_y2, area_frame_x1:area_frame_x2]
 
-            # If area has changed, load new JSON information
-            prev_area = current_area
-            current_area = compare_image_to_list(area_frame, current_area, area_list)
-
-            if prev_area != current_area:
-                jsonReader.load_map(current_area)
-                jsonReader.load_class(current_class, current_area)
-
-            json_class_text = "Loaded Class: " + str(jsonReader.get_setup_info().get("className", {}))
-            json_map_text = "Loaded Map: " + str(jsonReader.get_loaded_map())
+            with CV_lock:
+                current_class = compare_image_to_list(class_frame, current_class, class_list)
+                current_area = compare_image_to_list(area_frame, current_area, area_list)
 
             # Symbol detection for stop condition ################################################################################
             threshold = 0.95
             stop_frame = frame[view_frame_height-70 : view_frame_height, 0 : 40]
             stop_template = cv2.imread('lib/Images/Sacred Symbol.png', cv2.IMREAD_GRAYSCALE)
 
-            global is_stopped
             global last_time_is_stopped
 
             if match_image(stop_frame, stop_template, threshold) is True:
-                is_stopped, last_time_is_stopped = update_sticky_value(False, is_stopped, last_time_is_stopped, 3)
+                is_stopped_temp, last_time_is_stopped = update_sticky_value(False, get_is_stopped(), last_time_is_stopped, 3)
             else:
-                is_stopped, last_time_is_stopped = update_sticky_value(True, is_stopped, last_time_is_stopped, 3)
+                is_stopped_temp, last_time_is_stopped = update_sticky_value(True, get_is_stopped(), last_time_is_stopped, 3)
+
+            set_is_stopped(is_stopped_temp)
 
             # Show on the live feed the current state of is_stopped
-            if is_stopped == False:
+            if get_is_stopped() == False:
                 is_stopped_text = "Program Running"
             else:
                 is_stopped_text = "Program Paused"
 
             contours_rune_size = 0
 
-            if not is_stopped:
+            if not get_is_stopped():
                 # Define the cropping region (x, y, width, height)
                 map_data = jsonReader.get_map_data()
                 map_offset = map_data.get("mapOffset", {})
@@ -253,68 +268,28 @@ def capture_external_screen():
                 minimap_frame_hsv = cv2.cvtColor(minimap_frame, cv2.COLOR_BGR2HSV)
 
                 # Player Location ###################################################################################################
-                player_template = cv2.imread('lib/Images/player.png', cv2.IMREAD_UNCHANGED)
-                
-                # Split into BGR and Alpha
-                player_template_bgr = player_template[:, :, :3]
-                player_alpha_mask = player_template[:, :, 3]
+                # Define yellow color range
+                lower_yellow = np.array([25, 150, 200])  # Lower bound for yellow
+                upper_yellow = np.array([35, 220, 255])  # Upper bound for yellow
 
+                # Create a mask for yellow pixels
+                yellow_mask = cv2.inRange(minimap_frame_hsv, lower_yellow, upper_yellow)
 
+                # Find contours in the yellow mask
+                contours_player, _ = cv2.findContours(yellow_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-                w = 8
-                h = 8
-                template_8x8 = cv2.resize(player_template_bgr, (w, h), interpolation=cv2.INTER_AREA)
+                if contours_player:
+                    # Find the largest contour (biggest mass of yellow pixels)
+                    largest_contour = max(contours_player, key=cv2.contourArea)
+                    x, y, w, h = cv2.boundingRect(largest_contour)
 
-                # Create binary mask: 255 where opaque, 0 where transparent
-                mask = cv2.threshold(player_alpha_mask, 1, 255, cv2.THRESH_BINARY)[1]
-
-                # Convert to gray color space for matching
-                #player_template_gray = cv2.cvtColor(player_template, cv2.COLOR_BGR2GRAY)
-                #minimap_frame_gray = cv2.cvtColor(minimap_frame, cv2.COLOR_BGR2GRAY)
-
-                result = cv2.matchTemplate(minimap_frame, template_8x8, cv2.TM_SQDIFF_NORMED)
-                min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
-
-                #result = cv2.matchTemplate(minimap_frame_gray, player_template_gray, cv2.TM_CCOEFF_NORMED, mask = mask)
-                #threshold = 0.95  # Adjust this based on accuracy needs
-                #locations = np.where(result >= threshold)
-
-                #for pt in zip(*locations[::-1]):
-                    #x, y = pt
-                    #h, w = player_template_gray.shape
-
-                    
-
-                    # Resize mask and template if needed
-                    #mask_resized = cv2.resize(mask, (w, h))
-                    #template_resized = cv2.resize(player_template_bgr, (w, h))
-
-                    # Apply mask to both
-                    #region_visible = cv2.bitwise_and(region, region, mask=mask_resized)
-                    #template_visible = cv2.bitwise_and(template_resized, template_resized, mask=mask_resized)
-
-                # Extract region from frame
-                #region = minimap_frame[y:y+h, x:x+w]
-                x, y = min_loc
-                region = minimap_frame[y:y+h, x:x+w]
-
-                # Compare color
-                #diff = cv2.absdiff(region, template_8x8)
-                #mean_diff = np.mean(diff[mask == 255])
-
-                    # Draw result
-                    #color = (0, 255, 0) if mean_diff < 10 else (0, 0, 255)
-                    #cv2.rectangle(minimap_frame, pt, (pt[0]+w, pt[1]+h), color, 2)
-                    #cv2.putText(minimap_frame, f"Diff: {mean_diff:.1f}", (pt[0], pt[1]-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
-
-                #if mean_diff < 40:               
                     # Draw a rectangle around the largest yellow area
-                cv2.rectangle(minimap_frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                    cv2.rectangle(minimap_frame, (x, y), (x + w, y + h), (0, 255, 0), 2)  # Green box
 
                     # Save the location of the largest yellow area (center point)
-                global player_x, player_y 
-                player_x, player_y = x + w // 2, y + h // 2
-                update_player_position_list(player_x, player_y)
+                    global player_x, player_y 
+                    player_x, player_y = x + w // 2, y + h // 2
+                    update_player_position_list(player_x, player_y)
 
                 # Rune Location ###################################################################################################
                 # Define pink color range
@@ -361,11 +336,16 @@ def capture_external_screen():
             player_position_text = "Player X: " + str(player_x) + ", Y: " + str(player_y)
             goal_text = "Goal X: " + str(goal_x) + ", Y: " + str(goal_y)
 
-            image_recognition_state_text = "Identifying image: " + str(is_identifying_image)
+            verify_json_matching_cv = "Match: " + str(verify_class_and_area_loaded())
+
+            # Current loaded json file text
+            json_class_text = "Loaded Class: " + str(jsonReader.get_class_key())
+            json_area_text = "Loaded Area: " + str(jsonReader.get_area_key())
+            json_map_text = "Loaded Map: " + str(jsonReader.get_loaded_map())
 
             # Create a black window to track parameters
             height, width, _ = view_frame.shape
-            text_bar_height = 165
+            text_bar_height = 210
 
             black_bar = np.zeros((text_bar_height, width, 3), dtype=np.uint8)
 
@@ -376,10 +356,12 @@ def capture_external_screen():
             cv2.putText(black_bar, is_stopped_text, (2, 75), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
             cv2.putText(black_bar, rune_text, (2, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
             cv2.putText(black_bar, is_moving_text, (2, 105), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-            cv2.putText(black_bar, json_class_text, (2, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-            cv2.putText(black_bar, json_map_text, (2, 135), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-            cv2.putText(black_bar, image_recognition_state_text, (2, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-
+            cv2.putText(black_bar, current_class, (2, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+            cv2.putText(black_bar, current_area, (2, 135), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+            cv2.putText(black_bar, json_class_text, (2, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+            cv2.putText(black_bar, json_area_text, (2, 165), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+            cv2.putText(black_bar, json_map_text, (2, 180), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+            cv2.putText(black_bar, verify_json_matching_cv, (2, 195), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
             
             width1, width2, width3 = divide_width(width, 3)
 
@@ -394,6 +376,11 @@ def capture_external_screen():
             cv2.imshow("Player Detection", combined_frame)
 
             time.sleep(0.05)
+            
+            #global CV_is_started
+            #CV_is_started = True
+
+            set_run_once_after_stopping(get_is_stopped())
 
             # Press ']' to exit the loop
             if cv2.waitKey(1) & 0xFF == ord(']'):

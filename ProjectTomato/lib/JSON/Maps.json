@@ -1,71 +1,80 @@
 {
   "Carcion": {
+    "Sunken Ruins 3": {
+      "mapOffset": { "x": 7, "y": 68 },
+      "mapBounds": { "w": 188, "h": 77}
+    },
     "Calm Beach 1": {
       "mapOffset": { "x": 7, "y": 68 },
-      "mapBounds": { "w": 193, "h": 88},
-      "ground": 74
+      "mapBounds": { "w": 193, "h": 88}
     },
     "Enfolding 1": {
       "mapOffset": { "x": 7, "y": 68 },
-      "mapBounds": { "w": 172, "h": 102},
-      "ground": 74
+      "mapBounds": { "w": 172, "h": 102}
     }
   },
   "Arteria": {
     "Top Deck 1": {
       "mapOffset": { "x": 7, "y": 68 },
-      "mapBounds": { "w": 171, "h": 93},
-      "ground": 74
+      "mapBounds": { "w": 171, "h": 93}
     }
   },
   "Shangrila": {
+    "Autumn 5": {
+      "mapOffset": { "x": 7, "y": 68 },
+      "mapBounds": { "w": 196, "h": 90}
+    },
+    "Summer 1": {
+      "mapOffset": { "x": 7, "y": 68 },
+      "mapBounds": { "w": 192, "h": 72}
+    },
     "Summer 5": {
       "mapOffset": { "x": 7, "y": 68 },
-      "mapBounds": { "w": 204, "h": 80},
-      "ground": 77
+      "mapBounds": { "w": 204, "h": 80}
     },
     "Spring 2": {
       "mapOffset": { "x": 7, "y": 68 },
-      "mapBounds": { "w": 192, "h": 75},
-      "ground": 77
+      "mapBounds": { "w": 192, "h": 75}
+    },
+    "Spring 4": {
+      "mapOffset": { "x": 7, "y": 68 },
+      "mapBounds": { "w": 191, "h": 82}
     }
   },
   "Odium": {
     "Alley 3": {
       "mapOffset": { "x": 7, "y": 68 },
-      "mapBounds": { "w": 202, "h": 82},
-      "ground": 77
+      "mapBounds": { "w": 202, "h": 82}
     },
     "Gate 3": {
       "mapOffset": { "x": 7, "y": 68 },
-      "mapBounds": { "w": 210, "h": 82},
-      "ground": 77
+      "mapBounds": { "w": 210, "h": 82}
+    },
+    "Gate 2": {
+      "mapOffset": { "x": 7, "y": 68 },
+      "mapBounds": { "w": 199, "h": 85}
     }
   },
   "Arcus": {
     "Train 1": {
       "mapOffset": { "x": 7, "y": 68 },
-      "mapBounds": { "w": 197, "h": 86},
-      "ground": 81
+      "mapBounds": { "w": 197, "h": 86}
     },
     "Train 3": {
       "mapOffset": { "x": 7, "y": 68 },
-      "mapBounds": { "w": 208, "h": 86},
-      "ground": 81
+      "mapBounds": { "w": 208, "h": 86}
     }
   },
   "Burning Cernium": {
     "Western City 4": {
       "mapOffset": { "x": 7, "y": 68 },
-      "mapBounds": { "w": 233, "h": 82},
-      "ground": 77
+      "mapBounds": { "w": 233, "h": 82}
     }
   },
   "Cernium": {
     "Library 1": {
       "mapOffset": { "x": 7, "y": 68 },
-      "mapBounds": { "w": 174, "h": 73},
-      "ground": 77
+      "mapBounds": { "w": 174, "h": 73}
     }
   }
 

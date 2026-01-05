@@ -1,7 +1,7 @@
 {
   "className": "Demon Slayer",
-  "doubleJumpDelay": 200,
-  "shortDoubleJumpDelay": 300,
+  "doubleJumpDelay": 80,
+  "shortDoubleJumpDelay": 200,
   "horizontalMovementDistance": 31,
   "walkMultiplier": 0.068,
   "horizontalMovement": "Glide",
@@ -10,7 +10,50 @@
     "Carcion": {},
     "Arteria": {},
     "Shangrila": {
-      "Spring 2": { 
+      "Area Name": "Shangrila",
+      "Summer 1": { 
+        "Steps" : 2,      
+        "Rotation 1": {
+          "startingLocation": { "x": -1, "y": -1, "x tolerance": 2},
+          "commands": [
+            {"command": "Start Hold Attack", "parameter": 5, "wait": 1300},
+            {"command": "End Hold Attack", "parameter": 5, "wait": 0},
+            {"command": "Use Skill", "parameter": 3, "wait": 1100},
+            {"command": "Use Skill", "parameter": 2, "wait": 1700}
+          ]
+        },
+        "Rotation 2":{
+          "startingLocation": { "x": -1, "y": -1, "x tolerance": 2},
+          "commands": [
+            {"command": "Start Hold Attack", "parameter": 4, "wait": 15000},
+            {"command": "End Hold Attack", "parameter": 4, "wait": 300}
+          ]
+        }
+      },
+      "Autumn 5": { 
+        "Steps" : 2,      
+        "Rotation 1": {
+          "startingLocation": { "x": -1, "y": -1, "x tolerance": 2},
+          "commands": [
+            {"command": "Start Hold Attack", "parameter": 5, "wait": 3000},
+            {"command": "End Hold Attack", "parameter": 5, "wait": 0},
+            {"command": "Use Skill", "parameter": 3, "wait": 1100},
+            {"command": "Use Skill", "parameter": 2, "wait": 1400},
+            {"command": "Swap Keyboard Layout", "parameter": 0, "wait": 700}
+          ]
+        },
+        "Rotation 2":{
+          "startingLocation": { "x": -1, "y": -1, "x tolerance": 2},
+          "commands": [
+            {"command": "Start Hold Attack", "parameter": 4, "wait": 25000},
+            {"command": "End Hold Attack", "parameter": 4, "wait": 300}
+          ]
+        }
+      }
+    },
+    "Odium": {
+      "Area Name": "Odium",
+      "Alley 3": { 
         "Steps" : 2,      
         "Rotation 1": {
           "startingLocation": { "x": -1, "y": -1, "x tolerance": 2},
@@ -28,10 +71,8 @@
             {"command": "End Hold Attack", "parameter": 4, "wait": 300}
           ]
         }
-      }
-    },
-    "Odium": {
-      "Alley 3": { 
+      },
+      "Gate 2": { 
         "Steps" : 2,      
         "Rotation 1": {
           "startingLocation": { "x": -1, "y": -1, "x tolerance": 2},
@@ -52,6 +93,7 @@
       }
     },
     "Arcus": {
+      "Area Name": "Arcus",
       "Train 1": { 
         "Steps" : 2,      
         "Rotation 1": {
@@ -73,6 +115,7 @@
       }
     },
     "Burning Cernium": {
+      "Area Name": "Burning Cernium",
       "Western City 4": { 
         "Steps" : 2,      
         "Rotation 1": {

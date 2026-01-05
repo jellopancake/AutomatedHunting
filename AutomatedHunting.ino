@@ -9,10 +9,11 @@ int servo_alt_space = 6;
 int servo_colon_apostrophe = 7;
 int servo_ctrl_left = 8;
 int servo_down_right = 9;
+int servo_del_enter = 10;
 
 // Preset values based on class
-int doubleJumpDelay = 200;
-int shortDoubleJumpDelay = 300;
+int doubleJumpDelay = 80;
+int shortDoubleJumpDelay = 180;
 
 // Serial buffer for collecting incoming serial data
 // Use 255 as null case
@@ -29,7 +30,7 @@ bool buttonPressed = false;
 unsigned long lastDebounceTime = 0;
 const unsigned long debounceDelay = 1000;  // 50 ms debounce delay
 
-enum Key{LEFT, RIGHT, DOWN, F, G, H, J, COLON, APOS, ALT, CTRL, SPACE, SPACE2};
+enum Key{LEFT, RIGHT, DOWN, F, G, H, J, COLON, APOS, ALT, CTRL, SPACE, SPACE2, DEL, ENTER};
    Key left = LEFT;
    Key right = RIGHT;
    Key down = DOWN;
@@ -43,9 +44,11 @@ enum Key{LEFT, RIGHT, DOWN, F, G, H, J, COLON, APOS, ALT, CTRL, SPACE, SPACE2};
    Key swap = APOS;
    Key mainAttack = F;
    Key skill0 = G; // Ropelift
+   Key escape = DEL;
+   Key enter = ENTER;
 
 // Create a servo object 
-Servo Servo1, Servo2, Servo3, Servo4, Servo5, Servo6, Servo7;
+Servo Servo1, Servo2, Servo3, Servo4, Servo5, Servo6, Servo7, Servo8;
 void setup() { 
    // We need to attach the servo to pins 3-9
    Servo1.attach(servo_alt_space_2); 
@@ -55,6 +58,7 @@ void setup() {
    Servo5.attach(servo_colon_apostrophe);
    Servo6.attach(servo_ctrl_left); 
    Servo7.attach(servo_down_right); 
+   Servo8.attach(servo_del_enter);
    
    // Initialize in horizontal position
    Servo1.write(90);
@@ -64,6 +68,7 @@ void setup() {
    Servo5.write(90);
    Servo6.write(90);
    Servo7.write(90);
+   Servo8.write(90);
 
    // Attach move to rune button to pin 2
    pinMode(move_to_rune_button, INPUT_PULLUP);
@@ -105,7 +110,7 @@ void executeCommand(){
          doubleJumpDelay = delay1*20;
 
          int delay2 = serialBuffer[2] - '0';
-         shortDoubleJumpDelay = delay2*20;
+         shortDoubleJumpDelay = 60+delay2*20;
       }
 
       // Running commands
@@ -202,6 +207,12 @@ void executeCommand(){
          else if(command == 'W'){
             downJumpFlashjump();
          }
+         else if(command == 'X'){
+            delayedJumpSkill(param);
+         }
+         else if(command == 'Y'){
+            swapChars();
+         }
       }
       // Clear the buffer for the next command
       clearSerialBuffer();
@@ -246,6 +257,31 @@ void clearSerialBuffer(){
 }
 
 // Preset inputs //////////////////////////////////////////////////////////////////////////////////////////////////
+void swapChars(){
+   pressButton(escape);
+   delay(3000);
+   pressButton(escape);
+   delay(3000);
+   pressButton(enter);
+   delay(3000);
+   pressButton(enter);
+   delay(3000);
+   pressButton(enter);
+   delay(3000);
+   pressButton(escape);
+   delay(3000);
+   pressButton(escape);
+   delay(3000);
+   pressButton(right);
+   delay(3000);
+   pressButton(enter);
+   delay(3000);
+   pressButton(right);
+   delay(3000);
+   pressButton(enter);
+   delay(3000);
+   pressButton(enter);
+}
 
 void downJumpFlashjump(){
    pressDownButton(down);
@@ -283,7 +319,7 @@ void startJumpGlide(int param){
    Key dir = selectDir(param);
    pressDownButton(dir);
    delay(200);
-   pressButton(altJump);
+   shortPressButton(altJump);
    delay(doubleJumpDelay);
    pressDownButton(jump);
 }
@@ -353,17 +389,33 @@ void swapKeyboardLayout(){
 void useSkill(int param){
    Key skill = selectSkill(param);
 
-   delay(500);
-   pressButton(skill);
-   delay(500);
+   if (skill == skill0){
+      delay(500);
+      shortPressButton(skill);
+      delay(500);
+   }
+   else {
+      delay(500);
+      pressButton(skill);
+      delay(500);
+   }
 }
 
 // Jumps and uses a skill or main attack
 void jumpSkill(int param){
    Key skill = selectSkill(param);
 
-   delay(200);
-   pressButton(altJump);
+   delay(300);
+   shortPressButton(altJump);
+   pressButton(skill);
+}
+
+void delayedJumpSkill(int param){
+   Key skill = selectSkill(param);
+
+   delay(300);
+   shortPressButton(altJump);
+   delay(235);
    pressButton(skill);
 }
 
@@ -399,11 +451,11 @@ Key selectSkill(int param){
 // Performs a flashjump with an attack
 void doubleJumpAttack(){
    delay(100);
-   pressButton(altJump);
+   shortPressButton(altJump);
    delay(doubleJumpDelay);
    pressDownButton(jump);
    delay(100);
-   pressButton(mainAttack);
+   shortPressButton(mainAttack);
    releaseButton(jump);
    delay(100);
 }
@@ -411,7 +463,7 @@ void doubleJumpAttack(){
 // Performs a shorter flashjump with an attack
 void shortDoubleJumpAttack(){
    delay(200);
-   pressButton(altJump);
+   shortPressButton(altJump);
    delay(shortDoubleJumpDelay);
    pressDownButton(jump);
    delay(100);
@@ -467,9 +519,9 @@ Key selectOppositeDir(int param){
 // Performs an upjump by holding up and inputting two jumps quickly
 void upJump(){
    pressDownButton(up);
-   delay(200);
-   pressButton(altJump);
-   delay(160);
+   delay(150);
+   shortPressButton(altJump);
+   delay(doubleJumpDelay);
    pressButton(jump);
    releaseButton(up);
    delay(100); 
@@ -478,9 +530,9 @@ void upJump(){
 // Performs an upjump by holding up and inputting two jumps quickly
 void shortUpJump(){
    pressDownButton(up);
-   delay(200);
-   pressButton(altJump);
-   delay(250);
+   delay(150);
+   shortPressButton(altJump);
+   delay(shortDoubleJumpDelay);
    pressButton(jump);
    releaseButton(up);
    pressButton(mainAttack);
@@ -496,7 +548,7 @@ void upJumpWarrior(){
 void downJump(){
    pressDownButton(down);
    delay(400);
-   pressButton(jump);
+   shortPressButton(jump);
    delay(200);
    releaseButton(down);
    delay(100);
@@ -504,6 +556,15 @@ void downJump(){
 
 // Basic button input control //////////////////////////////////////////////////////////////////////////////////////////////////
 void pressButton(Key key){
+   int angle = keyToAngle(key);
+   Servo servo = keyToServo(key);
+   
+   servo.write(angle);
+   delay(600);
+   servo.write(90);
+}
+
+void shortPressButton(Key key){
    int angle = keyToAngle(key);
    Servo servo = keyToServo(key);
    
@@ -602,6 +663,9 @@ Servo keyToServo (Key key){
    else if(key == RIGHT || key == DOWN){
       return Servo7;
    }
+   else if(key == DEL || key == ENTER){
+      return Servo8;
+   }
    else{
       Serial.println("No servo found");
       Servo errorServo;
@@ -611,43 +675,49 @@ Servo keyToServo (Key key){
 
 int keyToAngle (Key key){
    if(key == RIGHT){
-      return 40;
+      return 37;
    }
    else if(key == DOWN){
       return 131;
    }
    else if(key == CTRL){
-      return 143;
+      return 136;
    }
    else if(key == LEFT){
       return 51;
    }
    else if(key == COLON){
-      return 50;
+      return 47;
    }
    else if(key == APOS){
-      return 132;
+      return 134;
    }
    else if(key == F){
-      return 48;
+      return 47;
    }
    else if(key == G){
-      return 132;
+      return 139;
    }
    else if(key == H){
-      return 50;
+      return 40;
    }
    else if(key == J){
-      return 132;
+      return 134;
    }
    else if(key == ALT){
-      return 37;
+      return 40;
    }
    else if(key == SPACE){
-      return 59;
+      return 56;
    }
    else if(key == SPACE2){
-      return 115;
+      return 130;
+   }
+   else if(key == DEL){
+      return 159;
+   }
+   else if(key == ENTER){
+      return 42;
    }
    else{
       Serial.println("No keys match");

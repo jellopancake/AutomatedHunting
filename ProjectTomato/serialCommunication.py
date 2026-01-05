@@ -34,7 +34,9 @@ serial_key = {
 	"End Hold Glide": 'T',
 	"Up Teleport": 'U',
 	"Down Teleport": 'V',
-	"Down Jump Flashjump": 'W'
+	"Down Jump Flashjump": 'W',
+    "Delayed Jump Skill": 'X',
+    "Swap Character": 'Y'
 }
 
 inverted_serial_key = {v : k for k, v in serial_key.items()}
@@ -50,6 +52,7 @@ def write_to_serial(message, message_type):
     # Byte 1: Message type, command vs settings
     # Byte 2: Command in ASCII (char)
     # Byte 3: Param in ASCII (char, 1-9)
+    validate_characters([message_type, message[0], message[1]])
     data = [ord(message_type), ord(message[0]), ord(message[1])]
     arduino.write(data)  
 
@@ -77,6 +80,10 @@ def send_and_wait(expect, send_data=None):
             return True
         elif response:
             print(f"[Python] Unexpected response: {response}")
+
+def validate_characters(arr):
+    if not all(isinstance(x, str) and len(x) == 1 for x in arr):
+        raise ValueError("All elements must be single-character strings.")
 
 # Handle incoming data (button press response)
 #def listen_to_arduino():

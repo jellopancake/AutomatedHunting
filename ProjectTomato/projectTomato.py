@@ -9,38 +9,15 @@ import random
 import pdb
 from datetime import datetime, timedelta
 import math
-
+                          
 # Importing variables from modules
-setup_info = jsonReader.get_setup_info()
-rotation_data = jsonReader.get_rotation_data()
-map_data = jsonReader.get_map_data()
-class_key = jsonReader.get_class_key()
-area_key = jsonReader.get_area_key()
 step_count = 0
 is_rotation_changed = False
 
 # This is used to convert commands to ASCII for serial communication for arduino
 serial_key = serialCommunication.serial_key
 
-def update_rotation_data():
-	global rotation_data
-	rotation_data = jsonReader.get_rotation_data()
-
-def update_map_data():
-	global map_data
-	map_data = jsonReader.get_map_data()
-
-def update_setup_info():
-	global setup_info
-	setup_info = jsonReader.get_setup_info()
-
-def update_class_key():
-	global class_key
-	class_key = jsonReader.get_class_key()
-
-def update_area_key():
-	global area_key
-	area_key = jsonReader.get_area_key()
+alien_event_variable = False
 
 # Uses the serial key dictionary to convert a text command to an ASCII value
 def convert_command_to_key(command):
@@ -53,10 +30,9 @@ def run_setup():
 	# Pos 2 = Short double jump delay multiplier, x | 300 + x * 20
 	# Pos 3 = Wait time in ms
 
-	update_setup_info()	
+	setup_info = jsonReader.get_setup_info()
 	double_jump_delay = (setup_info.get("doubleJumpDelay"))//20
-	short_double_jump_delay = (setup_info.get("shortDoubleJumpDelay")
-	)//20
+	short_double_jump_delay = (setup_info.get("shortDoubleJumpDelay")-60)//20
 
 	if double_jump_delay > 9:
 		double_jump_delay = 9
@@ -87,20 +63,21 @@ def run_rotation(rotation):
 		command_to_serial(item.get("command"), str(item.get("parameter")), int(item.get("wait")))
 		
 		# Stop running commands if program is stopped
-		if(computerVision.get_is_stopped() == True):
+		if(computerVision.get_is_stopped() == True or computerVision.verify_class_and_area_loaded() == False):
 			break
 
 def move_to_starting_location(rotation):
 	starting_position = rotation.get("startingLocation", {})
-	starting_position_x = starting_position.get("x")
-	starting_position_y = starting_position.get("y")
-	starting_position_x_tolerance = starting_position.get("x tolerance")
-	start_position_align = starting_position.get("align direction")
+	starting_position_x = starting_position.get("x", 20)
+	starting_position_y = starting_position.get("y", 20)
+	starting_position_x_tolerance = starting_position.get("x tolerance", 2)
+	start_position_align = starting_position.get("align direction", "no")
+	
+	computerVision.set_goal_location(starting_position_x, starting_position_y)
 
 	if starting_position_x != -1 and starting_position_y != -1:
-		computerVision.set_goal_location(starting_position_x, starting_position_y)
 		wait_until_stop_moving()
-		move_to_ground_floor(starting_position_y)
+		move_to_ground_floor(starting_position_y, starting_position_x)
 		walk_to_point_on_ground_floor(starting_position_x, starting_position_x_tolerance, start_position_align)
 		move_to_vertical_location(starting_position_y)
 
@@ -111,16 +88,21 @@ def wait_until_stop_moving():
 		# Do nothing
 
 def walk_to_point_on_ground_floor(goal_x, tolerance, align):
+	setup_info = jsonReader.get_setup_info()
 	horizontal_movement_type = setup_info.get("horizontalMovement")
 	horizontal_movement_distance = setup_info.get("horizontalMovementDistance")
 	while True:
 		player_x, player_y = computerVision.get_player_location()
 		x_difference = abs(goal_x - player_x)
+
+		# Stops any walks that have been started with no end
+		reset_servos()
+
 		# Right is higher, left is lower
-		if computerVision.get_is_stopped() == True:
-			reset_servos()
+		if computerVision.get_is_stopped() == True or computerVision.verify_class_and_area_loaded() == False:
 			break
 		elif x_difference <= tolerance:
+			map_data = jsonReader.get_map_data()
 			bounds = map_data.get("mapBounds", {}) 
 			width = int(bounds.get("w", 0))
 			halfway_point = round(width/2)
@@ -135,9 +117,9 @@ def walk_to_point_on_ground_floor(goal_x, tolerance, align):
 				direction = "Right"
 			elif goal_x - player_x < 0:
 				direction = "Left"
-			
+
 			if x_difference >= 0.75*horizontal_movement_distance and (horizontal_movement_type == "Flashjump" or horizontal_movement_type == "Teleport"):
-				num_repeats = round((x_difference+	.15*horizontal_movement_distance)/horizontal_movement_distance)
+				num_repeats = round((x_difference+0.15*horizontal_movement_distance)/horizontal_movement_distance)
 				start_walk(direction)
 				count = 0
 				while(count < num_repeats):
@@ -173,15 +155,16 @@ def walk_to_point_on_ground_floor(goal_x, tolerance, align):
 def calculate_hold_time(difference, multiplier, offset):
 	return (difference - offset) * multiplier
 
-def move_to_ground_floor(goal_y):
+def move_to_ground_floor(goal_y, goal_x):
 	while True:
 		player_x, player_y = computerVision.get_player_location()
 		y_difference = goal_y - player_y
+		x_difference = abs(goal_x - player_x)
 		# Down is higher, up is lower
-		if computerVision.get_is_stopped() == True:
+		if computerVision.get_is_stopped() == True or computerVision.verify_class_and_area_loaded() == False:
 			reset_servos()
 			break
-		elif (y_difference >= -9 and y_difference <= -2) or (y_difference <= 9 and y_difference >= 2):
+		elif ((y_difference >= -9 and y_difference <= -2) or (y_difference <= 9 and y_difference >= 2)) and x_difference <= 6:
 			if player_x < 80:
 				direction = "Right"
 			else:
@@ -191,19 +174,20 @@ def move_to_ground_floor(goal_y):
 			jump()
 			end_walk(direction)
 			time.sleep(0.5)
-		elif y_difference >= 10:
+		elif y_difference >= 10 or (y_difference >= 2 and x_difference >= 7):
 			down_jump()
 		else:
 			break
 		wait_until_stop_moving()
 
 def move_to_vertical_location(goal_y):
+	setup_info = jsonReader.get_setup_info()
 	vertical_movement_type = setup_info.get("verticalMovement")
 	while True:
 		player_x, player_y = computerVision.get_player_location()
 		y_difference = goal_y - player_y
 		# Down is higher, up is lower
-		if computerVision.get_is_stopped() == True:
+		if computerVision.get_is_stopped() == True or computerVision.verify_class_and_area_loaded() == False:
 			reset_servos()
 			break
 		elif y_difference <= 1 and y_difference >= -1:
@@ -236,8 +220,13 @@ def command_to_serial(command_text, param, wait):
 
 	if command_text == "End Walk" or command_text == "Reset Servos":
 		serialCommunication.write_to_serial(command, '+')
-	elif computerVision.get_is_stopped() == False:
+	elif computerVision.get_is_stopped() == False or alien_event_variable == True:
 		serialCommunication.write_to_serial(command, '+')
+	elif computerVision.verify_class_and_area_loaded() == False:
+		print("Wrong class loaded")
+		jsonReader.load_map(computerVision.current_area)
+		jsonReader.load_class(computerVision.current_class, computerVision.current_area)
+		reset_servos()
 	else:
 		print("Program is stopped")
 			
@@ -323,14 +312,12 @@ def convert_direction_to_param(direction):
 		return "Incorrect input. Direction not found."
 
 def load_rotation_data(old_rotation):
-	if class_key != jsonReader.get_class_key() or area_key != jsonReader.get_area_key():
-		update_rotation_data()
-		update_map_data()
-		update_setup_info()
-		update_class_key()
-		update_area_key()
-
-		num_rotations = rotation_data.get("Steps", 1)
+	if computerVision.verify_class_and_area_loaded() == False:
+		jsonReader.load_map(computerVision.current_area)
+		jsonReader.load_class(computerVision.current_class, computerVision.current_area)
+		
+		rotations = jsonReader.get_rotation_data()
+		num_rotations = rotations.get("Steps", 1)
 		
 		global step_count 
 		step_count = num_rotations
@@ -339,7 +326,7 @@ def load_rotation_data(old_rotation):
 		index = 1
 		while index < num_rotations + 1:
 			rotation_text = " ".join(["Rotation", str(index)])
-			rotation.append(rotation_data.get(rotation_text, {}))
+			rotation.append(rotations.get(rotation_text, {}))
 			index = index + 1
 		
 		global is_rotation_changed
@@ -348,33 +335,33 @@ def load_rotation_data(old_rotation):
 	return old_rotation
 
 def main():
-	while not jsonReader.get_rotation_data():
-		time.sleep(1)
+	global alien_event_variable
+	alien_event_variable = False
+
+	while alien_event_variable == True:
+		command_to_serial("Swap Character", '0', 0)
+		time.sleep(1200)
 	
+	while not computerVision.CV_has_run_once():
+		time.sleep(1)
+
 	rotation = {}
 	rotation = load_rotation_data(rotation)
 	run_setup()
-	
-	
+		
 	rotation_num = 0
 	iterations_elapsed = 0
 
-	while True:
-		check_for_map_change_first_3_seconds = True
-
+	while True:	  
 		while computerVision.get_is_stopped() == False:
-			# Only run once
-			if (check_for_map_change_first_3_seconds == True):
-				time.sleep(1.5)
-				while computerVision.get_is_identifying_image() == True:
-					time.sleep(0.5)
-				time.sleep(1)
-				rotation = load_rotation_data(rotation)
+			if computerVision.verify_class_and_area_loaded() == False:
+				while computerVision.verify_class_and_area_loaded() == False or computerVision.CV_has_run_once() == False:
+					rotation = load_rotation_data(rotation)
+					time.sleep(1)
 				global is_rotation_changed
 				if is_rotation_changed == True:
 					rotation_num = 0
 					is_rotation_changed = False
-				check_for_map_change_first_3_seconds = False
 			
 			# Only run if we have a rotation loaded
 			if rotation and rotation[rotation_num].get("startingLocation", {}):
@@ -383,13 +370,11 @@ def main():
 				rotation_num = (rotation_num + 1) % step_count
 				iterations_elapsed = 0
 			time.sleep(0.1)
-
+			
 		if iterations_elapsed == 0:
 			reset_servos()
 		iterations_elapsed = (iterations_elapsed + 1) % 10
 		time.sleep(0.3)
-
-
 
 if __name__ == "__main__":
 	main()

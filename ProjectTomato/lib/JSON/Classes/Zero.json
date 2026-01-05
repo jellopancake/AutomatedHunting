@@ -1,0 +1,91 @@
+{
+  "className": "Zero",
+  "doubleJumpDelay": 80,
+  "shortDoubleJumpDelay": 200,
+  "walkMultiplier": 0.068,
+  "horizontalMovementDistance": 60,
+  "horizontalMovement": "Teleport",
+  "verticalMovement": "Teleport",
+  "mobbingRotations": {
+    "Carcion": {},
+    "Arteria": {},
+    "Shangrila": {},
+    "Odium": {},
+    "Arcus": {},
+    "Burning Cernium": {},
+    "Cernium": {
+      "Area Name": "Cernium",
+      "Library 1": {      
+        "Steps" : 4, 
+        "Rotation 1": {
+          "startingLocation": { "x": 32, "y": 55, "x tolerance": 2, "align direction": "yes"},
+          "commands": [
+            {"command": "Start Walk", "parameter": 1, "wait": 0},
+            {"command": "Start Hold Attack", "parameter": 4, "wait": 2000},
+            {"command": "End Hold Attack", "parameter": 4, "wait": 0},
+            {"command": "Use Skill", "parameter": 2, "wait": 0},
+            {"command": "Start Hold Attack", "parameter": 4, "wait": 2000},
+            {"command": "End Hold Attack", "parameter": 4, "wait": 0},
+            {"command": "Use Skill", "parameter": 2, "wait": 0},
+            {"command": "End Walk", "parameter": 1, "wait": 0},
+            {"command": "Walk Short Distance", "parameter": 0, "wait": 300},
+            {"command": "Swap Keyboard Layout", "parameter": 0, "wait": 400},
+            {"command": "Use Skill", "parameter": 5, "wait": 900},
+            {"command": "Start Walk", "parameter": 0, "wait": 0},
+            {"command": "Start Hold Attack", "parameter": 4, "wait": 2000},
+            {"command": "End Hold Attack", "parameter": 4, "wait": 0},
+            {"command": "Use Skill", "parameter": 2, "wait": 0},
+            {"command": "Start Hold Attack", "parameter": 4, "wait": 2000},
+            {"command": "End Hold Attack", "parameter": 4, "wait": 0},
+            {"command": "Use Skill", "parameter": 2, "wait": 0},
+            {"command": "End Walk", "parameter": 0, "wait": 0}
+          ]
+        },
+        "Rotation 2":{
+          "startingLocation": { "x": 32, "y": 22, "x tolerance": 2, "align direction": "yes"},
+          "commands": [
+            {"command": "Start Hold Attack", "parameter": 4, "wait": 2000},
+            {"command": "End Hold Attack", "parameter": 4, "wait": 0},
+            {"command": "Start Walk", "parameter": 1, "wait": 300},
+            {"command": "Use Skill", "parameter": 2, "wait": 700},
+            {"command": "End Walk", "parameter": 1, "wait": 0},
+            {"command": "Start Walk", "parameter": 0, "wait": 1200},
+            {"command": "End Walk", "parameter": 0, "wait": 0},
+            {"command": "Start Walk", "parameter": 1, "wait": 1100},
+            {"command": "Start Hold Attack", "parameter": 2, "wait": 1300},
+            {"command": "End Hold Attack", "parameter": 2, "wait": 600},
+            {"command": "End Walk", "parameter": 1, "wait": 0},
+            {"command": "Start Walk", "parameter": 0, "wait": 600},
+            {"command": "End Walk", "parameter": 0, "wait": 0}
+          ]
+        },
+        "Rotation 3":{
+          "startingLocation": { "x": 135, "y": 23, "x tolerance": 2, "align direction": "yes"},
+          "commands": [
+            {"command": "Start Hold Attack", "parameter": 4, "wait": 2000},
+            {"command": "End Hold Attack", "parameter": 4, "wait": 300},
+            {"command": "Down Teleport", "parameter": 0, "wait": 1000}
+          ]        
+        },
+        "Rotation 4":{
+          "startingLocation": { "x": 135, "y": 39, "x tolerance": 6, "align direction": "yes"},
+          "commands": [
+            {"command": "Start Hold Attack", "parameter": 4, "wait": 2000},
+            {"command": "End Hold Attack", "parameter": 4, "wait": 300},
+            {"command": "Start Walk", "parameter": 0, "wait": 0},
+            {"command": "Use Skill", "parameter": 2, "wait": 0},
+            {"command": "End Walk", "parameter": 0, "wait": 0},
+            {"command": "Use Skill", "parameter": 3, "wait": 900},
+            {"command": "Start Walk", "parameter": 0, "wait": 0},
+            {"command": "Use Skill", "parameter": 2, "wait": 200},
+            {"command": "Start Hold Attack", "parameter": 4, "wait": 1500},
+            {"command": "End Hold Attack", "parameter": 4, "wait": 300},
+            {"command": "End Walk", "parameter": 0, "wait": 500},
+            {"command": "Down Teleport", "parameter": 0, "wait": 1300}
+          ]        
+        }
+      }
+    }
+  }
+}
+

@@ -2,8 +2,8 @@
   "className": "Blaster",
   "doubleJumpDelay": 80,
   "shortDoubleJumpDelay": 200,
-  "walkMultiplier": 0.068,
-  "horizontalMovementDistance": 43,
+  "walkMultiplier": 0.071,
+  "horizontalMovementDistance": 46,
   "horizontalMovement": "Flashjump",
   "verticalMovement": "Glide",
   "mobbingRotations": {

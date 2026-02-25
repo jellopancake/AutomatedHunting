@@ -2,8 +2,8 @@
   "className": "Demon Avenger",
   "doubleJumpDelay": 80,
   "shortDoubleJumpDelay": 140,
-  "walkMultiplier": 0.068,
-  "horizontalMovementDistance": 41,
+  "walkMultiplier": 0.071,
+  "horizontalMovementDistance": 44,
   "horizontalMovement": "Glide",
   "verticalMovement": "Glide",
   "mobbingRotations": {
@@ -17,6 +17,8 @@
         "Rotation 1": {
           "startingLocation": { "x": 150, "y": 54, "x tolerance": 2, "align direction": "yes"},
           "commands": [
+            {"command": "Swap Keyboard Layout", "parameter": 0, "wait": 1100},
+            {"command": "Use Skill", "parameter": 4, "wait": 1200},
             {"command": "Use Skill", "parameter": 5, "wait": 900},
             {"command": "Use Skill", "parameter": 0, "wait": 0},
             {"command": "Start Walk", "parameter": 1, "wait": 1100},
@@ -29,38 +31,44 @@
             {"command": "End Hold Glide", "parameter": 0, "wait": 500},
             {"command": "Start Hold Glide", "parameter": 1, "wait": 1100},
             {"command": "End Hold Glide", "parameter": 1, "wait": 500},
-            {"command": "Down Jump", "parameter": 0, "wait": 1200}
+            {"command": "Down Jump", "parameter": 0, "wait": 1200},
+            {"command": "Use Skill", "parameter": 5, "wait": 900}
           ]
         },
         "Rotation 2":{
-          "startingLocation": { "x": 98, "y": 54, "x tolerance": 2, "align direction": "yes"},
+          "startingLocation": { "x": 100, "y": 54, "x tolerance": 2, "align direction": "yes"},
           "commands": [    
-            {"command": "Start Hold Attack", "parameter": 3, "wait": 4000},
+            {"command": "Start Hold Attack", "parameter": 3, "wait": 3000},
+            {"command": "End Hold Attack", "parameter": 3, "wait": 0},
+            {"command": "Use Skill", "parameter": 2, "wait": 800},
+            {"command": "Start Hold Attack", "parameter": 3, "wait": 3000},
             {"command": "End Hold Attack", "parameter": 3, "wait": 0},
             {"command": "Use Skill", "parameter": 5, "wait": 800},
-            {"command": "Start Hold Attack", "parameter": 3, "wait": 4000},
+            {"command": "Start Hold Attack", "parameter": 3, "wait": 5000},
             {"command": "End Hold Attack", "parameter": 3, "wait": 0},
             {"command": "Use Skill", "parameter": 5, "wait": 800},
-            {"command": "Start Hold Attack", "parameter": 3, "wait": 4000},
+            {"command": "Start Hold Attack", "parameter": 3, "wait": 3000},
+            {"command": "End Hold Attack", "parameter": 3, "wait": 0},
+            {"command": "Use Skill", "parameter": 2, "wait": 800},
+            {"command": "Start Hold Attack", "parameter": 3, "wait": 3000},
             {"command": "End Hold Attack", "parameter": 3, "wait": 0},
             {"command": "Use Skill", "parameter": 5, "wait": 800},
-            {"command": "Start Hold Attack", "parameter": 3, "wait": 4000},
-            {"command": "End Hold Attack", "parameter": 3, "wait": 0},
-            {"command": "Use Skill", "parameter": 5, "wait": 800},
-            {"command": "Start Hold Glide", "parameter": 0, "wait": 1400},
+            {"command": "Start Hold Glide", "parameter": 0, "wait": 1500},
             {"command": "End Hold Glide", "parameter": 0, "wait": 400},
             {"command": "Walk Short Distance", "parameter": 1, "wait": 300},
-            {"command": "Use Skill", "parameter": 4, "wait": 1200}
+            {"command": "Use Skill", "parameter": 2, "wait": 800},
+            {"command": "Use Skill", "parameter": 4, "wait": 900}
           ]
         },
         "Rotation 3":{
           "startingLocation": { "x": 49, "y": 67, "x tolerance": 2, "align direction": "yes"},
           "commands": [
-            {"command": "Start Hold Glide", "parameter": 1, "wait": 1500},
+            {"command": "Start Hold Glide", "parameter": 1, "wait": 1600},
             {"command": "End Hold Glide", "parameter": 1, "wait": 500},
             {"command": "Jump Skill", "parameter": 2, "wait": 1500},
-            {"command": "Start Hold Glide", "parameter": 1, "wait": 1500},
-            {"command": "End Hold Glide", "parameter": 1, "wait": 500}
+            {"command": "Start Hold Glide", "parameter": 1, "wait": 1600},
+            {"command": "End Hold Glide", "parameter": 1, "wait": 500},
+            {"command": "Jump Skill", "parameter": 5, "wait": 1500}
           ]
         }
       }

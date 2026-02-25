@@ -17,6 +17,10 @@
     "Top Deck 1": {
       "mapOffset": { "x": 7, "y": 68 },
       "mapBounds": { "w": 171, "h": 93}
+    },
+    "Northern Outskirts": {
+      "mapOffset": { "x": 7, "y": 68 },
+      "mapBounds": { "w": 171, "h": 88}
     }
   },
   "Shangrila": {

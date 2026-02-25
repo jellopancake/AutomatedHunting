@@ -16,10 +16,9 @@ favourite_map_key = {
 	"Burning Cernium" : 'Western City 4',
 	"Arcus": 'Train 1',
 	"Odium": 'Gate 2',
-	#"Shangrila": 'Summer 1',
-    "Shangrila": 'Autumn 5',
+	"Shangrila": 'Summer 1',
 	"Arteria" : 'Top Deck 1',
-	"Carcion": 'Sunken Ruins 3'
+	"Carcion": 'Calm Beach 1'
 }
 
 # Map Data #################################################################################

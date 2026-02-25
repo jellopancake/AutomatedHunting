@@ -9,6 +9,9 @@ import random
 import pdb
 from datetime import datetime, timedelta
 import math
+from zoneinfo import ZoneInfo
+import sys
+import os
                           
 # Importing variables from modules
 step_count = 0
@@ -64,6 +67,7 @@ def run_rotation(rotation):
 		
 		# Stop running commands if program is stopped
 		if(computerVision.get_is_stopped() == True or computerVision.verify_class_and_area_loaded() == False):
+			reset_servos()
 			break
 
 def move_to_starting_location(rotation):
@@ -95,13 +99,13 @@ def walk_to_point_on_ground_floor(goal_x, tolerance, align):
 		player_x, player_y = computerVision.get_player_location()
 		x_difference = abs(goal_x - player_x)
 
-		# Stops any walks that have been started with no end
-		reset_servos()
-
 		# Right is higher, left is lower
 		if computerVision.get_is_stopped() == True or computerVision.verify_class_and_area_loaded() == False:
+			reset_servos()
 			break
 		elif x_difference <= tolerance:
+			reset_servos()
+
 			map_data = jsonReader.get_map_data()
 			bounds = map_data.get("mapBounds", {}) 
 			width = int(bounds.get("w", 0))
@@ -118,8 +122,8 @@ def walk_to_point_on_ground_floor(goal_x, tolerance, align):
 			elif goal_x - player_x < 0:
 				direction = "Left"
 
-			if x_difference >= 0.75*horizontal_movement_distance and (horizontal_movement_type == "Flashjump" or horizontal_movement_type == "Teleport"):
-				num_repeats = round((x_difference+0.15*horizontal_movement_distance)/horizontal_movement_distance)
+			if x_difference >= horizontal_movement_distance and (horizontal_movement_type == "Flashjump" or horizontal_movement_type == "Teleport"):
+				num_repeats = math.floor(x_difference/horizontal_movement_distance)
 				start_walk(direction)
 				count = 0
 				while(count < num_repeats):
@@ -128,9 +132,15 @@ def walk_to_point_on_ground_floor(goal_x, tolerance, align):
 					elif horizontal_movement_type == "Teleport":
 						teleport()
 					count += 1
+				leftover_x_difference = x_difference - num_repeats*horizontal_movement_distance
+				if leftover_x_difference > 0:
+					walk_multiplier = setup_info.get("walkMultiplier")
+					walk_offset = -10
+					hold_time = calculate_hold_time(leftover_x_difference, walk_multiplier, walk_offset)
+					time.sleep(hold_time)
 				end_walk(direction)
 			elif x_difference >= 25 and horizontal_movement_type == "Glide":
-				glide_multiplier = 0.030
+				glide_multiplier = 0.032
 				glide_offset = 0.6				
 				hold_time = calculate_hold_time(x_difference, glide_multiplier, glide_offset)
 				glide_max_time = 1.8
@@ -177,6 +187,7 @@ def move_to_ground_floor(goal_y, goal_x):
 		elif y_difference >= 10 or (y_difference >= 2 and x_difference >= 7):
 			down_jump()
 		else:
+			reset_servos()
 			break
 		wait_until_stop_moving()
 
@@ -191,6 +202,7 @@ def move_to_vertical_location(goal_y):
 			reset_servos()
 			break
 		elif y_difference <= 1 and y_difference >= -1:
+			reset_servos()
 			break
 		elif y_difference <= 9 and y_difference >= 2:
 			move_down()
@@ -303,6 +315,11 @@ def walk(hold_time, direction):
 def rope_lift():
 	command_to_serial("Use Skill", '0', 1400)
 
+def alien_swap():
+	command_to_serial("Swap Character", '0', 0)
+	now_est = datetime.now(ZoneInfo("America/Toronto"))
+	print(now_est)
+
 def convert_direction_to_param(direction):
 	if (direction == "Left"):
 		return '0'
@@ -338,9 +355,14 @@ def main():
 	global alien_event_variable
 	alien_event_variable = False
 
+	swap_count = 0
 	while alien_event_variable == True:
-		command_to_serial("Swap Character", '0', 0)
-		time.sleep(1200)
+		alien_swap()
+		num = random.randint(900, 1500)
+		time.sleep(num)
+		swap_count += 1
+		if swap_count >= 16:
+			os._exit(1)
 	
 	while not computerVision.CV_has_run_once():
 		time.sleep(1)

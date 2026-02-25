@@ -2,8 +2,8 @@
   "className": "Shadower",
   "doubleJumpDelay": 80,
   "shortDoubleJumpDelay": 160,
-  "walkMultiplier": 0.068,
-  "horizontalMovementDistance": 50,
+  "walkMultiplier": 0.071,
+  "horizontalMovementDistance": 48,
   "horizontalMovement": "Flashjump",
   "verticalMovement": "Upjump",
   "mobbingRotations": {
@@ -29,7 +29,7 @@
             {"command": "End Walk", "parameter": 0, "wait": 0},
             {"command": "Use Skill", "parameter": 2, "wait": 1000},
             {"command": "Start Walk", "parameter": 1, "wait": 0},
-            {"command": "Double Jump Attack", "parameter": 0, "wait": 1300},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 1550},
             {"command": "End Walk", "parameter": 1, "wait": 0},
             {"command": "Down Jump", "parameter": 0, "wait": 1200}
           ]

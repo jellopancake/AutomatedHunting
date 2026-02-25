@@ -2,8 +2,8 @@
   "className": "Nightwalker",
   "doubleJumpDelay": 60,
   "shortDoubleJumpDelay": 160,
-  "walkMultiplier": 0.068,
-  "horizontalMovementDistance": 45,
+  "walkMultiplier": 0.071,
+  "horizontalMovementDistance": 44,
   "horizontalMovement": "Flashjump",
   "verticalMovement": "Upjump",
   "mobbingRotations": {
@@ -52,10 +52,12 @@
           "startingLocation": { "x": 49, "y": 67, "x tolerance": 4, "align direction": "yes"},
           "commands": [
             {"command": "Start Walk", "parameter": 1, "wait": 200},
-            {"command": "Double Jump Attack", "parameter": 0, "wait": 1500},
-            {"command": "Double Jump Attack", "parameter": 0, "wait": 1500},
-            {"command": "Double Jump Attack", "parameter": 0, "wait": 1500},
-            {"command": "End Walk", "parameter": 1, "wait": 0}
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 1300},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 1300},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 1300},
+            {"command": "End Walk", "parameter": 1, "wait": 0},
+            {"command": "Start Walk", "parameter": 0, "wait": 900},
+            {"command": "End Walk", "parameter": 0, "wait": 0}
           ]
         }
       }

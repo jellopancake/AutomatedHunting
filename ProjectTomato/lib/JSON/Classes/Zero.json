@@ -2,8 +2,8 @@
   "className": "Zero",
   "doubleJumpDelay": 80,
   "shortDoubleJumpDelay": 200,
-  "walkMultiplier": 0.068,
-  "horizontalMovementDistance": 60,
+  "walkMultiplier": 0.071,
+  "horizontalMovementDistance": 41,
   "horizontalMovement": "Teleport",
   "verticalMovement": "Teleport",
   "mobbingRotations": {

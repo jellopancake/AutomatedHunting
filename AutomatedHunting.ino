@@ -415,7 +415,7 @@ void delayedJumpSkill(int param){
 
    delay(300);
    shortPressButton(altJump);
-   delay(235);
+   delay(230);
    pressButton(skill);
 }
 
@@ -693,10 +693,10 @@ int keyToAngle (Key key){
       return 134;
    }
    else if(key == F){
-      return 47;
+      return 50;
    }
    else if(key == G){
-      return 139;
+      return 145;
    }
    else if(key == H){
       return 40;

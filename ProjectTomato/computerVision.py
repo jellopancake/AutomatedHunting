@@ -335,6 +335,7 @@ def capture_external_screen():
             # Display the current position of the player and the goal
             player_position_text = "Player X: " + str(player_x) + ", Y: " + str(player_y)
             goal_text = "Goal X: " + str(goal_x) + ", Y: " + str(goal_y)
+            distance_between_player_and_goal_text = "Diff X: " + str(goal_x - player_x) + ", Y: " + str(goal_y - player_y)
 
             verify_json_matching_cv = "Match: " + str(verify_class_and_area_loaded())
 
@@ -345,7 +346,7 @@ def capture_external_screen():
 
             # Create a black window to track parameters
             height, width, _ = view_frame.shape
-            text_bar_height = 210
+            text_bar_height = 225
 
             black_bar = np.zeros((text_bar_height, width, 3), dtype=np.uint8)
 
@@ -353,15 +354,16 @@ def capture_external_screen():
             cv2.putText(black_bar, current_class, (2, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)              
             cv2.putText(black_bar, player_position_text, (2, 45), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 1)
             cv2.putText(black_bar, goal_text, (2, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 1)
-            cv2.putText(black_bar, is_stopped_text, (2, 75), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-            cv2.putText(black_bar, rune_text, (2, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-            cv2.putText(black_bar, is_moving_text, (2, 105), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-            cv2.putText(black_bar, current_class, (2, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-            cv2.putText(black_bar, current_area, (2, 135), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-            cv2.putText(black_bar, json_class_text, (2, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-            cv2.putText(black_bar, json_area_text, (2, 165), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-            cv2.putText(black_bar, json_map_text, (2, 180), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-            cv2.putText(black_bar, verify_json_matching_cv, (2, 195), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+            cv2.putText(black_bar, distance_between_player_and_goal_text, (2, 75), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 1)
+            cv2.putText(black_bar, is_stopped_text, (2, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+            cv2.putText(black_bar, rune_text, (2, 105), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+            cv2.putText(black_bar, is_moving_text, (2, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+            cv2.putText(black_bar, current_class, (2, 135), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+            cv2.putText(black_bar, current_area, (2, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+            cv2.putText(black_bar, json_class_text, (2, 165), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+            cv2.putText(black_bar, json_area_text, (2, 180), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+            cv2.putText(black_bar, json_map_text, (2, 195), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+            cv2.putText(black_bar, verify_json_matching_cv, (2, 210), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
             
             width1, width2, width3 = divide_width(width, 3)
 

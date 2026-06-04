@@ -415,7 +415,7 @@ void delayedJumpSkill(int param){
 
    delay(300);
    shortPressButton(altJump);
-   delay(230);
+   delay(180);
    pressButton(skill);
 }
 
@@ -522,7 +522,7 @@ void upJump(){
    delay(150);
    shortPressButton(altJump);
    delay(doubleJumpDelay);
-   pressButton(jump);
+   shortPressButton(jump);
    releaseButton(up);
    delay(100); 
 }
@@ -675,13 +675,13 @@ Servo keyToServo (Key key){
 
 int keyToAngle (Key key){
    if(key == RIGHT){
-      return 37;
+      return 35;
    }
    else if(key == DOWN){
       return 131;
    }
    else if(key == CTRL){
-      return 136;
+      return 139;
    }
    else if(key == LEFT){
       return 51;
@@ -693,7 +693,7 @@ int keyToAngle (Key key){
       return 134;
    }
    else if(key == F){
-      return 50;
+      return 53;
    }
    else if(key == G){
       return 145;
@@ -702,16 +702,16 @@ int keyToAngle (Key key){
       return 40;
    }
    else if(key == J){
-      return 134;
+      return 135;
    }
    else if(key == ALT){
       return 40;
    }
    else if(key == SPACE){
-      return 56;
+      return 59;
    }
    else if(key == SPACE2){
-      return 130;
+      return 123;
    }
    else if(key == DEL){
       return 159;

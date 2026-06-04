@@ -1,4 +1,14 @@
 {
+  "Talahart": {
+    "Ashlands 2": {
+      "mapOffset": { "x": 7, "y": 68 },
+      "mapBounds": { "w": 191, "h": 79}
+    },
+    "Ashlands 3": {
+      "mapOffset": { "x": 7, "y": 68 },
+      "mapBounds": { "w": 191, "h": 79}
+    }
+  },
   "Carcion": {
     "Sunken Ruins 3": {
       "mapOffset": { "x": 7, "y": 68 },

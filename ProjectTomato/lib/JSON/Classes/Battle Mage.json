@@ -28,9 +28,9 @@
             {"command": "End Walk", "parameter": 0, "wait": 0},
             {"command": "Start Walk", "parameter": 0, "wait": 300},
             {"command": "Start Hold Attack", "parameter": 2, "wait": 800},
-            {"command": "End Hold Attack", "parameter": 2, "wait": 2100},
+            {"command": "End Hold Attack", "parameter": 2, "wait": 2400},
             {"command": "End Walk", "parameter": 0, "wait": 0},
-            {"command": "Start Walk", "parameter": 1, "wait": 300},
+            {"command": "Start Walk", "parameter": 1, "wait": 500},
             {"command": "Use Skill", "parameter": 2, "wait": 1000},
             {"command": "End Walk", "parameter": 1, "wait": 200},
             {"command": "Down Teleport", "parameter": 1, "wait": 1000}            
@@ -60,7 +60,7 @@
             {"command": "Use Skill", "parameter": 2, "wait": 0},
             {"command": "Jump Skill", "parameter": 5, "wait": 1000},
             {"command": "End Walk", "parameter": 1, "wait": 0},
-            {"command": "Start Walk", "parameter": 0, "wait": 1500},
+            {"command": "Start Walk", "parameter": 0, "wait": 1300},
             {"command": "End Walk", "parameter": 0, "wait": 0},
             {"command": "Up Teleport", "parameter": 0, "wait": 1000}
           ]

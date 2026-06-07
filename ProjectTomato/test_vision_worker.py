@@ -42,6 +42,9 @@ def draw_debug(frame, state: BotState, frame_state: FrameState):
     cv2.putText(img, f"Class: {state.get_class()}", (10, 80),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
 
+    cv2.putText(img, f"Moving: {state.is_moving()}", (10, 100),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+
     return img
 
 

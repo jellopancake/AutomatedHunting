@@ -14,6 +14,7 @@ class SerialCommandExecutor:
         self.state = state
 
         self._running = True
+        self._last_gen = self.state.get_generation()
 
         self.worker = threading.Thread(target=self._run, daemon=True)
         self.worker.start()
@@ -38,14 +39,24 @@ class SerialCommandExecutor:
     def _run(self):
         while self._running:
             gen, cmd, param, wait = self.queue.get()
+            current_gen = self.state.get_generation()
 
-            # discard stale commands
-            if gen != self.state.get_generation():
+            if gen != current_gen:
+                if self._last_gen != current_gen:
+                    self._send_reset_servos()
+                    self._last_gen = current_gen
+
                 self.queue.task_done()
                 continue
 
             self._execute(cmd, param, wait)
             self.queue.task_done()
+
+    def _send_reset_servos(self):
+        try:
+            self._execute("Reset Servos", '0', 1000)
+        except Exception as e:
+            print("[Serial Reset Error]", e)
 
     # =========================
     # Core Execution
@@ -89,7 +100,8 @@ class SerialCommandExecutor:
         with self.lock:
             self.ser.write(packet)
 
-        print(f"[Serial CMD] + {constants.inverse_serial_key.get(cmd_char, "UNKNOWN")}, param={param}, wait={wait_ms}")
+        cmd_name = constants.inverse_serial_key.get(cmd_char, "UNKNOWN")
+        print(f"[Serial CMD] + {cmd_name}, param={param}, wait={wait_ms}")
 
         self._smart_delay(wait_ms)
 

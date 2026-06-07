@@ -78,9 +78,7 @@ class BotController:
                 continue
             
             self.load_and_run_current_rotation()            
-
-            time.sleep(0.05)
-
+            
         self._shutdown()
 
     # -----------------------------

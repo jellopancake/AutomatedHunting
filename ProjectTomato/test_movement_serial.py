@@ -27,7 +27,7 @@ def main():
     state = BotState()
     serial = SerialCommandExecutor(PORT, BAUD, state)
     config = ConfigStore()
-    mc = MovementController(serial, state)
+    mc = MovementController(serial, state, config)
 
     print("\n=== TEST START ===")
 

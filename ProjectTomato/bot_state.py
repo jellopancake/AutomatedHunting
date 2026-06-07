@@ -130,6 +130,9 @@ class BotState:
                 self._last_stop_change = time.time()
                 self.bus.emit("stop_changed", value)
 
+                # if stopped is true we inc generation to clear current serial commands
+                if (value):
+                    self._generation += 1
     def is_stopped(self) -> bool:
         with self._lock:
             return self._is_stopped

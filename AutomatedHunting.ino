@@ -81,14 +81,16 @@ void setup() {
    clearSerialBuffer();
 }
 
-void loop(){ // This is the main serial loop receiving commands from the PC 
-   if (Serial) { // Check if serial is still available 
-      readSerialToBuffer(); 
-   } else { 
-      reestablishSerialConnection(); 
-   }
-   // If serial communication sends a command, this tries to execute the command 
-   executeCommand(); 
+void loop(){
+   // This is the main serial loop receiving commands from the PC
+   if (Serial) {  // Check if serial is still available
+      readSerialToBuffer();
+   } else {
+      reestablishSerialConnection();
+   }   
+
+   // If serial communication sends a command, this tries to execute the command
+   executeCommand();
 }
 
 // Resets serial connections
@@ -184,6 +186,7 @@ void executeCommand(){
             Servo6.write(90);
             delay(200);
             Servo7.write(90);
+            delay(200);
          }
          else if(command == 'O'){
             walkOppositeIntoDoubleJump(param);
@@ -247,7 +250,12 @@ void readSerialToBuffer(){
          handshakeDone = false;
       }
    }
-   
+
+   if (!handshakeDone) {
+      if (runeButtonPressed()){
+         Serial.println("GO-TO-RUNE-COMMAND");  // Example: button-press message
+      }
+   }
 }
 
 

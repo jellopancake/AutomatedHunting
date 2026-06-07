@@ -34,7 +34,7 @@ class MovementController:
         self._move_vertical(goal_y)
 
     def _wait_until_stop(self):
-        time.sleep(0.2)
+        time.sleep(1)
         while self.state.is_moving():
             time.sleep(0.1)
 
@@ -54,6 +54,8 @@ class MovementController:
             player_x, player_y = self.state.get_player_position()
             diff = abs(goal_x - player_x)
 
+            print(f"[Player X] {player_x}, [Goal X] {goal_x}, [Difference] {diff}")
+
             if diff <= tolerance:
                 self.reset_servos()
                 self._align(goal_x, align)
@@ -63,23 +65,24 @@ class MovementController:
 
             if diff >= move_dist and move_type in ("Flashjump", "Teleport"):
                 self._fast_move(direction, diff, move_dist, move_type)
+                time.sleep(2)
 
             elif diff >= 25 and move_type == "Glide":
                 self._glide_move(direction, diff)
+                time.sleep(2)
 
             elif diff >= 5:
                 hold = self._calc_hold(diff, setup.get("walkMultiplier"), 0.82)
                 self.walk(hold, direction)
-                time.sleep(0.7)
 
             else:
                 self.walk_short_distance(direction)
-                time.sleep(0.7)
-
+                
             self._wait_until_stop()
 
     def _fast_move(self, direction, diff, dist, move_type):
         repeats = math.floor(diff / dist)
+        print(f"[Repeats] {repeats}, [Move Distance] {dist}, [Difference] {diff}")
 
         self.start_walk(direction)
 
@@ -136,6 +139,7 @@ class MovementController:
             else:
                 return
 
+            time.sleep(1)
             self._wait_until_stop()
 
     def _move_vertical(self, goal_y):
@@ -165,7 +169,10 @@ class MovementController:
                 else:
                     self.up_jump()
 
+            time.sleep(2)
             self._wait_until_stop()
+
+
 
     # -------------------------
     # Helpers

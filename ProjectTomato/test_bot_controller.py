@@ -20,46 +20,6 @@ from vision_worker import VisionWorker
 # ---- Hardware ----
 from serial_command_executor import SerialCommandExecutor
 
-class DummyRotation:
-    def __init__(self):
-        self.index = 0
-        self.rotations = [
-            {
-                "commands": [
-                    {"command": "MOVE", "parameter": "A", "wait": 50},
-                    {"command": "ATTACK", "parameter": "B", "wait": 50},
-                ]
-            }
-        ]
-
-    def reload_rotation(self):
-        pass
-
-    def get_current(self):
-        if self.index >= len(self.rotations):
-            return None
-        return self.rotations[self.index]
-
-    def next_rotation_step(self):
-        self.index += 1
-
-
-class DummyMovement:
-    def move_to_start(self):
-        print("[MOVE] move_to_start")
-
-    def reset_servos(self):
-        print("[MOVE] reset_servos")
-
-
-class DummyBus:
-    def subscribe(self, event, cb):
-        print(f"[BUS] subscribed to {event}")
-
-    def emit(self, event, data=None):
-        print(f"[BUS] emit {event}")
-
-
 # -----------------------------
 # INTERACTIVE TEST
 # -----------------------------
@@ -78,8 +38,6 @@ def run_test():
     rotation = RotationState(config)
     movement = MovementController(serial, state, config)
 
-
-
     # -----------------------------
     # Vision Worker (CV runs in background)
     # -----------------------------
@@ -90,8 +48,6 @@ def run_test():
     )
     vision_thread.start()
     vision_worker.loop_complete.wait()
-
-    movement.reset_servos()
 
     # -----------------------------
     # Bot Controller (but NOT auto-running)

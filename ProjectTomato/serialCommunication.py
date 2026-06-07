@@ -39,8 +39,6 @@ serial_key = {
     "Swap Character": 'Y'
 }
 
-inverted_serial_key = {v : k for k, v in serial_key.items()}
-
 # Writes data to the arduino in 3 byte(char) messages
 def write_to_serial(message, message_type): 
     # === Handshake ===

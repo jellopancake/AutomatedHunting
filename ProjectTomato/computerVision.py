@@ -154,7 +154,7 @@ def compare_image_to_list(frame, name, list):
     if not(match_image(frame, template, 0.90)):
         # Compare to list of images
         for item in list:
-            path = "".join(['lib/Images/', item, ".png"])
+            path = "".join(['lib/Images/', item, ".png"])     
             template = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
             if match_image(frame, template, 0.90):
                 return item

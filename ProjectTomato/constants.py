@@ -1,0 +1,72 @@
+area_list = ['Cernium', 
+                    'Burning Cernium', 
+                    'Arcus', 
+                    'Odium', 
+                    'Shangrila', 
+                    'Arteria', 
+                    'Carcion',
+                    'Talahart']
+
+class_list = ['Buccaneer', 
+                    'Dawn Warrior', 
+                    'Hero', 
+                    'Illium', 
+                    'Marksman', 
+                    'Mechanic', 
+                    'Mihile',
+                    'Nightwalker', 
+                    'Paladin',
+                    'Demon Slayer',
+                    'Shadower',
+                    'Wind Archer',
+                    'Demon Avenger',
+                    'Kanna',
+                    'Battle Mage',
+                    'Aran',
+                    'Blaze Wizard',
+                    'Blaster',
+                    'Lynn',
+                    'Moxuan',
+                    'Xenon',
+                    'Zero']
+
+serial_key = {
+	"Start Walk" : 'A',
+	"End Walk" : 'B',
+	"Double Jump": 'C',
+	"Double Jump Attack": 'D',
+	"Short Double Jump Attack": 'E',
+	"Up Jump" : 'F',
+	"Up Jump Warrior": 'G',
+	"Down Jump": 'H',
+	"Use Skill": 'I',
+	"Jump Skill": 'J',
+	"Swap Keyboard Layout": 'K',
+	"Start Hold Attack": 'L',
+	"End Hold Attack": 'M',
+	"Reset Servos": 'N',
+	"Walk Opposite To Double Jump Attack": 'O',
+	"Walk Opposite To Short Double Jump Attack": 'P',
+	"Walk Short Distance": 'Q',
+	"Short Up Jump": 'R',
+	"Start Hold Glide": 'S',
+	"End Hold Glide": 'T',
+	"Up Teleport": 'U',
+	"Down Teleport": 'V',
+	"Down Jump Flashjump": 'W',
+    "Delayed Jump Skill": 'X',
+    "Swap Character": 'Y'
+}
+
+inverse_serial_key = {v: k for k, v in serial_key.items()}
+
+favourite_map_key = {
+	"Cernium" : 'Library 1',
+	"Burning Cernium" : 'Western City 4',
+	"Arcus": 'Train 1',
+	"Odium": 'Gate 2',
+	"Shangrila": 'Summer 1',
+	"Arteria" : 'Top Deck 1',
+	"Carcion": 'Calm Beach 1',
+    "Talahart": 'Silent Ashlands 4'
+}

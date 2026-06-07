@@ -26,6 +26,31 @@ alien_event_variable = False
 def convert_command_to_key(command):
 	return serial_key.get(command, {})
 
+def command_to_serial(command_text, param, wait):
+	command = [
+		convert_command_to_key(command_text), param, wait
+	]
+
+	if command_text == "End Walk" or command_text == "Reset Servos":
+		serialCommunication.write_to_serial(command, '+')
+	elif computerVision.get_is_stopped() == False or alien_event_variable == True:
+		serialCommunication.write_to_serial(command, '+')
+	elif computerVision.verify_class_and_area_loaded() == False:
+		print("Wrong class loaded")
+		jsonReader.load_map(computerVision.current_area)
+		jsonReader.load_class(computerVision.current_class, computerVision.current_area)
+		reset_servos()
+	else:
+		print("Program is stopped")
+			
+def convert_direction_to_param(direction):
+	if (direction == "Left"):
+		return '0'
+	elif (direction == "Right"):
+		return '1'
+	else:
+		return "Incorrect input. Direction not found."
+
 # Sets initial values for delays in double jump, important for differences in double jump speed between classes
 # Also resets position of all servos to 90 degrees
 def run_setup():
@@ -53,7 +78,6 @@ def run_setup():
 		500
 	]
 	serialCommunication.write_to_serial(setup, '*')
-
 	reset_servos()
 
 def run_rotation(rotation):
@@ -225,23 +249,80 @@ def move_to_vertical_location(goal_y):
 			time.sleep(0.8)
 		wait_until_stop_moving()
 			
-def command_to_serial(command_text, param, wait):
-	command = [
-		convert_command_to_key(command_text), param, wait
-	]
-
-	if command_text == "End Walk" or command_text == "Reset Servos":
-		serialCommunication.write_to_serial(command, '+')
-	elif computerVision.get_is_stopped() == False or alien_event_variable == True:
-		serialCommunication.write_to_serial(command, '+')
-	elif computerVision.verify_class_and_area_loaded() == False:
-		print("Wrong class loaded")
+def load_rotation_data(old_rotation):
+	if computerVision.verify_class_and_area_loaded() == False:
 		jsonReader.load_map(computerVision.current_area)
 		jsonReader.load_class(computerVision.current_class, computerVision.current_area)
-		reset_servos()
-	else:
-		print("Program is stopped")
+		
+		rotations = jsonReader.get_rotation_data()
+		num_rotations = rotations.get("Steps", 1)
+		
+		global step_count 
+		step_count = num_rotations
+		rotation = []
+
+		index = 1
+		while index < num_rotations + 1:
+			rotation_text = " ".join(["Rotation", str(index)])
+			rotation.append(rotations.get(rotation_text, {}))
+			index = index + 1
+		
+		global is_rotation_changed
+		is_rotation_changed = True
+		return rotation
+	return old_rotation
+
+def main():
+	global alien_event_variable
+	alien_event_variable = False
+
+	swap_count = 0
+	while alien_event_variable == True:
+		alien_swap()
+		num = random.randint(900, 1500)
+		time.sleep(num)
+		swap_count += 1
+		if swap_count >= 16:
+			os._exit(1)
+	
+	while not computerVision.CV_has_run_once():
+		time.sleep(1)
+
+	rotation = {}
+	rotation = load_rotation_data(rotation)
+	run_setup()
+		
+	rotation_num = 0
+	iterations_elapsed = 0
+
+	while True:	  
+		while computerVision.get_is_stopped() == False:
+			if computerVision.verify_class_and_area_loaded() == False:
+				while computerVision.verify_class_and_area_loaded() == False or computerVision.CV_has_run_once() == False:
+					rotation = load_rotation_data(rotation)
+					time.sleep(1)
+				global is_rotation_changed
+				if is_rotation_changed == True:
+					rotation_num = 0
+					is_rotation_changed = False
 			
+			# Only run if we have a rotation loaded
+			if rotation and rotation[rotation_num].get("startingLocation", {}):
+				move_to_starting_location(rotation[rotation_num])
+				run_rotation(rotation[rotation_num])
+				rotation_num = (rotation_num + 1) % step_count
+				iterations_elapsed = 0
+			time.sleep(0.1)
+			
+		if iterations_elapsed == 0:
+			reset_servos()
+		iterations_elapsed = (iterations_elapsed + 1) % 10
+		time.sleep(0.3)
+
+if __name__ == "__main__":
+	main()
+
+
 def reset_servos():
 	command_to_serial("Reset Servos", '0', 500)
 
@@ -319,84 +400,3 @@ def alien_swap():
 	command_to_serial("Swap Character", '0', 0)
 	now_est = datetime.now(ZoneInfo("America/Toronto"))
 	print(now_est)
-
-def convert_direction_to_param(direction):
-	if (direction == "Left"):
-		return '0'
-	elif (direction == "Right"):
-		return '1'
-	else:
-		return "Incorrect input. Direction not found."
-
-def load_rotation_data(old_rotation):
-	if computerVision.verify_class_and_area_loaded() == False:
-		jsonReader.load_map(computerVision.current_area)
-		jsonReader.load_class(computerVision.current_class, computerVision.current_area)
-		
-		rotations = jsonReader.get_rotation_data()
-		num_rotations = rotations.get("Steps", 1)
-		
-		global step_count 
-		step_count = num_rotations
-		rotation = []
-
-		index = 1
-		while index < num_rotations + 1:
-			rotation_text = " ".join(["Rotation", str(index)])
-			rotation.append(rotations.get(rotation_text, {}))
-			index = index + 1
-		
-		global is_rotation_changed
-		is_rotation_changed = True
-		return rotation
-	return old_rotation
-
-def main():
-	global alien_event_variable
-	alien_event_variable = False
-
-	swap_count = 0
-	while alien_event_variable == True:
-		alien_swap()
-		num = random.randint(900, 1500)
-		time.sleep(num)
-		swap_count += 1
-		if swap_count >= 16:
-			os._exit(1)
-	
-	while not computerVision.CV_has_run_once():
-		time.sleep(1)
-
-	rotation = {}
-	rotation = load_rotation_data(rotation)
-	run_setup()
-		
-	rotation_num = 0
-	iterations_elapsed = 0
-
-	while True:	  
-		while computerVision.get_is_stopped() == False:
-			if computerVision.verify_class_and_area_loaded() == False:
-				while computerVision.verify_class_and_area_loaded() == False or computerVision.CV_has_run_once() == False:
-					rotation = load_rotation_data(rotation)
-					time.sleep(1)
-				global is_rotation_changed
-				if is_rotation_changed == True:
-					rotation_num = 0
-					is_rotation_changed = False
-			
-			# Only run if we have a rotation loaded
-			if rotation and rotation[rotation_num].get("startingLocation", {}):
-				move_to_starting_location(rotation[rotation_num])
-				run_rotation(rotation[rotation_num])
-				rotation_num = (rotation_num + 1) % step_count
-				iterations_elapsed = 0
-			time.sleep(0.1)
-			
-		if iterations_elapsed == 0:
-			reset_servos()
-		iterations_elapsed = (iterations_elapsed + 1) % 10
-		time.sleep(0.3)
-
-if __name__ == "__main__":
-	main()

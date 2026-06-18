@@ -343,75 +343,18 @@
     "Shangrila": {
       "Area Name": "Shangrila",
       "Summer 1": {    
-        "Steps" : 5,    
+        "Steps" : 1,    
         "Rotation 1": {
-          "startingLocation": { "x": 43, "y": 42, "x tolerance": 2, "align direction": "no"},
+          "startingLocation": { "x": 67, "y": 42, "x tolerance": 2, "align direction": "yes"},
           "commands": [
-            {"command": "Delayed Jump Skill", "parameter": 1, "wait": 1500},
             {"command": "Swap Keyboard Layout", "parameter": 0, "wait": 1200},
-            {"command": "Start Walk", "parameter": 0, "wait": 1100},
-            {"command": "End Walk", "parameter": 0, "wait": 0},
-            {"command": "Start Walk", "parameter": 1, "wait": 800},
-            {"command": "Use Skill", "parameter": 2, "wait": 0},
-            {"command": "End Walk", "parameter": 1, "wait": 0}
-          ]
-        },
-        "Rotation 2": {
-          "startingLocation": { "x": 85, "y": 42, "x tolerance": 2, "align direction": "no"},
-          "commands": [
-            {"command": "Delayed Jump Skill", "parameter": 1, "wait": 1500},
-            {"command": "Down Teleport", "parameter": 0, "wait": 800},
-            {"command": "Start Walk", "parameter": 0, "wait": 0},
-            {"command": "Use Skill", "parameter": 2, "wait": 0},
-            {"command": "End Walk", "parameter": 0, "wait": 0},
-            {"command": "Use Skill", "parameter": 5, "wait": 800},
-            {"command": "Start Walk", "parameter": 1, "wait": 500},
-            {"command": "Start Hold Attack", "parameter": 2, "wait": 2500},
-            {"command": "End Hold Attack", "parameter": 2, "wait": 900},
-            {"command": "End Walk", "parameter": 1, "wait": 0},
-            {"command": "Start Walk", "parameter": 0, "wait": 1200},
-            {"command": "End Walk", "parameter": 0, "wait": 0},
-            {"command": "Use Skill", "parameter": 3, "wait": 800}
-          ]
-        },
-        "Rotation 3": {
-          "startingLocation": { "x": 152, "y": 54, "x tolerance": 2, "align direction": "yes"},
-          "commands": [
-            {"command": "Use Skill", "parameter": 5, "wait": 600},
-            {"command": "Up Teleport", "parameter": 0, "wait": 500},
-            {"command": "Use Skill", "parameter": 4, "wait": 1000},
-            {"command": "Jump Skill", "parameter": 5, "wait": 1800},
-            {"command": "Start Walk", "parameter": 1, "wait": 800},
-            {"command": "End Walk", "parameter": 1, "wait": 0},
-            {"command": "Start Walk", "parameter": 0, "wait": 1050},
-            {"command": "Start Hold Attack", "parameter": 2, "wait": 1900},
-            {"command": "End Hold Attack", "parameter": 2, "wait": 0},
-            {"command": "End Walk", "parameter": 0, "wait": 0},
-            {"command": "Use Skill", "parameter": 5, "wait": 600}
-          ]
-        },
-        "Rotation 4": {
-          "startingLocation": { "x": 73, "y": 30, "x tolerance": 2, "align direction": "yes"},
-          "commands": [
-            {"command": "Use Skill", "parameter": 5, "wait": 200},
-            {"command": "Up Teleport", "parameter": 0, "wait": 500},
-            {"command": "Start Walk", "parameter": 1, "wait": 1200},
-            {"command": "End Walk", "parameter": 1, "wait": 0},
-            {"command": "Start Walk", "parameter": 0, "wait": 600},
-            {"command": "Use Skill", "parameter": 2, "wait": 2300},
-            {"command": "End Walk", "parameter": 0, "wait": 0},
-            {"command": "Use Skill", "parameter": 5, "wait": 500},
-            {"command": "Down Teleport", "parameter": 0, "wait": 400},
-            {"command": "Use Skill", "parameter": 5, "wait": 200},
-            {"command": "Down Jump", "parameter": 0, "wait": 1200}
-          ]
-        },
-        "Rotation 5": {
-          "startingLocation": { "x": 34, "y": 42, "x tolerance": 2, "align direction": "yes"},
-          "commands": [            
-            {"command": "Start Hold Attack", "parameter": 5, "wait": 5000},
-            {"command": "End Hold Attack", "parameter": 5, "wait": 400},
-            {"command": "Use Skill", "parameter": 3, "wait": 800}
+            {"command": "Start Hold Attack", "parameter": 5, "wait": 15000},
+            {"command": "End Hold Attack", "parameter": 5, "wait": 300},
+            {"command": "Up Teleport", "parameter": 0, "wait": 800},
+            {"command": "Use Skill", "parameter": 5, "wait": 900},
+            {"command": "Start Hold Attack", "parameter": 5, "wait": 15000},
+            {"command": "End Hold Attack", "parameter": 5, "wait": 300},
+            {"command": "Down Teleport", "parameter": 0, "wait": 800}
           ]
         }
       }
@@ -440,7 +383,7 @@
       "Train 1": {      
         "Steps" : 1, 
         "Rotation 1": {
-          "startingLocation": { "x": 85, "y": 55, "x tolerance": 1, "align direction": "yes"},
+          "startingLocation": { "x": 85, "y": 55, "x tolerance": 2, "align direction": "yes"},
           "commands": [
             {"command": "Swap Keyboard Layout", "parameter": 0, "wait": 1200},
             {"command": "Start Hold Attack", "parameter": 5, "wait": 15000},

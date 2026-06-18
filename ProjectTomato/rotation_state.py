@@ -40,7 +40,7 @@ class RotationState:
         with self._lock:
             self.rotation_index = (self.rotation_index + 1) % self.step_count
 
-    def previous_rotation_step(self):
+    def prev_rotation_step(self):
         if self.step_count == 0:
             return
 

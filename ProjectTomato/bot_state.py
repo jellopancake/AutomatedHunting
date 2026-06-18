@@ -60,17 +60,17 @@ class BotState:
         self._rune_confirm_time = 1.0   # seconds needed for consensus
         self._rune_cooldown = 600.0     # 10 minutes
 
-        # event bus (inject this)
-        self.bus = None
-
         # rotation / config sync flag
         self._config_loaded = True
 
         # used to clear serial queue when area/class swaps
         self._generation = 0
+        self._is_queue_empty = True
+
+        self._bus = None
 
     def set_event_bus(self, bus):
-        self.bus = bus
+        self._bus = bus
 
     # =========================================================
     # Player position
@@ -118,6 +118,9 @@ class BotState:
     def set_gui_stopped(self, value: bool):
         with self._lock:
             self._gui_stop = value
+            # if stopped is true we inc generation to clear current serial commands
+            if (value):
+                self._generation += 1
 
     def is_gui_stopped(self) -> bool:
         with self._lock:
@@ -128,11 +131,11 @@ class BotState:
             if self._is_stopped != value:
                 self._is_stopped = value
                 self._last_stop_change = time.time()
-                self.bus.emit("stop_changed", value)
 
                 # if stopped is true we inc generation to clear current serial commands
                 if (value):
                     self._generation += 1
+
     def is_stopped(self) -> bool:
         with self._lock:
             return self._is_stopped
@@ -173,6 +176,18 @@ class BotState:
 
     def is_loaded(self):
         return bool(self._area or self._class)
+
+    # =========================================================
+    # Serial tracking
+    # =========================================================
+
+    def set_queue_empty(self, value: bool):
+        with self._lock:
+            self._is_queue_empty = value
+
+    def is_queue_empty(self) -> bool:
+        with self._lock:
+            return self._is_queue_empty
 
     # =========================================================
     # Rune position
@@ -223,10 +238,9 @@ class BotState:
                 # state confirmed
                 if self._rune_available != detected:
                     self._rune_available = detected
+                    
+                    if detected and self._bus:
+                        self._bus.emit("rune_detected")
 
-                    # emit events only on transitions
-                    if self.bus:
-                        if detected:
-                            self.bus.emit("rune_detected")
-                        else:
-                            self.bus.emit("rune_lost")
+                    if detected:
+                        self._last_rune_used_time = now

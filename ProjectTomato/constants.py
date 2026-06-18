@@ -68,5 +68,5 @@ favourite_map_key = {
 	"Shangrila": 'Summer 1',
 	"Arteria" : 'Top Deck 1',
 	"Carcion": 'Calm Beach 1',
-    "Talahart": 'Silent Ashlands 4'
+    "Talahart": 'Ashlands 3'
 }

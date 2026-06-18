@@ -47,7 +47,6 @@ def draw_debug(frame, state: BotState, frame_state: FrameState):
 
     return img
 
-
 # ---------------------------------------------------
 # MAIN TEST LOOP
 # ---------------------------------------------------
@@ -59,11 +58,10 @@ def run_cv_debug():
     frame_state = FrameState()
     config = ConfigStore()
     bus = EventBus()
+    state.set_event_bus(bus)
     serial = SerialCommandExecutor(PORT, BAUD, state)
 
-    state.set_event_bus(bus)
-
-    worker = VisionWorker(state, config, frame_state, bus, serial)
+    worker = VisionWorker(state, config, frame_state, serial)
 
     capture_index = 0
     cap = cv2.VideoCapture(capture_index, apiPreference=cv2.CAP_ANY, params=[

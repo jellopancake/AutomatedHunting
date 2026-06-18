@@ -4,6 +4,7 @@ from movement_controller import MovementController
 from serial_command_executor import SerialCommandExecutor
 from bot_state import BotState 
 from config_store import ConfigStore
+from event_bus import EventBus
 
 # =========================================================
 # Minimal Config stub (required by MovementController)
@@ -24,9 +25,12 @@ def main():
     # CHANGE THIS to your actual COM port
     PORT = "COM3"
     BAUD = 9600    
+
+    bus = EventBus()
     state = BotState()
     serial = SerialCommandExecutor(PORT, BAUD, state)
     config = ConfigStore()
+    state.set_event_bus(bus)
     mc = MovementController(serial, state, config)
 
     print("\n=== TEST START ===")

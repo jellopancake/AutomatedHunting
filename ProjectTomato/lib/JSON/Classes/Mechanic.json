@@ -9,7 +9,39 @@
   "mobbingRotations": {
     "Carcion": {},
     "Arteria": {},
-    "Shangrila": {},
+    "Shangrila": {
+      "Summer 1": { 
+        "Steps" : 2,      
+        "Rotation 1": {
+          "startingLocation": { "x": 125, "y": 54, "x tolerance": 2, "align direction": "no"},
+          "commands": [
+            {"command": "Use Skill", "parameter": 5, "wait": 800},
+            {"command": "Use Skill", "parameter": 0, "wait": 2300},
+            {"command": "Start Walk", "parameter": 1, "wait": 1800},
+            {"command": "End Walk", "parameter": 1, "wait": 0},
+            {"command": "Walk Short Distance", "parameter": 0, "wait": 300},
+            {"command": "Use Skill", "parameter": 4, "wait": 1200},
+            {"command": "Use Skill", "parameter": 5, "wait": 800},
+            {"command": "Down Jump", "parameter": 0, "wait": 2400},
+            {"command": "Start Walk", "parameter": 1, "wait": 1200},
+            {"command": "End Walk", "parameter": 1, "wait": 0},
+            {"command": "Start Walk", "parameter": 0, "wait": 1250},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 1400},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 1400},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 1400},
+            {"command": "End Walk", "parameter": 0, "wait": 0},
+            {"command": "Use Skill", "parameter": 3, "wait": 800}
+          ]
+        },
+        "Rotation 2": {
+          "startingLocation": { "x": 64, "y": 42, "x tolerance": 2, "align direction": "yes"},
+          "commands": [
+            {"command": "Start Hold Attack", "parameter": 5, "wait": 30000},
+            {"command": "End Hold Attack", "parameter": 5, "wait": 0}
+          ]
+        }
+      }
+    },
     "Odium": {
       "Area Name": "Odium",
       "Gate 2": {    

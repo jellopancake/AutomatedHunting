@@ -707,10 +707,10 @@ int keyToAngle (Key key){
       return 145;
    }
    else if(key == H){
-      return 40;
+      return 42;
    }
    else if(key == J){
-      return 135;
+      return 138;
    }
    else if(key == ALT){
       return 40;

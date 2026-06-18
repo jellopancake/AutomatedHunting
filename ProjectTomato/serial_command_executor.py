@@ -15,6 +15,7 @@ class SerialCommandExecutor:
 
         self._running = True
         self._last_gen = self.state.get_generation()
+        self._last_reset_gen = None
 
         self.worker = threading.Thread(target=self._run, daemon=True)
         self.worker.start()
@@ -23,9 +24,24 @@ class SerialCommandExecutor:
     # Public API (NON-BLOCKING)
     # =========================
     def submit(self, command_text, param='0', wait=0):
-        #add an artifical delay
-        #wait = wait + 100
-        self.queue.put((self.state.get_generation(), command_text, param, wait))
+        gen = self.state.get_generation()
+        item = (gen, command_text, param, wait)
+
+        with self.lock:
+            if command_text == "Reset Servos":
+                # if same generation as last reset → ignore
+                if self._last_reset_gen == gen:
+                    return
+                
+                self._last_reset_gen = gen
+            
+            self.queue.put(item)
+
+        self.check_queue()
+
+        #with self.lock:
+            #print([item for item in self.queue.queue if item[0] == self.state.get_generation()])
+        
 
     def submit_config(self, double_jump_delay, short_double_jump_delay):
         self.queue.put((self.state.get_generation(), "CONFIG_SETUP", double_jump_delay, short_double_jump_delay))
@@ -38,7 +54,10 @@ class SerialCommandExecutor:
     # =========================
     def _run(self):
         while self._running:
-            gen, cmd, param, wait = self.queue.get()
+            try:
+                gen, cmd, param, wait = self.queue.get(timeout=0.5)
+            except queue.Empty:
+                continue
             current_gen = self.state.get_generation()
 
             if gen != current_gen:
@@ -84,6 +103,7 @@ class SerialCommandExecutor:
         # =========================
         # NORMAL COMMAND PACKET
         # =========================
+
         cmd_char = self.encode(command_text)
 
         if len(cmd_char) != 1 or len(param) != 1:
@@ -105,6 +125,7 @@ class SerialCommandExecutor:
 
         self._smart_delay(wait_ms)
 
+
     # =========================
     # Handshake Protocol
     # =========================
@@ -116,9 +137,15 @@ class SerialCommandExecutor:
         self.ser.write(b"ACK\n")
         self._wait_line("READY")
 
-    def _wait_line(self, expected):
-        while True:
-            line = self.ser.readline().decode().strip()
+    def _wait_line(self, expected, timeout=2.0):
+        start = time.time()
+
+        while self._running:
+            if time.time() - start > timeout:
+                print(f"[Serial Timeout Waiting For] {expected}")
+                return
+
+            line = self.ser.readline().decode(errors="ignore").strip()
             if not line:
                 continue
 
@@ -137,6 +164,16 @@ class SerialCommandExecutor:
             if self.state.is_stopped():
                 return
             time.sleep(0.01)
+
+        self.check_queue()
+
+    def check_queue(self):
+        gen = self.state.get_generation()
+        remaining_queue = any(
+            item[0] == gen and item[1] != "Reset Servos"
+            for item in self.queue.queue
+        )
+        self.state.set_queue_empty(not remaining_queue)
 
     # =========================
     # Encode

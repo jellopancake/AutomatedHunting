@@ -31,7 +31,6 @@ def run_test():
     frame_state = FrameState()
     config = ConfigStore()
     bus = EventBus()
-
     state.set_event_bus(bus)
 
     serial = SerialCommandExecutor(PORT, BAUD, state)
@@ -41,7 +40,7 @@ def run_test():
     # -----------------------------
     # Vision Worker (CV runs in background)
     # -----------------------------
-    vision_worker = VisionWorker(state, config, frame_state, bus, serial)
+    vision_worker = VisionWorker(state, config, frame_state, serial)
     vision_thread = threading.Thread(
         target=vision_worker.run,
         daemon=True

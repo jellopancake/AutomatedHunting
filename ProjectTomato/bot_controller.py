@@ -12,33 +12,20 @@ class BotController:
     - reacts to EventBus signals
     """
 
-    def __init__(self, state, serial_executor, rotation_controller, movement_controller, bus):
+    def __init__(self, state, serial, rotation, movement_controller):
         self.state = state
-        self.serial = serial_executor
-        self.rotation = rotation_controller
+        self.serial = serial
+        self.rotation = rotation
         self.movement = movement_controller
-        self.bus = bus
 
         self._lock = threading.Lock()
         self._running = False
         self._thread = None
 
         # internal control flags
-        self._paused = False
         self._stop_requested = False
-
-        # subscribe to events
-        self._bind_events()
-
-    # -----------------------------
-    # EVENT BINDING
-    # -----------------------------
-    def _bind_events(self):
-        self.bus.subscribe("stop_changed", self._on_stop_changed)
-
-    def _on_stop_changed(self, is_stopped: bool):
-        with self._lock:
-            self._paused = is_stopped
+        self._last_reset_time = 0
+        self._reset_interval = 5.0
 
     # -----------------------------
     # START / STOP
@@ -48,7 +35,7 @@ class BotController:
             return
 
         self._running = True
-        self._thread = threading.Thread(target=self._loop, daemon=True)
+        self._thread = threading.Thread(target=self.run, daemon=True)
         self._thread.start()
 
     def stop(self):
@@ -60,16 +47,21 @@ class BotController:
     # -----------------------------
     # MAIN LOOP
     # -----------------------------
-    def _loop(self):
+    def run(self):
         while self._running:
             # hard stop
             if self._stop_requested:
                 break
 
             # pause from CV / GUI
-            if self._paused or self.state.is_stopped():
-                self.movement.reset_servos()
-                time.sleep(0.5)
+            if self.state.is_stopped() or self.state.is_gui_stopped():
+                now = time.time()
+
+                if now - self._last_reset_time >= self._reset_interval:
+                    self.movement.reset_servos()
+                    self._last_reset_time = now
+
+                time.sleep(0.1)  # small yield, NOT blocking delay
                 continue
 
             # If config is empty, CV still needs to provide data
@@ -78,7 +70,7 @@ class BotController:
                 continue
             
             self.load_and_run_current_rotation()            
-            
+
         self._shutdown()
 
     # -----------------------------
@@ -101,11 +93,11 @@ class BotController:
             return
 
         self.movement.move_to_start(rotation_step)
+        self._wait()
 
         commands = rotation_step.get("commands", [])
 
         for cmd_step in commands:
-
             if self._should_interrupt():
                 self.movement.reset_servos()
                 return
@@ -115,7 +107,7 @@ class BotController:
             wait = int(cmd_step.get("wait"))
 
             self.movement._send(cmd, param, wait)
-
+        self._wait()
     # -----------------------------
     # MOVEMENT / STATE CHECKS
     # -----------------------------
@@ -123,12 +115,22 @@ class BotController:
         return (
             self.state.is_stopped()
             or self.state.is_gui_stopped()
-            or self._stop_requested 
-            or self._paused
+            or self._stop_requested
         )
+
+    # =========================
+    # Timing (non-blocking safe)
+    # =========================
+    def _wait(self, timeout = 30):
+        start = time.time()
+
+        while (time.time() - start) < timeout:
+            if self.state.is_stopped() or self.state.is_gui_stopped() or self.state.is_queue_empty():
+                return
+            time.sleep(0.01)
 
     # -----------------------------
     # CLEANUP
     # -----------------------------
     def _shutdown(self):
-        self.serial.reset_servos()
+        self.movement.reset_servos()

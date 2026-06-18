@@ -65,11 +65,9 @@ class MovementController:
 
             if diff >= move_dist and move_type in ("Flashjump", "Teleport"):
                 self._fast_move(direction, diff, move_dist, move_type)
-                time.sleep(2)
 
             elif diff >= 25 and move_type == "Glide":
                 self._glide_move(direction, diff)
-                time.sleep(2)
 
             elif diff >= 5:
                 hold = self._calc_hold(diff, setup.get("walkMultiplier"), 0.82)
@@ -77,7 +75,10 @@ class MovementController:
 
             else:
                 self.walk_short_distance(direction)
-                
+            
+            if move_type == "Teleport":
+                self.attack()
+            self._wait()
             self._wait_until_stop()
 
     def _fast_move(self, direction, diff, dist, move_type):
@@ -100,6 +101,7 @@ class MovementController:
             t = min(hold, 1.8)
             self.glide(t, direction)
             hold -= t
+        
 
     def _align(self, goal_x, align):
         if align != "yes":
@@ -120,6 +122,9 @@ class MovementController:
     # Vertical movement
     # -------------------------
     def _move_to_ground(self, goal_y, goal_x):
+        setup = self.config.get_setup_info()
+        move_type = setup.get("horizontalMovement")
+
         while True:
             if self._should_abort():
                 self.reset_servos()
@@ -139,7 +144,9 @@ class MovementController:
             else:
                 return
 
-            time.sleep(1)
+            self.attack()
+                
+            self._wait()
             self._wait_until_stop()
 
     def _move_vertical(self, goal_y):
@@ -161,15 +168,31 @@ class MovementController:
             elif diff >= 10:
                 self.down_jump()
 
-            elif diff <= -2:
+            elif diff >= -9 and diff <= -2:
+                self.move_up()
+
+            elif diff <= 9 and diff >= 2:
+                self.move_down()
+
+            elif diff <= -10 and diff >= -20:
                 if move_type == "Teleport":
                     self.up_teleport()
                 elif move_type == "Warrior Upjump":
-                    self.up_jump_warrior()
+                    if diff >= -14:
+                        self.up_jump_warrior()
+                    else:
+                        self.rope_lift()
+                elif move_type == "Glide":
+                    self.rope_lift()
                 else:
                     self.up_jump()
+            
+            elif diff <= -21:
+                self.rope_lift()
 
-            time.sleep(2)
+            self.attack()
+
+            self._wait()
             self._wait_until_stop()
 
 
@@ -202,6 +225,9 @@ class MovementController:
     # -------------------------
     def reset_servos(self):
         self._send("Reset Servos", '0', 500)
+
+    def attack(self):
+        self._send("Use Skill", '5', 500)
 
     def jump(self):
         self._send("Jump Skill", '5', 1400)
@@ -275,6 +301,17 @@ class MovementController:
         time.sleep(hold_time)
         self.end_glide(direction)
         time.sleep(0.35)
+
+    # =========================
+    # Timing (non-blocking safe)
+    # =========================
+    def _wait(self, timeout = 30):
+        start = time.time()
+
+        while (time.time() - start) < timeout:
+            if self.state.is_stopped() or self.state.is_gui_stopped() or self.state.is_queue_empty():
+                return
+            time.sleep(0.01)
 
     # -------------------------
     # Event

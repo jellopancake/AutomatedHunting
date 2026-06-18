@@ -6,12 +6,11 @@ import time
 import constants
 
 class VisionWorker(threading.Thread): 
-    def __init__(self, state, json_store, frame_state, event_bus, serial):
+    def __init__(self, state, config, frame_state, serial):
         super().__init__(daemon=True)
         self.state = state
-        self.bus = event_bus
         self.frame_state = frame_state
-        self.json = json_store
+        self.config = config
         self.serial = serial
 
         self.loop_complete = threading.Event()
@@ -77,7 +76,7 @@ class VisionWorker(threading.Thread):
         self.compare_area_and_class(p_class, area)
 
         # ---- update JSON and set minimap bounds ----
-        self.json.load_map(self.state.get_area())
+        self.config.load_map(self.state.get_area())
         self.set_minimap_bounds()
 
     # =========================================================
@@ -93,14 +92,14 @@ class VisionWorker(threading.Thread):
 
         if class_changed or area_changed:
             self.state.set_context(area, p_class)
-            self.json.load_class(p_class, area)
+            self.config.load_class(p_class, area)
 
             # ONLY push config if class changed
             if class_changed:
                 self.push_config()
     
     def set_minimap_bounds(self):
-        map_data = self.json.get_map_data()
+        map_data = self.config.get_map_data()
         offset = map_data.get("mapOffset", {})
         bounds = map_data.get("mapBounds", {})
 
@@ -110,7 +109,7 @@ class VisionWorker(threading.Thread):
         self.frame_state.set_minimap_bounds_yhxw(my, mh, mx, mw)
 
     def push_config(self):
-        setup = self.json.get_setup_info()
+        setup = self.config.get_setup_info()
 
         double_jump = setup["doubleJumpDelay"]
         short_double_jump = setup["shortDoubleJumpDelay"]

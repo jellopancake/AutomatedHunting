@@ -9,7 +9,25 @@
   "mobbingRotations": {
     "Carcion": {},
     "Arteria": {},
-    "Shangrila": {},
+    "Shangrila": {
+      "Summer 1": {    
+        "Steps" : 1,    
+        "Rotation 1": {
+          "startingLocation": { "x": 67, "y": 42, "x tolerance": 2, "align direction": "yes"},
+          "commands": [
+            {"command": "Swap Keyboard Layout", "parameter": 0, "wait": 1200},
+            {"command": "Use Skill", "parameter": 1, "wait": 1000},
+            {"command": "Start Hold Attack", "parameter": 5, "wait": 15000},
+            {"command": "End Hold Attack", "parameter": 5, "wait": 300},
+            {"command": "Up Teleport", "parameter": 0, "wait": 800},
+            {"command": "Use Skill", "parameter": 1, "wait": 1000},
+            {"command": "Start Hold Attack", "parameter": 5, "wait": 15000},
+            {"command": "End Hold Attack", "parameter": 5, "wait": 300},
+            {"command": "Down Teleport", "parameter": 0, "wait": 800}
+          ]
+        }
+      }
+    },
     "Odium": {
       "Area Name": "Odium",
       "Gate 2": {    

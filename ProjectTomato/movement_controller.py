@@ -5,16 +5,18 @@ import math
 
 
 class MovementController:
-    def __init__(self, serial, state, config):
+    def __init__(self, serial, state, config, rotation):
         self.serial = serial
         self.state = state
         self.config = config
+        self.rotation = rotation
 
     # -------------------------
     # Movement logic
     # -------------------------
     def move_to_start(self, rotation_step):
         start = rotation_step.get("startingLocation", {})
+        self.sync_rotation()
 
         goal_x = start.get("x", 20)
         goal_y = start.get("y", 20)
@@ -35,8 +37,15 @@ class MovementController:
 
     def _wait_until_stop(self):
         time.sleep(1)
-        while self.state.is_moving():
-            time.sleep(0.1)
+        while self.state.is_moving() and not self._should_abort():
+            self._wait(1)
+
+    def is_at_goal(self):
+        px, py = self.state.get_player_position()
+        gx, gy = self.state.get_goal_position()
+        tol_x_upper_bound = 4
+
+        return abs(px - gx) <= tol_x_upper_bound and abs(py - gy) <= 1
 
     # -------------------------
     # Horizontal movement
@@ -78,6 +87,7 @@ class MovementController:
             
             if move_type == "Teleport":
                 self.attack()
+
             self._wait()
             self._wait_until_stop()
 
@@ -153,6 +163,10 @@ class MovementController:
         setup = self.config.get_setup_info()
         move_type = setup.get("verticalMovement")
 
+        last_py = 0
+        stuck_count = 0
+        MAX_STUCK = 4  # number of loops with no movement before aborting
+
         while True:
             if self._should_abort():
                 self.reset_servos()
@@ -161,10 +175,24 @@ class MovementController:
             px, py = self.state.get_player_position()
             diff = goal_y - py
 
+            # --- Stuck detection ---
+            if abs(py - last_py) <= 1:
+                stuck_count += 1
+            else:
+                stuck_count = 0
+                last_py = py
+
+            if stuck_count >= MAX_STUCK:
+                print(f"[ABORT] Y position stuck at {py} for {stuck_count+1} iterations")
+                self.reset_servos()
+                return
+
+            # --- Goal reached ---
             if abs(diff) <= 1:
                 self.reset_servos()
                 return
 
+            # --- Movement logic ---
             elif diff >= 10:
                 self.down_jump()
 
@@ -195,7 +223,21 @@ class MovementController:
             self._wait()
             self._wait_until_stop()
 
+    # -------------------------
+    # Rotation validifier
+    # -------------------------
 
+    def is_rotation_synced(self):
+        area = self.state.get_area()
+        p_class = self.state.get_class()
+
+        return self.rotation.is_rotation_synced(area, p_class)
+    
+    def sync_rotation(self):
+        area = self.state.get_area()
+        p_class = self.state.get_class()
+
+        self.rotation.sync_rotation(area, p_class)
 
     # -------------------------
     # Helpers
@@ -204,7 +246,7 @@ class MovementController:
         return max(0, (diff - offset) * mult)
 
     def _should_abort(self):
-        return self.state.is_stopped() or self.state.is_gui_stopped()
+        return self.state.is_stopped() or self.state.is_gui_stopped() or not self.is_rotation_synced()
 
     # -------------------------
     # Core helpers

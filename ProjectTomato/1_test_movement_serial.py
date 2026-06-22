@@ -1,6 +1,7 @@
 import time
 
 from movement_controller import MovementController
+from rotation_state import RotationState
 from serial_command_executor import SerialCommandExecutor
 from bot_state import BotState 
 from config_store import ConfigStore
@@ -31,7 +32,8 @@ def main():
     serial = SerialCommandExecutor(PORT, BAUD, state)
     config = ConfigStore()
     state.set_event_bus(bus)
-    mc = MovementController(serial, state, config)
+    rotation = RotationState(config)
+    mc = MovementController(serial, state, config, rotation)
 
     print("\n=== TEST START ===")
 

@@ -49,7 +49,7 @@ def main():
     # 4. Movement + Rotation
     # =========================================================
     rotation = RotationState(config)
-    movement_controller = MovementController(serial_executor, state, config)
+    movement_controller = MovementController(serial_executor, state, config, rotation)
 
     # =========================================================
     # 5. Bot Controller

@@ -17,6 +17,9 @@ class RotationState:
         self.rotation_index = 0
         self.step_count = 0
 
+        self._rotation_class = "Burning Cernium"
+        self._rotation_area = "Hero"
+
         self._running = True
 
     # -------------------------
@@ -28,6 +31,19 @@ class RotationState:
             if not self.rotation:
                 return None
             return copy.deepcopy(self.rotation[self.rotation_index])
+
+    # -------------------------
+    # Rotation snapshot
+    # -------------------------
+
+    def is_rotation_synced(self, area, p_class):
+        with self._lock:
+            return area == self._rotation_area and p_class == self._rotation_class
+    
+    def sync_rotation(self, area, p_class):
+        with self._lock:
+            self._rotation_area = area
+            self._rotation_class = p_class
 
     # -------------------------
     # Rotation index adjusters

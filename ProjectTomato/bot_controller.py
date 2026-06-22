@@ -81,7 +81,7 @@ class BotController:
         self.rotation.reload_rotation()
         #self.debug_rotation_info()
         self._execute_current_rotation()
-        self.rotation.next_rotation_step()
+
 
     def debug_rotation_info(self):
         #print(self.rotation.rotation)
@@ -95,6 +95,10 @@ class BotController:
         self.movement.move_to_start(rotation_step)
         self._wait()
 
+        # --- check if goal reached ---
+        if not self.movement.is_at_goal():
+            return  # skip commands AND don't advance rotation
+
         commands = rotation_step.get("commands", [])
 
         for cmd_step in commands:
@@ -107,7 +111,9 @@ class BotController:
             wait = int(cmd_step.get("wait"))
 
             self.movement._send(cmd, param, wait)
+            
         self._wait()
+        self.rotation.next_rotation_step()
     # -----------------------------
     # MOVEMENT / STATE CHECKS
     # -----------------------------

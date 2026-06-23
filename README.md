@@ -1,12 +1,4 @@
 # Automated Game Player
-
-# Program in action
-https://github.com/user-attachments/assets/261ecac8-e09e-4560-8653-710fe57ce5ed
-
-# Character Swapping in action
-https://github.com/user-attachments/assets/705199d5-01bb-43ea-951a-18f4a6b2cde3
-
-
  Arduino(C) + Python program that automatically plays a game for you.
 # Includes:
  - Computer Vision that pulls frames from an HDMI connection to a separate controller PC
@@ -26,6 +18,12 @@ https://github.com/user-attachments/assets/705199d5-01bb-43ea-951a-18f4a6b2cde3
  - Modular design with JSON files allowing the user to add as many rotations as they want for as many classes and maps as they want
  - Classes can have their own rotations for each map
  - Self corrects player positioning when it is thrown off due to lag spikes or special event monsters
+
+# Program in action
+https://github.com/user-attachments/assets/261ecac8-e09e-4560-8653-710fe57ce5ed
+
+# Character Swapping in action
+https://github.com/user-attachments/assets/705199d5-01bb-43ea-951a-18f4a6b2cde3
 
 # Arduino Setup
 ![20260225_162108](https://github.com/user-attachments/assets/1bd40d1f-9142-4527-bb42-1e6892d01a60)

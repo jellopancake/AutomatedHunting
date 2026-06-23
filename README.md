@@ -9,12 +9,14 @@
  - Arduino is loaded with preprogrammed macros for standard actions
  
 # Includes:
+ # 4 threads
  - 4 threads running, GUI thread, bot controller thread, CV thread, and serial thread
  - CV that tracks the player location and corrects player positioning by pathfinding to the starting points of the next rotation
  - GUI that provides debugging and status of the bot
  - Bot controller that runs the movement controller to pathfind to the starting location and executes the rotation upon reaching the point
  - Serial communication that receives commands from the bot controller to send to the arduino
-
+   
+ # 4 data states
  - 4 data state structures, config(JSON) state, bot state, rotation state, frame state
  - Rotation data of each class saved in JSON to allow modularity for including new classes and new maps
  - General bot state that holds most of the key information passed between controllers (e.g player position)

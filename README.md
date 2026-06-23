@@ -1,13 +1,25 @@
 # Automated Game Player
  Arduino(C) + Python program that automatically plays a game for you.
+ 
+# Explanation:
+ - This is a multi-threaded asynchronous program that incorporates computer vision, serial communication, MVC design, arduino, with a pyqt6 GUI
+ - The core premise is to use a controller PC(Main) to run the bot while a separate PC(Sub) runs the game
+ - The Sub PC sends data to the Main PC via HDMI cable which allows the Main PC to make decisions
+ - The decisions the Main PC makes are sent to an arduino that actuates servo motors to press keys on a keyboard attached to the Sub PC to perform actions
+ - Arduino is loaded with preprogrammed macros for standard actions
+ 
 # Includes:
- - Computer Vision that pulls frames from an HDMI connection to a separate controller PC
+ - 4 threads running, GUI thread, bot controller thread, CV thread, and serial thread
  - CV that tracks the player location and corrects player positioning by pathfinding to the starting points of the next rotation
  - GUI that provides debugging and status of the bot
- - Keyboard is pressed by servos coordinated using an arduino microcontroller
- - Arduino is loaded with preprogrammed macros for standard actions
- - Serial communication between the main PC and Arduino to send commands based on logic handling done by the controller PC
- - Rotation data of each class saved in JSON to allow modularity for including new classes and new maps 
+ - Bot controller that runs the movement controller to pathfind to the starting location and executes the rotation upon reaching the point
+ - Serial communication that receives commands from the bot controller to send to the arduino
+
+ - 4 data state structures, config(JSON) state, bot state, rotation state, frame state
+ - Rotation data of each class saved in JSON to allow modularity for including new classes and new maps
+ - General bot state that holds most of the key information passed between controllers (e.g player position)
+ - Rotation state for more control when other states update while mid execution of a bot controller cycle
+ - Frame state to categorize the information fed into the computer vision thread
 
 # Features
  - Program stops when the player opens their inventory to allow for manual control to be taken

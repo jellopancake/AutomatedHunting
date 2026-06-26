@@ -60,7 +60,7 @@
           "commands": [
             {"command": "Walk Short Distance", "parameter": 1, "wait": 600},
             {"command": "Use Skill", "parameter": 5, "wait": 700},
-            {"command": "Use Skill", "parameter": 4, "wait": 1200},
+            {"command": "Use Skill", "parameter": 4, "wait": 700},
             {"command": "Up Teleport", "parameter": 0, "wait": 2100},
             {"command": "Start Walk", "parameter": 1, "wait": 700},
             {"command": "End Walk", "parameter": 1, "wait": 0},
@@ -143,7 +143,7 @@
             {"command": "Start Walk", "parameter": 0, "wait": 900},
             {"command": "Use Skill", "parameter": 2, "wait": 0},
             {"command": "End Walk", "parameter": 0, "wait": 0},
-            {"command": "Use Skill", "parameter": 4, "wait": 1000},
+            {"command": "Delayed Jump Skill", "parameter": 1, "wait": 1300},
             {"command": "Start Walk", "parameter": 0, "wait": 1600},
             {"command": "End Walk", "parameter": 0, "wait": 0}
 

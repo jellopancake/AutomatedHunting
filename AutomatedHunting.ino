@@ -9,7 +9,7 @@ int servo_alt_space = 6;
 int servo_colon_apostrophe = 7;
 int servo_ctrl_left = 8;
 int servo_down_right = 9;
-int servo_del_enter = 10;
+int servo_del_enter = 11;
 
 // Preset values based on class
 int doubleJumpDelay = 80;
@@ -316,7 +316,7 @@ void upTeleport(){
 void downTeleport(){
    pressDownButton(down);
    delay(500);
-   pressButton(skill2);
+   shortPressButton(skill2);
    delay(200);
    releaseButton(down);
    delay(100);
@@ -686,7 +686,7 @@ int keyToAngle (Key key){
       return 25;
    }
    else if(key == DOWN){
-      return 122;
+      return 117;
    }
    else if(key == CTRL){
       return 141;
@@ -695,10 +695,10 @@ int keyToAngle (Key key){
       return 51;
    }
    else if(key == COLON){
-      return 47;
+      return 52;
    }
    else if(key == APOS){
-      return 134;
+      return 130;
    }
    else if(key == F){
       return 54;
@@ -707,7 +707,7 @@ int keyToAngle (Key key){
       return 145;
    }
    else if(key == H){
-      return 40;
+      return 42;
    }
    else if(key == J){
       return 138;

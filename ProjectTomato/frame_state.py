@@ -25,6 +25,8 @@ class FrameState:
         self._display_frame_height = 220
         self._display_frame_width = 250
 
+        
+
         self._minimap_bounds_yhxw = [68, 100, 7, 240]
 
     def update_state(self, frame):

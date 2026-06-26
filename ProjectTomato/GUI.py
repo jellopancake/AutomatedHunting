@@ -31,6 +31,14 @@ class GUI(QWidget):
         )
         self.display_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
+        self.class_label = QLabel()
+        self.area_label = QLabel()
+        self.stop_label = QLabel()
+
+        for lbl in (self.class_label, self.area_label, self.stop_label):
+            lbl.setFixedSize(70, 70)  # slightly bigger than 40 for padding
+            lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
         self.info_text = QTextEdit()
         self.info_text.setReadOnly(True)
         self.info_text.setFixedHeight(150)
@@ -46,8 +54,19 @@ class GUI(QWidget):
         self.step_button.clicked.connect(self.next_step)
 
         # ---- Layout ----
-        frame_layout = QHBoxLayout()
+        frame_layout = QVBoxLayout()
         frame_layout.addWidget(self.display_label)
+
+        # ---- Small images row ----
+        mini_layout = QHBoxLayout()
+        mini_layout.addWidget(self.class_label)
+        mini_layout.addWidget(self.area_label)
+        mini_layout.addWidget(self.stop_label)
+
+        mini_layout.setSpacing(10)
+        mini_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        frame_layout.addLayout(mini_layout)
 
         main_layout = QVBoxLayout()
         main_layout.addLayout(frame_layout)
@@ -133,6 +152,14 @@ class GUI(QWidget):
     def update_ui(self):
         # ---- Frames ----
         display = self.frame_state.get_display_frame()
+
+        class_frame = self.frame_state.get_class_frame()
+        area_frame = self.frame_state.get_area_frame()
+        stop_frame = self.frame_state.get_stop_frame()
+
+        self.set_label_image(self.class_label, class_frame)
+        self.set_label_image(self.area_label, area_frame)
+        self.set_label_image(self.stop_label, stop_frame)
 
         # ---- Bot State ----
         player_pos = self.state.get_player_position()
@@ -228,7 +255,6 @@ class GUI(QWidget):
         if frame is None:
             return
 
-        # Convert BGR (OpenCV) → RGB (Qt)
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
         h, w, ch = rgb.shape
@@ -244,12 +270,12 @@ class GUI(QWidget):
 
         pixmap = QPixmap.fromImage(qt_img)
 
-        # Optional: scale to label size (keeps UI stable)
         label.setPixmap(
             pixmap.scaled(
                 label.width(),
                 label.height(),
-                Qt.AspectRatioMode.KeepAspectRatio
+                Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation
             )
         )
     

@@ -5,12 +5,12 @@
   "walkMultiplier": 0.071,
   "horizontalMovementDistance": 45,
   "horizontalMovement": "Flashjump",
-  "verticalMovement": "Warrior Upjump",
+  "verticalMovement": "Upjump",
   "mobbingRotations": {
     "Carcion": {},
     "Arteria": {},
     "Shangrila": {
-            "Summer 1": { 
+        "Summer 1": { 
         "Steps" : 2,      
         "Rotation 1": {
           "startingLocation": { "x": 125, "y": 54, "x tolerance": 2, "align direction": "no"},
@@ -59,7 +59,7 @@
           "startingLocation": { "x": 150, "y": 54, "x tolerance": 2, "align direction": "yes"},
           "commands": [
             {"command": "Use Skill", "parameter": 1, "wait": 2000},
-            {"command": "Up Jump Warrior", "parameter": 0, "wait": 0},
+            {"command": "Up Jump", "parameter": 0, "wait": 0},
             {"command": "Use Skill", "parameter": 5, "wait": 1600},
             {"command": "Start Walk", "parameter": 1, "wait": 1100},
             {"command": "End Walk", "parameter": 1, "wait": 200},

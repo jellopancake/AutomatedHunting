@@ -34,10 +34,10 @@
  - Self corrects player positioning when it is thrown off due to lag spikes or special event monsters
 
 # Program in action
-https://github.com/user-attachments/assets/261ecac8-e09e-4560-8653-710fe57ce5ed
+https://github.com/user-attachments/assets/13b29be0-05f6-47a5-8e27-85fe71b21c6b
 
 # Character Swapping in action
-https://github.com/user-attachments/assets/705199d5-01bb-43ea-951a-18f4a6b2cde3
+https://github.com/user-attachments/assets/6e2d8c7e-4736-4469-a6dd-de1c93196348
 
 # Arduino Setup
 ![20260225_162108](https://github.com/user-attachments/assets/1bd40d1f-9142-4527-bb42-1e6892d01a60)

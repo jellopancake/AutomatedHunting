@@ -12,7 +12,7 @@ class MovementController:
         self.rotation = rotation
 
     # -------------------------
-    # Movement logic
+    # Main function
     # -------------------------
     def move_to_start(self, rotation_step):
         start = rotation_step.get("startingLocation", {})
@@ -34,6 +34,10 @@ class MovementController:
         self._move_to_ground(goal_y, goal_x)
         self._walk_to_x(goal_x, tolerance, align)
         self._move_vertical(goal_y)
+    
+    # -------------------------
+    # Main function helpers
+    # -------------------------
 
     def _wait_until_stop(self):
         time.sleep(1)
@@ -55,23 +59,47 @@ class MovementController:
         move_type = setup.get("horizontalMovement")
         move_dist = setup.get("horizontalMovementDistance")
 
+        last_px = 0
+        stuck_count = 0
+        MAX_STUCK = 4  # number of loops with no movement before aborting
+
         while True:
+            # --- Force stop ---
             if self._should_abort():
                 self.reset_servos()
                 return
 
-            player_x, player_y = self.state.get_player_position()
-            diff = abs(goal_x - player_x)
+            px, py = self.state.get_player_position()
+            diff = abs(goal_x - px)
 
-            print(f"[Player X] {player_x}, [Goal X] {goal_x}, [Difference] {diff}")
+            print(f"[Player X] {px}, [Goal X] {goal_x}, [Difference] {diff}")
 
+            # --- Goal reached ---
             if diff <= tolerance:
                 self.reset_servos()
                 self._align(goal_x, align)
+                print(f"[HORIZONTAL] Goal Achieved")
                 return
 
-            direction = "Right" if goal_x > player_x else "Left"
+            direction = "Right" if goal_x > px else "Left"
 
+            # --- Stuck detection ---
+            if abs(px - last_px) <= 1:
+                stuck_count += 1
+            else:
+                stuck_count = 0
+                last_px = px
+
+            if stuck_count >= MAX_STUCK:
+                print(f"[ABORT] X position stuck at {px} for {stuck_count+1} iterations")
+                self.start_walk(direction)
+                self.double_jump_attack(direction)
+                self.end_walk(direction)
+                
+                self.reset_servos()
+                return
+
+            # --- Movement logic ---
             if diff >= move_dist and move_type in ("Flashjump", "Teleport"):
                 self._fast_move(direction, diff, move_dist, move_type)
 
@@ -90,6 +118,10 @@ class MovementController:
 
             self._wait()
             self._wait_until_stop()
+
+    # -------------------------
+    # Horizontal movement helpers
+    # -------------------------
 
     def _fast_move(self, direction, diff, dist, move_type):
         repeats = math.floor(diff / dist)
@@ -129,13 +161,14 @@ class MovementController:
             self.walk_short_distance("Right")
 
     # -------------------------
-    # Vertical movement
+    # Vertical movement part 1
     # -------------------------
     def _move_to_ground(self, goal_y, goal_x):
         setup = self.config.get_setup_info()
         move_type = setup.get("horizontalMovement")
 
         while True:
+            # --- Force stop ---
             if self._should_abort():
                 self.reset_servos()
                 return
@@ -144,10 +177,13 @@ class MovementController:
             y_diff = goal_y - py
             x_diff = abs(goal_x - px)
 
+            # --- Goal reached ---
             if abs(y_diff) <= 1:
                 self.reset_servos()
+                print(f"[VERTICAL 1] Goal Achieved")
                 return
 
+            # --- Movement logic ---
             elif y_diff >= 10:
                 self.down_jump()
 
@@ -159,6 +195,10 @@ class MovementController:
             self._wait()
             self._wait_until_stop()
 
+    # -------------------------
+    # Vertical movement part 2
+    # -------------------------
+
     def _move_vertical(self, goal_y):
         setup = self.config.get_setup_info()
         move_type = setup.get("verticalMovement")
@@ -168,12 +208,19 @@ class MovementController:
         MAX_STUCK = 4  # number of loops with no movement before aborting
 
         while True:
+            # --- Force stop ---
             if self._should_abort():
                 self.reset_servos()
                 return
 
             px, py = self.state.get_player_position()
             diff = goal_y - py
+
+            # --- Goal reached ---
+            if abs(diff) <= 1:
+                self.reset_servos()
+                print(f"[VERTICAL 2] Goal Achieved")
+                return
 
             # --- Stuck detection ---
             if abs(py - last_py) <= 1:
@@ -184,14 +231,13 @@ class MovementController:
 
             if stuck_count >= MAX_STUCK:
                 print(f"[ABORT] Y position stuck at {py} for {stuck_count+1} iterations")
+                direction = "Right"
+                self.start_walk(direction)
+                self.double_jump_attack(direction)
+                self.end_walk(direction)
                 self.reset_servos()
                 return
-
-            # --- Goal reached ---
-            if abs(diff) <= 1:
-                self.reset_servos()
-                return
-
+            
             # --- Movement logic ---
             elif diff >= 10:
                 self.down_jump()

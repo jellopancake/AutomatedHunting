@@ -713,13 +713,13 @@ int keyToAngle (Key key){
       return 138;
    }
    else if(key == ALT){
-      return 40;
+      return 50;
    }
    else if(key == SPACE){
       return 59;
    }
    else if(key == SPACE2){
-      return 124;
+      return 128;
    }
    else if(key == DEL){
       return 159;

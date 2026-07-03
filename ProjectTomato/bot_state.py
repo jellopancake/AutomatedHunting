@@ -23,8 +23,12 @@ class BotState:
         self._goal_y = 0
 
         # movement history (for "is moving")
-        self.history_size = 8
-        self._history = deque([(0, 0)] * self.history_size, maxlen=self.history_size)
+        self.history_size = 10
+        self._movement_history = deque(maxlen=self.history_size)
+        self._last_x = 0
+        self._last_y = 0
+
+        self._is_moving = False
 
         # -------------------------
         # GUI override stop
@@ -75,11 +79,20 @@ class BotState:
     # =========================================================
     # Player position
     # =========================================================
-    def set_player_position(self, x: int, y: int):
-        with self._lock:
-            self._player_x = x
-            self._player_y = y
-            self._history.append((x, y))
+    def set_player_position(self, x, y):
+        self._player_x = x
+        self._player_y = y
+
+        dx = abs(x - self._last_x)
+        dy = abs(y - self._last_y)
+
+        # ignore tiny jitter (<= 1 pixel)
+        moved = (dx > 1) or (dy > 1)
+
+        self._movement_history.append(moved)
+
+        self._last_x = x
+        self._last_y = y
 
     def get_player_position(self):
         with self._lock:
@@ -98,19 +111,10 @@ class BotState:
             return self._goal_x, self._goal_y
 
     # =========================================================
-    # Movement detection (replaces check_is_moving)
+    # Movement detection
     # =========================================================
     def is_moving(self) -> bool:
-        with self._lock:
-            if len(self._history) < 2:
-                return False
-
-            px, py = self._history[-1]
-
-            for x, y in self._history:
-                if abs(x - px) > 1 or abs(y - py) > 1:
-                    return True
-            return False
+        return any(self._movement_history) 
 
     # =========================================================
     # Stop state

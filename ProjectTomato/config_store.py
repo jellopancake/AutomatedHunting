@@ -20,6 +20,8 @@ class ConfigStore:
         self._area_key = ""
         self._loaded_map = ""
 
+        self._rotation_version = 0
+
     # -----------------------------
     # LOAD MAP DATA
     # -----------------------------
@@ -38,6 +40,7 @@ class ConfigStore:
     # -----------------------------
     def load_class(self, class_choice: str, area_choice: str):
         with self._lock:
+            self._rotation_version += 1
             map_key = constants.favourite_map_key.get(area_choice)
 
             with open(f"lib/JSON/Classes/{class_choice}.json", "r") as f:
@@ -72,15 +75,15 @@ class ConfigStore:
     # -----------------------------
     def get_map_data(self):
         with self._lock:
-            return copy.deepcopy(self._map_data)
+            return self._map_data
 
     def get_rotation_data(self):
         with self._lock:
-            return copy.deepcopy(self._rotation_data)
+              return self._rotation_data
 
     def get_setup_info(self):
         with self._lock:
-            return copy.deepcopy(self._setup_info)
+            return self._setup_info
 
     def get_class_key(self):
         with self._lock:
@@ -93,3 +96,7 @@ class ConfigStore:
     def get_loaded_map(self):
         with self._lock:
             return self._loaded_map
+        
+    def get_rotation_version(self):
+        with self._lock:
+            return self._rotation_version

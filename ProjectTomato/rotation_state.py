@@ -1,7 +1,6 @@
-import time
-import math
-import copy
 import threading
+import hashlib
+import ujson
 
 class RotationState:
     def __init__(self, config):
@@ -12,7 +11,7 @@ class RotationState:
         self.config = config
         self._lock = threading.RLock()
 
-        self._last_rotations = None
+        self._last_version = -1
         self.rotation = []
         self.rotation_index = 0
         self.step_count = 0
@@ -30,7 +29,7 @@ class RotationState:
         with self._lock:
             if not self.rotation:
                 return None
-            return copy.deepcopy(self.rotation[self.rotation_index])
+            return self.rotation[self.rotation_index]
 
     # -------------------------
     # Rotation snapshot
@@ -81,10 +80,10 @@ class RotationState:
     def reload_rotation(self):
         rotations = self.config.get_rotation_data() or {}
 
-        if rotations == self._last_rotations:
+        if self.config.get_rotation_version() == self._last_version:
             return
 
-        self._last_rotations = rotations
+        self._last_version = self.config.get_rotation_version()
 
         self.step_count = rotations.get("Steps", 1)
 
@@ -94,3 +93,4 @@ class RotationState:
         ]
 
         self.reset_rotation_index()
+

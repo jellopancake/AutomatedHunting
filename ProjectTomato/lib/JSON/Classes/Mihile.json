@@ -75,6 +75,7 @@
             {"command": "Double Jump Attack", "parameter": 0, "wait": 1200},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 1200},
             {"command": "End Walk", "parameter": 1, "wait": 0},
+            {"command": "Use Skill", "parameter": 4, "wait": 1000},
             {"command": "Start Walk", "parameter": 0, "wait": 200},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 1200},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 1300},

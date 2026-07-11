@@ -22,11 +22,7 @@ class BotState:
         self._goal_x = 0
         self._goal_y = 0
 
-        # movement history (for "is moving")
-        self.history_size = 10
-        self._movement_history = deque(maxlen=self.history_size)
-        self._last_x = 0
-        self._last_y = 0
+        self._last_movement_time = 0
 
         self._is_moving = False
 
@@ -80,19 +76,15 @@ class BotState:
     # Player position
     # =========================================================
     def set_player_position(self, x, y):
-        self._player_x = x
-        self._player_y = y
+        with self._lock:
+            dx = abs(x - self._player_x)
+            dy = abs(y - self._player_y)
 
-        dx = abs(x - self._last_x)
-        dy = abs(y - self._last_y)
+            if dx > 1 or dy > 1:
+                self._last_movement_time = time.time()
 
-        # ignore tiny jitter (<= 1 pixel)
-        moved = (dx > 1) or (dy > 1)
-
-        self._movement_history.append(moved)
-
-        self._last_x = x
-        self._last_y = y
+            self._player_x = x
+            self._player_y = y
 
     def get_player_position(self):
         with self._lock:
@@ -113,8 +105,9 @@ class BotState:
     # =========================================================
     # Movement detection
     # =========================================================
-    def is_moving(self) -> bool:
-        return any(self._movement_history) 
+    def is_moving(self):
+        with self._lock:
+            return (time.time() - self._last_movement_time) < 0.5
 
     # =========================================================
     # Stop state

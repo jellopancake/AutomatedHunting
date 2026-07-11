@@ -13,6 +13,20 @@ class VisionWorker(threading.Thread):
         self.config = config
         self.serial = serial
 
+        # ---- Image Templates for CV comparison ----
+        self.stop_template = cv2.imread('lib/Images/Sacred Symbol.png', cv2.IMREAD_GRAYSCALE)
+
+        self.class_templates = {
+            name: cv2.imread(f'lib/Images/{name}.png', cv2.IMREAD_GRAYSCALE)
+            for name in constants.class_list
+        }
+
+        self.area_templates = {
+            name: cv2.imread(f'lib/Images/{name}.png', cv2.IMREAD_GRAYSCALE)
+            for name in constants.area_list
+        }
+
+        # ---- Run once before botcontroller check ----
         self.loop_complete = threading.Event()
         self.loop_count = 0
         self.lock = threading.Lock()
@@ -38,18 +52,24 @@ class VisionWorker(threading.Thread):
 
         while self.running:
             ret, frame = cap.read()
-            if not ret:
-                print("Failed to grab frame.")
-                break
 
-            self.process(frame)
+            if not ret or frame is None:
+                print("[CV] Frame grab failed, retrying...")
+                time.sleep(0.01)
+                continue
 
             # SIGNAL: one full loop completed
             with self.lock:
                 self.loop_count += 1
                 self.loop_complete.set()
 
-            time.sleep(0.03)
+            start = time.time()
+
+            self.process(frame)
+
+            elapsed = time.time() - start
+            sleep_time = max(0, 0.03 - elapsed)
+            time.sleep(sleep_time)
 
         cap.release()
 
@@ -75,10 +95,6 @@ class VisionWorker(threading.Thread):
 
         self.compare_area_and_class(p_class, area)
 
-        # ---- update JSON and set minimap bounds ----
-        self.config.load_map(self.state.get_area())
-        self.set_minimap_bounds()
-
     # =========================================================
     # Bot State, Frame State, and Config updates
     # =========================================================
@@ -97,6 +113,12 @@ class VisionWorker(threading.Thread):
             # ONLY push config if class changed
             if class_changed:
                 self.push_config()
+
+            # ONLY load new map if area has changed
+            if area_changed:
+            # ---- update JSON and set minimap bounds ----
+                self.config.load_map(self.state.get_area())
+                self.set_minimap_bounds()
     
     def set_minimap_bounds(self):
         map_data = self.config.get_map_data()
@@ -179,8 +201,7 @@ class VisionWorker(threading.Thread):
     # =========================================================
 
     def detect_stop(self, frame):
-        stop_template = cv2.imread('lib/Images/Sacred Symbol.png', cv2.IMREAD_GRAYSCALE)
-        cv_stop = self.match_image(frame, stop_template, 0.95)
+        cv_stop = self.match_image(frame, self.stop_template, 0.95)
         
         if (self.state.stop_age() >= 3):
             return not cv_stop
@@ -188,43 +209,56 @@ class VisionWorker(threading.Thread):
             return self.state.is_stopped()
         
     def detect_class(self, frame):
-        return self.compare_image_to_list(frame, self.state.get_class(), constants.class_list)
+        return self.compare_image_to_list(
+            frame,
+            self.state.get_class(),
+            constants.class_list,
+            self.class_templates
+    )
 
     def detect_area(self, frame):
-        return self.compare_image_to_list(frame, self.state.get_area(), constants.area_list)
-    
+        return self.compare_image_to_list(
+            frame,
+            self.state.get_area(),
+            constants.area_list,
+            self.area_templates
+        )
     # =========================================================
     # Image Recognition and Comparison
     # =========================================================
 
     # Compares an image to a list of potential class/area images
-    def compare_image_to_list(self, frame, name, list):
+    def compare_image_to_list(self, frame, name, items, template_dict):
         if name and name.strip():
-            image_path = f'lib/Images/{name}.png'
-            template = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+            template = template_dict.get(name)
 
             if template is None:
-                return name  # or False / fallback
+                return name
 
             if not self.match_image(frame, template, 0.90):
-                for item in list:
-                    path = "".join(['lib/Images/', item, ".png"])     
-                    template = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
-                    if self.match_image(frame, template, 0.90):
-                        return item                
+                for item in items:
+                    template = template_dict.get(item)
+                    if template is not None and self.match_image(frame, template, 0.90):
+                        return item
 
         return name
-    
-    def match_image(self, cropped_frame, template, threshold):   
-        # Convert frame to grayscale
+        
+    def match_image(self, cropped_frame, template, threshold):
+        if cropped_frame is None or template is None:
+            return False
+
+        if cropped_frame.size == 0 or template.size == 0:
+            return False
+
+        h, w = cropped_frame.shape[:2]
+        th, tw = template.shape[:2]
+
+        if th > h or tw > w:
+            return False
+
         gray_frame = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2GRAY)
 
-        # Apply template matching
         result = cv2.matchTemplate(gray_frame, template, cv2.TM_CCOEFF_NORMED)
-        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+        _, max_val, _, _ = cv2.minMaxLoc(result)
 
-        # If match is above threshold, draw a rectangle around the found template
-        if max_val >= threshold:
-            return True
-        else:
-            return False
+        return max_val >= threshold

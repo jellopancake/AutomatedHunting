@@ -184,6 +184,8 @@ class VisionWorker(threading.Thread):
         mask = cv2.inRange(hsv, lower_pink, upper_pink)
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
+        rune_detected_now = False
+
         if contours:
             c = max(contours, key=cv2.contourArea)
             x, y, w, h = cv2.boundingRect(c)
@@ -192,9 +194,9 @@ class VisionWorker(threading.Thread):
 
             if (contours_size > rune_size):
                 self.state.set_rune_position(x,y)
+                rune_detected_now = True
                 
-            rune_detected_now = (contours_size > rune_size)
-            self.state.update_rune_observation(rune_detected_now)
+        self.state.update_rune_observation(rune_detected_now)
 
     # =========================================================
     # Stop, Class, Area Detection

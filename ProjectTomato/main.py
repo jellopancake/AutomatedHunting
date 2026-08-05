@@ -23,7 +23,6 @@ from serial_command_executor import SerialCommandExecutor
 # ---- GUI ----
 from GUI import GUI
 
-
 def main():
     # =========================================================
     # 1. Core Systems

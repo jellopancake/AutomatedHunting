@@ -96,7 +96,7 @@ class BotController:
         self._wait()
 
         # --- check if goal reached ---
-        if not self.movement.is_at_goal():
+        if not self.movement.is_at_goal() and not self.movement.is_demon_slayer():
             return  # skip commands AND don't advance rotation
 
         commands = rotation_step.get("commands", [])

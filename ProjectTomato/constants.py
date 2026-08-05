@@ -45,7 +45,7 @@ serial_key = {
 	"Start Hold Attack": 'L',
 	"End Hold Attack": 'M',
 	"Reset Servos": 'N',
-	"Walk Opposite To Double Jump Attack": 'O',
+	"Fast Teleport": 'O',
 	"Walk Opposite To Short Double Jump Attack": 'P',
 	"Walk Short Distance": 'Q',
 	"Short Up Jump": 'R',

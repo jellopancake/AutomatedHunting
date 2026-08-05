@@ -189,7 +189,7 @@ void executeCommand(){
             delay(200);
          }
          else if(command == 'O'){
-            walkOppositeIntoDoubleJump(param);
+            fastTeleport(param);
          }
          else if (command == 'P'){
             walkOppositeIntoShortDoubleJump(param);
@@ -315,7 +315,7 @@ void upTeleport(){
 
 void downTeleport(){
    pressDownButton(down);
-   delay(500);
+   delay(600);
    shortPressButton(skill2);
    delay(200);
    releaseButton(down);
@@ -340,21 +340,22 @@ void endJumpGlide(int param){
 
 void walkShortDistance(int param){
    Key dir = selectDir(param);
-   walk(dir, 200);
+   walk(dir, 240);
    delay(200);
 }
 
 // Walks a short amount in one direction then does a double jump to the opposite direction
-void walkOppositeIntoDoubleJump(int param){
-   Key oppositeDir = selectOppositeDir(param);
+void fastTeleport(int param){
    Key dir = selectDir(param);
 
-   walk(oppositeDir, 350);
-   delay(200);
    pressDownButton(dir);
+   delay(750);
+   pressButton(skill2);
    delay(150);
-   doubleJumpAttack();
    releaseButton(dir);
+   delay(500);
+   pressButton(mainAttack);
+   delay(500);
 }
 
 // Walks a short amount in one direction then does a short double jump to the opposite direction
@@ -683,10 +684,10 @@ Servo keyToServo (Key key){
 
 int keyToAngle (Key key){
    if(key == RIGHT){
-      return 25;
+      return 31;
    }
    else if(key == DOWN){
-      return 117;
+      return 109;
    }
    else if(key == CTRL){
       return 141;
@@ -701,7 +702,7 @@ int keyToAngle (Key key){
       return 130;
    }
    else if(key == F){
-      return 54;
+      return 56;
    }
    else if(key == G){
       return 145;
@@ -710,13 +711,13 @@ int keyToAngle (Key key){
       return 42;
    }
    else if(key == J){
-      return 138;
+      return 136;
    }
    else if(key == ALT){
       return 50;
    }
    else if(key == SPACE){
-      return 59;
+      return 55;
    }
    else if(key == SPACE2){
       return 128;

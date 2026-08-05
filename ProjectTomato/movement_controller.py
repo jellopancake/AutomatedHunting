@@ -27,7 +27,7 @@ class MovementController:
 
         print(f"[GOAL] x={goal_x}, y={goal_y}, tolerance={tolerance}, align={align}")
 
-        if goal_x == -1 or goal_y == -1:
+        if self.is_demon_slayer():
             return
 
         self._wait_until_stop()
@@ -38,6 +38,10 @@ class MovementController:
     # -------------------------
     # Main function helpers
     # -------------------------
+
+    def is_demon_slayer(self):
+        gx, gy = self.state.get_goal_position()
+        return gx == -1 or gy == -1
 
     def _wait_until_stop(self):
         time.sleep(1)

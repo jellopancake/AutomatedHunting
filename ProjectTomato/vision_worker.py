@@ -133,8 +133,8 @@ class VisionWorker(threading.Thread):
     def push_config(self):
         setup = self.config.get_setup_info()
 
-        double_jump = setup["doubleJumpDelay"]
-        short_double_jump = setup["shortDoubleJumpDelay"]
+        double_jump = setup.get("doubleJumpDelay") or constants.jump_delay
+        short_double_jump = setup.get("shortDoubleJumpDelay") or constants.short_jump_delay
 
         # -------------------------
         # Validate inputs first

@@ -1,6 +1,6 @@
 {
   "className": "Lynn",
-  "doubleJumpDelay": 80,
+  "doubleJumpDelay": null,
   "shortDoubleJumpDelay": 200,
   "walkMultiplier": 0.071,
   "horizontalMovementDistance": 46,
@@ -9,6 +9,7 @@
   "mobbingRotations": {
     "Carcion": {},
     "Arteria": {
+      "Area Name": "Arteria",
       "Top Deck 1": {  
         "Steps" : 5,     
         "Rotation 1": {
@@ -48,7 +49,7 @@
             {"command": "Start Walk", "parameter": 0, "wait": 700},
             {"command": "End Walk", "parameter": 0, "wait": 0},
             {"command": "Start Walk", "parameter": 1, "wait": 700},
-            {"command": "Double Jump Attack", "parameter": 0, "wait": 2000},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 2150},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 1400},
             {"command": "Use Skill", "parameter": 5, "wait": 800},
             {"command": "End Walk", "parameter": 1, "wait": 0},
@@ -64,7 +65,7 @@
             {"command": "End Walk", "parameter": 1, "wait": 0},
             {"command": "Start Walk", "parameter": 0, "wait": 1600},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 1400},
-            {"command": "Double Jump Attack", "parameter": 0, "wait": 2550},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 2650},
             {"command": "End Walk", "parameter": 0, "wait": 800},
             {"command": "Down Jump", "parameter": 0, "wait": 0},
             {"command": "Use Skill", "parameter": 5, "wait": 600},
@@ -76,12 +77,12 @@
           "startingLocation": { "x": 28, "y": 75, "x tolerance": 3, "align direction": "yes"},
           "commands": [
             {"command": "Start Walk", "parameter": 1, "wait": 300},
-            {"command": "Double Jump Attack", "parameter": 0, "wait": 1300},
-            {"command": "Double Jump Attack", "parameter": 0, "wait": 1300},
-            {"command": "Double Jump Attack", "parameter": 0, "wait": 1300},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 1600},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 1600},
+            {"command": "Double Jump Attack", "parameter": 0, "wait": 1600},
             {"command": "End Walk", "parameter": 1, "wait": 0},
             {"command": "Start Walk", "parameter": 0, "wait": 300},
-            {"command": "Jump Skill", "parameter": 5, "wait": 1800},
+            {"command": "Jump Skill", "parameter": 5, "wait": 700},
             {"command": "End Walk", "parameter": 0, "wait": 0}
           ]
         }

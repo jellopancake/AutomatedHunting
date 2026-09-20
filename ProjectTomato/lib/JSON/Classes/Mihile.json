@@ -1,6 +1,6 @@
 {
   "className": "Mihile",
-  "doubleJumpDelay": 80,
+  "doubleJumpDelay": null,
   "shortDoubleJumpDelay": 200,
   "walkMultiplier": 0.072,  
   "horizontalMovementDistance": 45,

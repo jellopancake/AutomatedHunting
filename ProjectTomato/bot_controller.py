@@ -1,7 +1,6 @@
 import threading
 import time
-from queue import Queue
-
+import random
 
 class BotController:
     """
@@ -109,6 +108,9 @@ class BotController:
             cmd = cmd_step.get("command")
             param = str(cmd_step.get("parameter"))
             wait = int(cmd_step.get("wait"))
+            
+            if self.movement.is_demon_slayer():
+                wait += random.randint(0, int(wait * 0.10))
 
             self.movement._send(cmd, param, wait)
             

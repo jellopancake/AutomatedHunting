@@ -10,6 +10,7 @@
     "Carcion": {},
     "Arteria": {},
     "Shangrila": {
+      "Area Name": "Shangrila",
       "Summer 1": { 
         "Steps" : 2,      
         "Rotation 1": {
@@ -36,7 +37,7 @@
         "Rotation 2": {
           "startingLocation": { "x": 64, "y": 42, "x tolerance": 2, "align direction": "yes"},
           "commands": [
-            {"command": "Start Hold Attack", "parameter": 5, "wait": 30000},
+            {"command": "Start Hold Attack", "parameter": 5, "wait": 45000},
             {"command": "End Hold Attack", "parameter": 5, "wait": 0}
           ]
         }

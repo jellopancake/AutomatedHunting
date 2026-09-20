@@ -70,3 +70,6 @@ favourite_map_key = {
 	"Carcion": 'Calm Beach 1',
     "Talahart": 'Ashlands 3'
 }
+
+jump_delay = 40
+short_jump_delay = 160

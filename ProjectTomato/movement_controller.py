@@ -3,7 +3,6 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 import math
 
-
 class MovementController:
     def __init__(self, serial, state, config, rotation):
         self.serial = serial
@@ -221,7 +220,7 @@ class MovementController:
             diff = goal_y - py
 
             # --- Goal reached ---
-            if abs(diff) <= 1:
+            if abs(diff) <= 2:
                 self.reset_servos()
                 print(f"[VERTICAL 2] Goal Achieved")
                 return

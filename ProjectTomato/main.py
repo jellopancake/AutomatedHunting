@@ -51,7 +51,7 @@ def main():
     movement_controller = MovementController(serial_executor, state, config, rotation)
 
     # =========================================================
-    # 5. Bot Controller
+    # 5. Bot Controller 
     # ==============================================
     # ===========
     bot_controller = BotController(

@@ -37,7 +37,7 @@
           "startingLocation": { "x": 134, "y": 54, "x tolerance": 1, "align direction": "no"},
           "commands": [
             {"command": "Use Skill", "parameter": 4, "wait": 1500},
-            {"command": "Swap Keyboard Layout", "parameter": 0, "wait": 1000},
+            {"command": "Use Skill", "parameter": 8, "wait": 1000},
             {"command": "Up Jump", "parameter": 0, "wait": 400},
             {"command": "Use Skill", "parameter": 2, "wait": 800},
             {"command": "Start Walk", "parameter": 1, "wait": 2100},
@@ -105,7 +105,7 @@
           "startingLocation": { "x": 129, "y": 62, "x tolerance": 1, "align direction": "yes"},
           "commands": [
             {"command": "Delayed Jump Skill", "parameter": 5, "wait": 1300},
-            {"command": "Swap Keyboard Layout", "parameter": 0, "wait": 1300},
+            {"command": "Use Skill", "parameter": 8, "wait": 1300},
             {"command": "Use Skill", "parameter": 3, "wait": 600},
             {"command": "Start Walk", "parameter": 1, "wait": 800},
             {"command": "End Walk", "parameter": 1, "wait": 0},
@@ -183,7 +183,7 @@
         "Rotation 1": {
           "startingLocation": { "x": 33, "y": 33, "x tolerance": 2, "align direction": "yes"},
           "commands": [
-            {"command": "Swap Keyboard Layout", "parameter": 0, "wait": 1200},
+            {"command": "Use Skill", "parameter": 8, "wait": 1200},
             {"command": "Down Jump", "parameter": 0, "wait": 1200},
             {"command": "Use Skill", "parameter": 3, "wait": 1200},
             {"command": "Use Skill", "parameter": 4, "wait": 700},
@@ -251,7 +251,7 @@
           "startingLocation": { "x": 43, "y": 42, "x tolerance": 2, "align direction": "no"},
           "commands": [
             {"command": "Delayed Jump Skill", "parameter": 5, "wait": 1500},
-            {"command": "Swap Keyboard Layout", "parameter": 0, "wait": 1200},
+            {"command": "Use Skill", "parameter": 8, "wait": 1200},
             {"command": "Start Walk", "parameter": 0, "wait": 1100},
             {"command": "End Walk", "parameter": 0, "wait": 0},
             {"command": "Start Walk", "parameter": 1, "wait": 700},
@@ -327,7 +327,7 @@
           "startingLocation": { "x": 43, "y": 42, "x tolerance": 2, "align direction": "no"},
           "commands": [
             {"command": "Delayed Jump Skill", "parameter": 1, "wait": 1500},
-            {"command": "Swap Keyboard Layout", "parameter": 0, "wait": 1200},
+            {"command": "Use Skill", "parameter": 8, "wait": 1200},
             {"command": "Start Walk", "parameter": 0, "wait": 1100},
             {"command": "End Walk", "parameter": 0, "wait": 0},
             {"command": "Start Walk", "parameter": 1, "wait": 700},
@@ -405,7 +405,7 @@
         "Rotation 1": {
           "startingLocation": { "x": 161, "y": 64, "x tolerance": 2, "align direction": "yes"},
           "commands": [
-            {"command": "Swap Keyboard Layout", "parameter": 0, "wait": 2000},
+            {"command": "Use Skill", "parameter": 8, "wait": 2000},
             {"command": "Use Skill", "parameter": 0, "wait": 2900},
             {"command": "Up Jump Warrior", "parameter": 0, "wait": 2100},
             {"command": "Start Walk", "parameter": 0, "wait": 900},

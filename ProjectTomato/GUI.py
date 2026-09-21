@@ -4,12 +4,14 @@ from PyQt6.QtWidgets import (
     QWidget, QLabel, QVBoxLayout, QHBoxLayout, QTextEdit, QPushButton, QSizePolicy
 )
 from PyQt6.QtGui import QImage, QPixmap, QFont
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 import threading
 import textwrap
 from playsound import playsound
 
 class GUI(QWidget):
+    gui_message_signal = pyqtSignal(str)
+
     def __init__(self, frame_state, state, rotation, bus):
         super().__init__()
 
@@ -19,7 +21,9 @@ class GUI(QWidget):
         self.rotation = rotation
 
         self.setWindowTitle("Monitor")
-
+        self.resize(800, 600)
+        self.setMinimumSize(800, 600)
+        self.gui_message_signal.connect(self.display_gui_message)
         self.gui_paused = False
 
         # ---- UI Elements ----
@@ -35,14 +39,23 @@ class GUI(QWidget):
         self.area_label = QLabel()
         self.stop_label = QLabel()
 
+        self.state_text = QTextEdit()
+        self.state_text.setReadOnly(True)
+        self.state_text.setFont(QFont("Consolas", 12))
+        self.state_text.setFixedHeight(200)
+
         for lbl in (self.class_label, self.area_label, self.stop_label):
             lbl.setFixedSize(70, 70)  # slightly bigger than 40 for padding
             lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.info_text = QTextEdit()
         self.info_text.setReadOnly(True)
-        self.info_text.setFixedHeight(150)
+        self.info_text.setFixedHeight(140)
         self.info_text.setFont(QFont("Consolas", 12))
+
+        self.message_text = QTextEdit()
+        self.message_text.setReadOnly(True)
+        self.message_text.setFont(QFont("Consolas", 10))
 
         # ---- Buttons ----
         self.pause_button = QPushButton("Pause")
@@ -53,11 +66,18 @@ class GUI(QWidget):
         self.prev_button.clicked.connect(self.prev_step)
         self.step_button.clicked.connect(self.next_step)
 
-        # ---- Layout ----
-        frame_layout = QVBoxLayout()
-        frame_layout.addWidget(self.display_label)
+        # ==========================================
+        # Top: Minimap + Class/Area/Stop
+        # ==========================================
+        top_layout = QHBoxLayout()
 
-        # ---- Small images row ----
+        # Minimap
+        top_layout.addWidget(self.display_label, 4)
+
+        # Right side
+        right_layout = QVBoxLayout()
+
+        # Class / Area / Stop to the right of minimap
         mini_layout = QHBoxLayout()
         mini_layout.addWidget(self.class_label)
         mini_layout.addWidget(self.area_label)
@@ -66,11 +86,31 @@ class GUI(QWidget):
         mini_layout.setSpacing(10)
         mini_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        frame_layout.addLayout(mini_layout)
+        right_layout.addLayout(mini_layout)
+        # Text underneath the images
+        right_layout.addWidget(self.state_text)
+
+        top_layout.addLayout(right_layout, 2)
+
+
+        # ==========================================
+        # Bottom: Status + Event Messages
+        # ==========================================
+
+        bottom_layout = QHBoxLayout()
+
+        bottom_layout.addWidget(self.info_text, 1)
+        bottom_layout.addWidget(self.message_text, 3)
+
+
+        # ==========================================
+        # Main Layout
+        # ==========================================
 
         main_layout = QVBoxLayout()
-        main_layout.addLayout(frame_layout)
-        main_layout.addWidget(self.info_text)
+
+        main_layout.addLayout(top_layout, 4)
+        main_layout.addLayout(bottom_layout, 1)
 
         button_layout = QHBoxLayout()
         button_layout.addWidget(self.pause_button)
@@ -121,6 +161,7 @@ class GUI(QWidget):
 
         # subscribe to events
         self.bus.subscribe("rune_detected", self.on_rune_detected)
+        self.bus.subscribe("gui_message", self.on_gui_message)
 
         # ---- Timer ----
         self.timer = QTimer()
@@ -161,6 +202,7 @@ class GUI(QWidget):
         self.set_label_image(self.area_label, area_frame)
         self.set_label_image(self.stop_label, stop_frame)
 
+
         # ---- Bot State ----
         player_pos = self.state.get_player_position()
         rune_pos = self.state.get_rune_position()
@@ -182,21 +224,27 @@ class GUI(QWidget):
         # ---- Render Frames ----
         self.set_label_image(self.display_label, display)
 
-        # ---- Update Text Panel ----
+        # ---- Update Top Right Text Panel ----
+
+        state_text = textwrap.dedent(f"""
+            Class: {current_class}
+            Area: {current_area}
+            STOPPED: {is_stopped}
+        """).strip()
+
+        self.state_text.setText(state_text)
+
+        # ---- Update Bottom Left Text Panel ----
         text = textwrap.dedent(f"""
             STOPPED: {is_stopped}
             GUI STOPPED: {is_gui_stopped}
             
             Player: {player_pos}
             Rune: {rune_pos}
+            Rotation Index: {rotation_index}
 
             isMoving: {is_moving}
             runeAvailable: {rune_available}
-
-            Rotation Index: {rotation_index}
-            Class: {current_class}
-            Area: {current_area}
-
             Generation: {generation}
             Queue Empty: {is_queue_empty}
             """).strip()
@@ -278,7 +326,11 @@ class GUI(QWidget):
                 Qt.TransformationMode.SmoothTransformation
             )
         )
-    
+
+    # =========================================================
+    # RUNE
+    # =========================================================
+
     def on_rune_detected(self, data=None):
         # non-blocking sound
         threading.Thread(
@@ -286,3 +338,30 @@ class GUI(QWidget):
             daemon=True
         ).start()
 
+         # Add message to event log
+        self.gui_message_signal.emit("[RUNE] Rune spawned!")
+
+    # =========================================================
+    # TEXT WINDOW
+    # =========================================================
+
+    def on_gui_message(self, message):
+        self.gui_message_signal.emit(message)
+
+    def display_gui_message(self, message):
+        self.message_text.append(message)
+
+        # Keep only the most recent 100 messages
+        document = self.message_text.document()
+
+        while document.blockCount() > 100:
+            cursor = self.message_text.textCursor()
+            cursor.movePosition(cursor.MoveOperation.Start)
+            cursor.select(cursor.SelectionType.BlockUnderCursor)
+            cursor.removeSelectedText()
+            cursor.deleteChar()
+
+        # Scroll to the newest message
+        self.message_text.verticalScrollBar().setValue(
+            self.message_text.verticalScrollBar().maximum()
+        )

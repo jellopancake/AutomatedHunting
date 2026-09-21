@@ -41,7 +41,7 @@ enum Key{LEFT, RIGHT, DOWN, F, G, H, J, COLON, APOS, ALT, CTRL, SPACE, SPACE2, D
    Key skill2 = H;
    Key skill3 = J;
    Key skill4 = ALT;
-   Key swap = APOS;
+   Key skill5 = APOS;
    Key mainAttack = F;
    Key skill0 = G; // Ropelift
    Key escape = DEL;
@@ -159,8 +159,7 @@ void executeCommand(){
 
          }
          else if (command == 'K'){
-            swapKeyboardLayout();
-
+            //unused
          }
          else if (command == 'L'){
             startHoldAttack(param);
@@ -192,7 +191,7 @@ void executeCommand(){
             fastTeleport(param);
          }
          else if (command == 'P'){
-            walkOppositeIntoShortDoubleJump(param);
+            //unused
          }
          else if(command == 'Q'){
             walkShortDistance(param);
@@ -213,7 +212,7 @@ void executeCommand(){
             downTeleport();
          }
          else if(command == 'W'){
-            downJumpFlashjump();
+            //unused
          }
          else if(command == 'X'){
             delayedJumpSkill(param);
@@ -358,19 +357,6 @@ void fastTeleport(int param){
    delay(500);
 }
 
-// Walks a short amount in one direction then does a short double jump to the opposite direction
-void walkOppositeIntoShortDoubleJump(int param){
-   Key oppositeDir = selectOppositeDir(param);
-   Key dir = selectDir(param);
-
-   walk(oppositeDir, 350);
-   delay(200);
-   pressDownButton(dir);
-   delay(150);
-   shortDoubleJumpAttack();
-   releaseButton(dir);
-}
-
 void walk(Key dir, int time){
    pressDownButton(dir);
    delay(time);
@@ -390,7 +376,7 @@ void endHoldAttack(int param){
 
 void swapKeyboardLayout(){
    delay(500);
-   pressButton(swap);
+   pressButton(skill5);
    delay(500);
 }
 
@@ -453,6 +439,9 @@ Key selectSkill(int param){
    } 
    else if(param == 7){
       skill = down;
+   }
+   else if(param == 8){
+      skill = skill5;
    }
    return skill;
 }

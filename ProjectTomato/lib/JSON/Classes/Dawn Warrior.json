@@ -71,7 +71,7 @@
           "commands": [    
             {"command": "Start Hold Attack", "parameter": 5, "wait": 24000},
             {"command": "End Hold Attack", "parameter": 5, "wait": 100},
-            {"command": "Swap Keyboard Layout", "parameter": 0, "wait": 800},
+            {"command": "Use Skill", "parameter": 8, "wait": 800},
             {"command": "Use Skill", "parameter": 2, "wait": 800},
             {"command": "Start Walk", "parameter": 0, "wait": 400},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 1400},

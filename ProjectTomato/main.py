@@ -42,7 +42,7 @@ def main():
     # =========================================================
     PORT = "COM3"
     BAUD = 9600
-    serial_executor = SerialCommandExecutor(PORT, BAUD, state)
+    serial_executor = SerialCommandExecutor(PORT, BAUD, state, bus)
 
     # =========================================================
     # 4. Movement + Rotation

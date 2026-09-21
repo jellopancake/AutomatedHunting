@@ -41,24 +41,52 @@ serial_key = {
 	"Down Jump": 'H',
 	"Use Skill": 'I',
 	"Jump Skill": 'J',
-	"Swap Keyboard Layout": 'K',
+	"UNUSED1": 'K',
 	"Start Hold Attack": 'L',
 	"End Hold Attack": 'M',
 	"Reset Servos": 'N',
 	"Fast Teleport": 'O',
-	"Walk Opposite To Short Double Jump Attack": 'P',
+	"UNUSED2": 'P',
 	"Walk Short Distance": 'Q',
 	"Short Up Jump": 'R',
 	"Start Hold Glide": 'S',
 	"End Hold Glide": 'T',
 	"Up Teleport": 'U',
 	"Down Teleport": 'V',
-	"Down Jump Flashjump": 'W',
+	"UNUSED3": 'W',
     "Delayed Jump Skill": 'X',
     "Swap Character": 'Y'
 }
 
 inverse_serial_key = {v: k for k, v in serial_key.items()}
+
+serial_key_data_type = {
+	"Start Walk" : 'dir',
+	"End Walk" : 'dir',
+	"Double Jump": 'dir',
+	"Double Jump Attack": 'dir',
+	"Short Double Jump Attack": 'dir',
+	"Up Jump" : 'na',
+	"Up Jump Warrior": 'na',
+	"Down Jump": 'na',
+	"Use Skill": 'skill',
+	"Jump Skill": 'skill',
+	"UNUSED1": 'na',
+	"Start Hold Attack": 'skill',
+	"End Hold Attack": 'skill',
+	"Reset Servos": 'na',
+	"Fast Teleport": 'dir',
+	"UNUSED2": 'na',
+	"Walk Short Distance": 'dir',
+	"Short Up Jump": 'na',
+	"Start Hold Glide": 'dir',
+	"End Hold Glide": 'dir',
+	"Up Teleport": 'na',
+	"Down Teleport": 'na',
+	"UNUSED3": 'na',
+    "Delayed Jump Skill": 'skill',
+    "Swap Character": 'na'
+}
 
 favourite_map_key = {
 	"Cernium" : 'Library 1',

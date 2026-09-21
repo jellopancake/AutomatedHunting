@@ -16,7 +16,7 @@
           "startingLocation": { "x": 129, "y": 62, "x tolerance": 1, "align direction": "yes"},
           "commands": [
             {"command": "Delayed Jump Skill", "parameter": 1, "wait": 1300},
-            {"command": "Swap Keyboard Layout", "parameter": 0, "wait": 1300},
+            {"command": "Use Skill", "parameter": 8, "wait": 1300},
             {"command": "Use Skill", "parameter": 5, "wait": 600},
             {"command": "Start Walk", "parameter": 1, "wait": 800},
             {"command": "End Walk", "parameter": 1, "wait": 0},
@@ -96,7 +96,7 @@
           "startingLocation": { "x": 43, "y": 42, "x tolerance": 2, "align direction": "no"},
           "commands": [
             {"command": "Delayed Jump Skill", "parameter": 1, "wait": 1500},
-            {"command": "Swap Keyboard Layout", "parameter": 0, "wait": 1200},
+            {"command": "Use Skill", "parameter": 8, "wait": 1200},
             {"command": "Use Skill", "parameter": 2, "wait": 800},
             {"command": "Start Walk", "parameter": 0, "wait": 1100},
             {"command": "End Walk", "parameter": 0, "wait": 0},
@@ -171,7 +171,7 @@
           "startingLocation": { "x": 43, "y": 42, "x tolerance": 2, "align direction": "no"},
           "commands": [
             {"command": "Delayed Jump Skill", "parameter": 1, "wait": 1500},
-            {"command": "Swap Keyboard Layout", "parameter": 0, "wait": 1200},
+            {"command": "Use Skill", "parameter": 8, "wait": 1200},
             {"command": "Use Skill", "parameter": 2, "wait": 800},
             {"command": "Start Walk", "parameter": 0, "wait": 1100},
             {"command": "End Walk", "parameter": 0, "wait": 0},
@@ -248,7 +248,7 @@
         "Rotation 1": {
           "startingLocation": { "x": 38, "y": 51, "x tolerance": 2, "align direction": "no"},
           "commands": [
-            {"command": "Swap Keyboard Layout", "parameter": 0, "wait": 1200},
+            {"command": "Use Skill", "parameter": 8, "wait": 1200},
             {"command": "Use Skill", "parameter": 3, "wait": 900},
             {"command": "Up Jump", "parameter": 0, "wait": 0},
             {"command": "Use Skill", "parameter": 5, "wait": 600}
@@ -354,7 +354,7 @@
           "commands": [    
             {"command": "Start Hold Attack", "parameter": 5, "wait": 24000},
             {"command": "End Hold Attack", "parameter": 5, "wait": 100},
-            {"command": "Swap Keyboard Layout", "parameter": 0, "wait": 800},
+            {"command": "Use Skill", "parameter": 8, "wait": 800},
             {"command": "Use Skill", "parameter": 2, "wait": 800},
             {"command": "Start Walk", "parameter": 0, "wait": 1400},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 1400},
@@ -404,7 +404,7 @@
             {"command": "End Walk", "parameter": 0, "wait": 0},
             {"command": "Down Jump", "parameter": 0, "wait": 0},
             {"command": "Use Skill", "parameter": 5, "wait": 700},
-            {"command": "Swap Keyboard Layout", "parameter": 0, "wait": 500},
+            {"command": "Use Skill", "parameter": 8, "wait": 500},
             {"command": "Start Walk", "parameter": 0, "wait": 1300},
             {"command": "End Walk", "parameter": 0, "wait": 0},
             {"command": "Start Walk", "parameter": 1, "wait": 700},
@@ -469,7 +469,7 @@
             {"command": "Start Walk", "parameter": 1, "wait": 400},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 1900},
             {"command": "End Walk", "parameter": 1, "wait": 500},
-            {"command": "Swap Keyboard Layout", "parameter": 0, "wait": 1000}
+            {"command": "Use Skill", "parameter": 8, "wait": 1000}
           ]
         },
         "Rotation 2":{

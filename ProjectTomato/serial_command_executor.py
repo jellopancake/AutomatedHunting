@@ -5,10 +5,11 @@ import queue
 import constants
 
 class SerialCommandExecutor:
-    def __init__(self, port, baudrate, state):
+    def __init__(self, port, baudrate, state, bus):
         self.ser = serial.Serial(port=port, baudrate=baudrate, timeout=1)
         time.sleep(2)
 
+        self.bus = bus
         self.queue = queue.Queue()
         self.lock = threading.Lock()
         self.state = state
@@ -98,6 +99,7 @@ class SerialCommandExecutor:
                 self.ser.write(packet)
 
             print(f"[Serial CONFIG] * {param}{wait_ms}")
+
             return
 
         # =========================
@@ -120,9 +122,7 @@ class SerialCommandExecutor:
         with self.lock:
             self.ser.write(packet)
 
-        cmd_name = constants.inverse_serial_key.get(cmd_char, "UNKNOWN")
-        print(f"[Serial CMD] + {cmd_name}, param={param}, wait={wait_ms}")
-
+        self.printToGUI(cmd_char, param, wait_ms)
         self._smart_delay(wait_ms)
 
 
@@ -183,3 +183,54 @@ class SerialCommandExecutor:
         if command_text not in constants.serial_key:
             raise ValueError(f"Unknown command: {command_text}")
         return constants.serial_key[command_text]
+
+    # =========================
+    # Print to GUI
+    # =========================    
+
+    def printToGUI(self, cmd_char, param, wait_ms):
+        cmd_name = constants.inverse_serial_key.get(cmd_char, "UNKNOWN")
+        readable_param = self.parseAndReturnReadableParam(cmd_name, param)
+
+        if readable_param == "no param":
+            message = f"[Serial CMD] {cmd_name}, wait={wait_ms}ms"
+        else:
+            message = f"[Serial CMD] {cmd_name}, param={readable_param}, wait={wait_ms}ms"
+
+        print(message)
+        self.bus.emit("gui_message", message)
+
+    def parseAndReturnReadableParam(self, cmd_name, param):
+        cmd_type = constants.serial_key_data_type.get(cmd_name)
+
+        if (cmd_type == "dir"):
+            if param == '0':
+                return "left"
+            elif param == '1':
+                return "right"
+            else:
+                return "incorrect param type(direction)"
+        elif (cmd_type == "skill"):
+            match param:
+                case '0':
+                    return "G"
+                case '1':
+                    return "CTRL"
+                case '2':
+                    return "H"
+                case '3':
+                    return "J"
+                case '4':
+                    return "ALT"
+                case '5':
+                    return "F"
+                case '6':
+                    return "UP"
+                case '7':
+                    return "DOWN"
+                case '8':
+                    return "APOS"
+                case _:
+                    return "incorrect param type(skill)"
+        else:
+            return "no param"

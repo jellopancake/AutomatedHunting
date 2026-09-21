@@ -20,7 +20,7 @@
         "Rotation 1": {
           "startingLocation": { "x": 32, "y": 55, "x tolerance": 2, "align direction": "yes"},
           "commands": [
-            {"command": "Swap Keyboard Layout", "parameter": 0, "wait": 1300},
+            {"command": "Use Skill", "parameter": 8, "wait": 1300},
             {"command": "Use Skill", "parameter": 2, "wait": 700},
             {"command": "Use Skill", "parameter": 3, "wait": 700},
             {"command": "Start Walk", "parameter": 1, "wait": 200},

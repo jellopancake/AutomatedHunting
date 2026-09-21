@@ -88,7 +88,7 @@
           "commands": [
             {"command": "Start Walk", "parameter": 1, "wait": 200},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 1800},
-            {"command": "Swap Keyboard Layout", "parameter": 0, "wait": 1200},
+            {"command": "Use Skill", "parameter": 8, "wait": 1200},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 1800},
             {"command": "End Walk", "parameter": 1, "wait": 0}
           ]
@@ -131,7 +131,7 @@
             {"command": "Double Jump Attack", "parameter": 0, "wait": 1400},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 1600},
             {"command": "End Walk", "parameter": 1, "wait": 0},
-            {"command": "Swap Keyboard Layout", "parameter": 0, "wait": 900},
+            {"command": "Use Skill", "parameter": 8, "wait": 900},
             {"command": "Start Walk", "parameter": 1, "wait": 1600},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 1400},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 1400},
@@ -172,7 +172,7 @@
         "Rotation 1":{
           "startingLocation": { "x": 138, "y": 68, "x tolerance": 4, "align direction": "yes"},
           "commands": [
-            {"command": "Swap Keyboard Layout", "parameter": 0, "wait": 900},
+            {"command": "Use Skill", "parameter": 8, "wait": 900},
             {"command": "Start Walk", "parameter": 0, "wait": 200},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 1300},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 1300},
@@ -194,7 +194,7 @@
         "Rotation 1": {
           "startingLocation": { "x": 166, "y": 64, "x tolerance": 2, "align direction": "yes"},
           "commands": [
-            {"command": "Swap Keyboard Layout", "parameter": 0, "wait": 900},
+            {"command": "Use Skill", "parameter": 8, "wait": 900},
             {"command": "Start Walk", "parameter": 0, "wait": 0},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 1400},
             {"command": "Double Jump Attack", "parameter": 0, "wait": 1400},

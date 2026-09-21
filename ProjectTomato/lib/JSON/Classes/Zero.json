@@ -29,7 +29,7 @@
             {"command": "Use Skill", "parameter": 2, "wait": 0},
             {"command": "End Walk", "parameter": 1, "wait": 0},
             {"command": "Walk Short Distance", "parameter": 0, "wait": 300},
-            {"command": "Swap Keyboard Layout", "parameter": 0, "wait": 400},
+            {"command": "Use Skill", "parameter": 8, "wait": 400},
             {"command": "Use Skill", "parameter": 5, "wait": 900},
             {"command": "Start Walk", "parameter": 0, "wait": 0},
             {"command": "Start Hold Attack", "parameter": 4, "wait": 2000},

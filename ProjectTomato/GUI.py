@@ -217,6 +217,7 @@ class GUI(QWidget):
 
         generation = self.state.get_generation()
         is_queue_empty = self.state.is_queue_empty()
+        rune_cardinal_location = self.state.get_rune_cardinal_location()
 
         # ---- Draw overlay on display frame ----
         display = self.draw_overlay(display)
@@ -230,6 +231,7 @@ class GUI(QWidget):
             Class: {current_class}
             Area: {current_area}
             STOPPED: {is_stopped}
+            RUNE LOCATION: {rune_cardinal_location}
         """).strip()
 
         self.state_text.setText(state_text)

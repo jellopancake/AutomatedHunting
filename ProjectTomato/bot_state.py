@@ -47,6 +47,8 @@ class BotState:
 
         self._rune_x = 0
         self._rune_y = 0
+
+        self._rune_cardinal_location = "Unknown"
         
         # Rune state
         self._rune_available = False
@@ -189,6 +191,14 @@ class BotState:
     # =========================================================
     # Rune position
     # =========================================================
+
+    def set_rune_cardinal_location(self, location):
+        with self._lock:
+            self._rune_cardinal_location = location
+
+    def get_rune_cardinal_location(self):
+        with self._lock:
+            return self._rune_cardinal_location
 
     def set_rune_position(self, x: int, y: int):
         with self._lock:

@@ -194,9 +194,37 @@ class VisionWorker(threading.Thread):
 
             if (contours_size > rune_size):
                 self.state.set_rune_position(x,y)
+                rune_cardinal_pos = self.get_rune_quadrant((x,y))
+                self.state.set_rune_cardinal_location(rune_cardinal_pos)
+
                 rune_detected_now = True
                 
         self.state.update_rune_observation(rune_detected_now)
+
+    def get_rune_quadrant(self, rune_pos):
+        # Pull minimap data
+        map_data = self.config.get_map_data()
+        bounds = map_data.get("mapBounds", {})
+        mw, mh = int(bounds.get("w", 0)), int(bounds.get("h", 0))
+
+        if rune_pos is None or mw == 0 or mh == 0:
+            return "Unknown"
+
+        rx, ry = rune_pos
+
+        col = rx // (mw / 3)
+        row = ry // (mh / 3)
+
+        quadrants = [
+            ["Top Left", "Top Middle", "Top Right"],
+            ["Middle Left", "Middle", "Middle Right"],
+            ["Bottom Left", "Bottom", "Bottom Right"]
+        ]
+
+        col = min(int(col), 2)
+        row = min(int(row), 2)
+
+        return quadrants[row][col]
 
     # =========================================================
     # Stop, Class, Area Detection

@@ -99,6 +99,10 @@ class GUI(QWidget):
 
         # Last rune position
 
+        rune_title = QLabel("Last Rune Position")
+        rune_title.setFont(QFont("Consolas", 11))
+        rune_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
         # ---- Last Rune Position Grid ----
         self.rune_grid = QGridLayout()
         self.rune_grid.setSpacing(0)
@@ -106,7 +110,7 @@ class GUI(QWidget):
         self.rune_cells = []
 
         for row in range(3):
-            for col in range(3):
+            for col in range(6):
                 cell = QLabel()
                 cell.setFixedHeight(40)
                 cell.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -122,6 +126,7 @@ class GUI(QWidget):
                 self.rune_grid.addWidget(cell, row, col)
                 self.rune_cells.append(cell)
 
+        right_layout.addWidget(rune_title)
         right_layout.addLayout(self.rune_grid)
 
         # ==========================================
@@ -266,7 +271,6 @@ class GUI(QWidget):
             Class: {current_class}
             Area: {current_area}
             STOPPED: {is_stopped}
-            RUNE LOCATION: {rune_cardinal_location}
         """).strip()
 
         self.state_text.setText(state_text)
@@ -389,24 +393,11 @@ class GUI(QWidget):
                 }
             """)
 
-        if location is None:
+        if location < 1:
             return
 
-        location_map = {
-            "top left": 0,
-            "top middle": 1,
-            "top right": 2,
-
-            "middle left": 3,
-            "middle": 4,
-            "middle right": 5,
-
-            "bottom left": 6,
-            "bottom middle": 7,
-            "bottom right": 8,
-        }
-
-        index = location_map.get(location.lower())
+        # locations are from 0 - 18
+        index = location-1
 
         if index is None:
             return

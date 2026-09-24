@@ -48,7 +48,7 @@ class BotState:
         self._rune_x = 0
         self._rune_y = 0
 
-        self._rune_cardinal_location = "Unknown"
+        self._rune_cardinal_location = 0
         
         # Rune state
         self._rune_available = False

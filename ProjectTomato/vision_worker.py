@@ -212,13 +212,13 @@ class VisionWorker(threading.Thread):
 
         rx, ry = rune_pos
 
-        col = rx // (mw / 3)
+        col = rx // (mw / 6)
         row = ry // (mh / 3)
 
         quadrants = [
-            ["Top Left", "Top Middle", "Top Right"],
-            ["Middle Left", "Middle", "Middle Right"],
-            ["Bottom Left", "Bottom", "Bottom Right"]
+            [1, 2, 3, 4, 5, 6],
+            [7, 8, 9, 10, 11, 12],
+            [13, 14, 15, 16, 17, 18]
         ]
 
         col = min(int(col), 2)

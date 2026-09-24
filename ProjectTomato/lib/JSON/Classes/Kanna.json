@@ -10,7 +10,7 @@
     "Talahart":{
       "Area Name": "Talahart",
       "Ashlands 3": {  
-        "Steps" : 7,     
+        "Steps" : 6,     
         "Rotation 1": {
           "startingLocation": { "x": 35, "y": 52, "x tolerance": 1, "align direction": "yes"},
           "commands": [
@@ -37,18 +37,11 @@
             {"command": "Delayed Jump Skill", "parameter": 1, "wait": 1300},
             {"command": "Fast Teleport", "parameter": 1, "wait": 1200},
             {"command": "Start Walk", "parameter": 1, "wait": 750},
-            {"command": "End Walk", "parameter": 1, "wait": 200}
+            {"command": "End Walk", "parameter": 1, "wait": 200},
+            {"command": "Use Skill", "parameter": 1, "wait": 600}
           ]
         },
-        "Rotation 4": {
-          "startingLocation": { "x": 160, "y": 51, "x tolerance": 2, "align direction": "no"},
-          "commands": [
-            {"command": "Use Skill", "parameter": 1, "wait": 600},
-            {"command": "Start Walk", "parameter": 0, "wait": 850},
-            {"command": "End Walk", "parameter": 0, "wait": 0}
-          ]
-        },
-        "Rotation 5":{
+        "Rotation 4":{
           "startingLocation": { "x": 149, "y": 52, "x tolerance": 1, "align direction": "yes"},
           "commands": [
             {"command": "Up Teleport", "parameter": 0, "wait": 400},
@@ -61,7 +54,7 @@
             {"command": "Fast Teleport", "parameter": 0, "wait": 1200}
           ]
         },
-        "Rotation 6":{
+        "Rotation 5":{
           "startingLocation": { "x": 81, "y": 40, "x tolerance": 2, "align direction": "no"},
           "commands": [
             {"command": "Start Walk", "parameter": 0, "wait": 150},
@@ -74,7 +67,7 @@
             {"command": "End Walk", "parameter": 1, "wait": 0}
           ]
         },
-        "Rotation 7":{
+        "Rotation 6":{
           "startingLocation": { "x": 35, "y": 65, "x tolerance": 2, "align direction": "yes"},
           "commands": [
             {"command": "Start Walk", "parameter": 1, "wait": 400},

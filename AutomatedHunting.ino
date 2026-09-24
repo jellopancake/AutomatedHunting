@@ -673,10 +673,10 @@ Servo keyToServo (Key key){
 
 int keyToAngle (Key key){
    if(key == RIGHT){
-      return 25;
+      return 21;
    }
    else if(key == DOWN){
-      return 104;
+      return 105;
    }
    else if(key == CTRL){
       return 141;

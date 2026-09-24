@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 from PyQt6.QtWidgets import (
-    QWidget, QLabel, QVBoxLayout, QHBoxLayout, QTextEdit, QPushButton, QSizePolicy
+    QWidget, QLabel, QVBoxLayout, QHBoxLayout, QTextEdit, QPushButton, QSizePolicy, QGridLayout
 )
 from PyQt6.QtGui import QImage, QPixmap, QFont
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
@@ -42,7 +42,6 @@ class GUI(QWidget):
         self.state_text = QTextEdit()
         self.state_text.setReadOnly(True)
         self.state_text.setFont(QFont("Consolas", 12))
-        self.state_text.setFixedHeight(200)
 
         for lbl in (self.class_label, self.area_label, self.stop_label):
             lbl.setFixedSize(70, 70)  # slightly bigger than 40 for padding
@@ -60,21 +59,26 @@ class GUI(QWidget):
         # ---- Buttons ----
         self.pause_button = QPushButton("Pause")
         self.prev_button = QPushButton("Prev Step")
-        self.step_button = QPushButton("Next Step")
+        self.next_button = QPushButton("Next Step")
 
         self.pause_button.clicked.connect(self.toggle_pause)
         self.prev_button.clicked.connect(self.prev_step)
-        self.step_button.clicked.connect(self.next_step)
+        self.next_button.clicked.connect(self.next_step)
+
+        self.pause_button.setMinimumHeight(50)
+        self.prev_button.setMinimumHeight(50)
+        self.next_button.setMinimumHeight(50)
 
         # ==========================================
         # Top: Minimap + Class/Area/Stop
         # ==========================================
         top_layout = QHBoxLayout()
 
+        # LEFT SIDE
         # Minimap
         top_layout.addWidget(self.display_label, 4)
 
-        # Right side
+        # RIGHT SIDE
         right_layout = QVBoxLayout()
 
         # Class / Area / Stop to the right of minimap
@@ -87,11 +91,38 @@ class GUI(QWidget):
         mini_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         right_layout.addLayout(mini_layout)
+
         # Text underneath the images
         right_layout.addWidget(self.state_text)
 
         top_layout.addLayout(right_layout, 2)
 
+        # Last rune position
+
+        # ---- Last Rune Position Grid ----
+        self.rune_grid = QGridLayout()
+        self.rune_grid.setSpacing(0)
+
+        self.rune_cells = []
+
+        for row in range(3):
+            for col in range(3):
+                cell = QLabel()
+                cell.setFixedHeight(40)
+                cell.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+                cell.setStyleSheet("""
+                    QLabel {
+                        background-color: #252525;
+                        border: 1px solid #444;
+                        border-radius: 3px;
+                    }
+                """)
+
+                self.rune_grid.addWidget(cell, row, col)
+                self.rune_cells.append(cell)
+
+        right_layout.addLayout(self.rune_grid)
 
         # ==========================================
         # Bottom: Status + Event Messages
@@ -115,7 +146,7 @@ class GUI(QWidget):
         button_layout = QHBoxLayout()
         button_layout.addWidget(self.pause_button)
         button_layout.addWidget(self.prev_button)
-        button_layout.addWidget(self.step_button)
+        button_layout.addWidget(self.next_button)
 
         main_layout.addLayout(button_layout)
 
@@ -146,6 +177,7 @@ class GUI(QWidget):
             border: 1px solid #333;
             padding: 6px;
             border-radius: 6px;
+            font-size: 16px;
         }
 
         QPushButton:hover {
@@ -221,6 +253,9 @@ class GUI(QWidget):
 
         # ---- Draw overlay on display frame ----
         display = self.draw_overlay(display)
+
+        # ---- Update rune positioning grid ----
+        self.update_rune_grid(rune_cardinal_location)
 
         # ---- Render Frames ----
         self.set_label_image(self.display_label, display)
@@ -342,6 +377,47 @@ class GUI(QWidget):
 
          # Add message to event log
         self.gui_message_signal.emit("[RUNE] Rune spawned!")
+
+    def update_rune_grid(self, location):
+        # Reset all cells
+        for cell in self.rune_cells:
+            cell.setStyleSheet("""
+                QLabel {
+                    background-color: #252525;
+                    border: 1px solid #444;
+                    border-radius: 3px;
+                }
+            """)
+
+        if location is None:
+            return
+
+        location_map = {
+            "top left": 0,
+            "top middle": 1,
+            "top right": 2,
+
+            "middle left": 3,
+            "middle": 4,
+            "middle right": 5,
+
+            "bottom left": 6,
+            "bottom middle": 7,
+            "bottom right": 8,
+        }
+
+        index = location_map.get(location.lower())
+
+        if index is None:
+            return
+
+        self.rune_cells[index].setStyleSheet("""
+            QLabel {
+                background-color: #D050D0;
+                border: 2px solid #FF80FF;
+                border-radius: 3px;
+            }
+        """)
 
     # =========================================================
     # TEXT WINDOW

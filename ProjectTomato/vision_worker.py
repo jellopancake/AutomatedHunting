@@ -85,6 +85,7 @@ class VisionWorker(threading.Thread):
             time.sleep(sleep_time)
 
         cap.release()
+        print("[CV] Capture released")
 
     def process(self, frame):        
         self.frame_state.set_raw_frame(frame)

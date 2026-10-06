@@ -2,6 +2,15 @@ import ujson
 import threading
 import copy
 import constants
+from pathlib import Path
+
+# Helper function to create the image paths
+def resource_path(*parts):
+    return BASE_DIR.joinpath(*parts)
+
+
+BASE_DIR = Path(__file__).resolve().parent
+
 
 class ConfigStore:
     """
@@ -27,7 +36,7 @@ class ConfigStore:
     # -----------------------------
     def load_map(self, area_choice: str):
         with self._lock:
-            with open("lib/JSON/Maps.json", "r") as f:
+            with open(resource_path("lib", "JSON", "Maps.json"), "r") as f:
                 raw = ujson.load(f)
 
             area_data = raw.get(area_choice, {})
@@ -43,7 +52,7 @@ class ConfigStore:
             self._rotation_version += 1
             map_key = constants.favourite_map_key.get(area_choice)
 
-            with open(f"lib/JSON/Classes/{class_choice}.json", "r") as f:
+            with open(resource_path("lib", "JSON", "Classes", f"{class_choice}.json"), "r") as f:
                 raw = ujson.load(f)
 
             self._setup_info = {

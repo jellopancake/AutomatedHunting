@@ -110,12 +110,15 @@ class FrameState:
 
     # Getter
     def get_hsv_minimap(self):
-        return self._hsv_minimap.copy()
+        with self.lock:
+            return self._hsv_minimap.copy()
 
     # Setter
     def set_hsv_minimap(self, frame):
         hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        self._hsv_minimap = hsv_frame
+        
+        with self.lock:
+            self._hsv_minimap = hsv_frame
 
     # =========================================================
     # GUI Frames

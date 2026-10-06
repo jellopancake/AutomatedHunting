@@ -15,6 +15,7 @@ class SerialCommandExecutor:
         self.state = state
 
         self._running = True
+        self._shutdown_requested = False
         self._last_gen = self.state.get_generation()
         self._last_reset_gen = None
 
@@ -44,11 +45,17 @@ class SerialCommandExecutor:
             #print([item for item in self.queue.queue if item[0] == self.state.get_generation()])
         
 
-    def submit_config(self, double_jump_delay, short_double_jump_delay):
+    def submit_config(self, double_jump_delay: str, short_double_jump_delay: str):
         self.queue.put((self.state.get_generation(), "CONFIG_SETUP", double_jump_delay, short_double_jump_delay))
 
     def stop(self):
         self._running = False
+
+        if self.worker and self.worker.is_alive():
+            self.worker.join(timeout=2)
+
+        if self.ser.is_open:
+            self.ser.close()
 
     # =========================
     # Worker Loop
@@ -71,6 +78,7 @@ class SerialCommandExecutor:
 
             self._execute(cmd, param, wait)
             self.queue.task_done()
+
 
     def _send_reset_servos(self):
         try:
@@ -137,15 +145,13 @@ class SerialCommandExecutor:
         self.ser.write(b"ACK\n")
         self._wait_line("READY")
 
+
     def _wait_line(self, expected, timeout=2.0):
         start = time.time()
 
-        while self._running:
-            if time.time() - start > timeout:
-                print(f"[Serial Timeout Waiting For] {expected}")
-                return
-
+        while time.time() - start < timeout:
             line = self.ser.readline().decode(errors="ignore").strip()
+
             if not line:
                 continue
 
@@ -153,6 +159,18 @@ class SerialCommandExecutor:
                 return
 
             print("[Serial Unexpected]", line)
+        
+        print(f"[Serial Timeout Waiting For] {expected}")
+        return False
+
+    # -----------------------------
+    # INTERRUPT BOOL
+    # -----------------------------
+    def _should_interrupt(self):
+        return (
+            self.state.is_stopped()
+            or self.state.is_gui_stopped()
+        )
 
     # =========================
     # Timing (non-blocking safe)
@@ -161,11 +179,12 @@ class SerialCommandExecutor:
         start = time.time()
 
         while (time.time() - start) * 1000 < wait_ms:
-            if self.state.is_stopped():
+            if self._should_interrupt():
                 return
             time.sleep(0.01)
 
-        self.check_queue()
+        if not self._should_interrupt():
+            self.check_queue()
 
     def check_queue(self):
         gen = self.state.get_generation()

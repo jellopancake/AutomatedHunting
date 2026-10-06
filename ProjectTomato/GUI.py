@@ -8,17 +8,21 @@ from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 import threading
 import textwrap
 from playsound import playsound
+import time
 
 class GUI(QWidget):
     gui_message_signal = pyqtSignal(str)
 
-    def __init__(self, frame_state, state, rotation, bus):
+    def __init__(self, frame_state, state, rotation, bus, bot_controller, vision_worker, serial_executor):
         super().__init__()
 
         self.bus = bus
         self.frame_state = frame_state
         self.state = state
         self.rotation = rotation
+        self.bot_controller = bot_controller
+        self.vision_worker = vision_worker
+        self.serial_executor = serial_executor
 
         self.setWindowTitle("Monitor")
         self.resize(800, 600)
@@ -434,3 +438,16 @@ class GUI(QWidget):
         self.message_text.verticalScrollBar().setValue(
             self.message_text.verticalScrollBar().maximum()
         )
+
+    def closeEvent(self, event):
+        self.state.set_gui_stopped(True)
+        time.sleep(2)
+
+        self.bot_controller.stop()
+
+        self.vision_worker.stop()
+        self.vision_worker.join(timeout=2)
+
+        self.serial_executor.stop()
+
+        event.accept()

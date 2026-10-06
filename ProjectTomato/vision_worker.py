@@ -4,6 +4,14 @@ import numpy as np
 import threading
 import time
 import constants
+from pathlib import Path
+
+# Helper function to create the image paths
+def resource_path(*parts):
+    return BASE_DIR.joinpath(*parts)
+
+
+BASE_DIR = Path(__file__).resolve().parent
 
 class VisionWorker(threading.Thread): 
     def __init__(self, state, config, frame_state, serial):
@@ -14,30 +22,33 @@ class VisionWorker(threading.Thread):
         self.serial = serial
 
         # ---- Image Templates for CV comparison ----
-        self.stop_template = cv2.imread('lib/Images/Sacred Symbol.png', cv2.IMREAD_GRAYSCALE)
+        self.stop_template = cv2.imread(str(resource_path("lib", "Images", "Sacred Symbol.png")), cv2.IMREAD_GRAYSCALE)
 
         self.class_templates = {
-            name: cv2.imread(f'lib/Images/{name}.png', cv2.IMREAD_GRAYSCALE)
+            name: cv2.imread(str(resource_path("lib", "Images", f"{name}.png")), cv2.IMREAD_GRAYSCALE)
             for name in constants.class_list
         }
 
         self.area_templates = {
-            name: cv2.imread(f'lib/Images/{name}.png', cv2.IMREAD_GRAYSCALE)
+            name: cv2.imread(str(resource_path("lib", "Images", f"{name}.png")), cv2.IMREAD_GRAYSCALE)
             for name in constants.area_list
         }
 
         # ---- Run once before botcontroller check ----
-        self.loop_complete = threading.Event()
-        self.loop_count = 0
+        self.startup_complete = threading.Event()
+        self.startup_success = False
         self.lock = threading.Lock()
 
-        self.running = True
+        self._running = True
+
+    def stop(self):
+        self._running = False
 
     def run(self):
         capture_index = 0
         cap = cv2.VideoCapture(
             capture_index,
-            apiPreference=cv2.CAP_ANY,
+            apiPreference=cv2.CAP_MSMF,
             params=[
                 cv2.CAP_PROP_FRAME_WIDTH, 1920,
                 cv2.CAP_PROP_FRAME_HEIGHT, 1080
@@ -48,9 +59,11 @@ class VisionWorker(threading.Thread):
 
         if not cap.isOpened():
             print("Error: Capture card not detected.")
+            self.startup_success = False
+            self.startup_complete.set()
             return
 
-        while self.running:
+        while self._running:
             ret, frame = cap.read()
 
             if not ret or frame is None:
@@ -58,10 +71,10 @@ class VisionWorker(threading.Thread):
                 time.sleep(0.01)
                 continue
 
-            # SIGNAL: one full loop completed
-            with self.lock:
-                self.loop_count += 1
-                self.loop_complete.set()
+            if not self.startup_complete.is_set():    
+                self.startup_success = True
+                self.startup_complete.set()
+                print("[CV] Startup successful")
 
             start = time.time()
 
@@ -88,27 +101,27 @@ class VisionWorker(threading.Thread):
             self.find_rune(self.frame_state.get_hsv_minimap())
 
         # ---- class detection ----
-        p_class = self.detect_class(self.frame_state.get_class_frame())
+        new_class = self.detect_class(self.frame_state.get_class_frame())
 
         # ---- area detection ----
-        area = self.detect_area(self.frame_state.get_area_frame())
+        new_area = self.detect_area(self.frame_state.get_area_frame())
 
-        self.compare_area_and_class(p_class, area)
+        self.compare_area_and_class(new_class, new_area)
 
     # =========================================================
     # Bot State, Frame State, and Config updates
     # =========================================================
     
-    def compare_area_and_class(self, p_class, area):
+    def compare_area_and_class(self, new_class, new_area):
         current_class = self.state.get_class()
         current_area = self.state.get_area()
 
-        class_changed = (p_class != current_class)
-        area_changed = (area != current_area)
+        class_changed = (new_class != current_class)
+        area_changed = (new_area != current_area)
 
         if class_changed or area_changed:
-            self.state.set_context(area, p_class)
-            self.config.load_class(p_class, area)
+            self.state.set_context(new_area, new_class)
+            self.config.load_class(new_class, new_area)
 
             # ONLY push config if class changed
             if class_changed:
@@ -208,7 +221,7 @@ class VisionWorker(threading.Thread):
         mw, mh = int(bounds.get("w", 0)), int(bounds.get("h", 0))
 
         if rune_pos is None or mw == 0 or mh == 0:
-            return "Unknown"
+            return -1
 
         rx, ry = rune_pos
 
@@ -221,7 +234,7 @@ class VisionWorker(threading.Thread):
             [13, 14, 15, 16, 17, 18]
         ]
 
-        col = min(int(col), 2)
+        col = min(int(col), 5)
         row = min(int(row), 2)
 
         return quadrants[row][col]
@@ -292,3 +305,4 @@ class VisionWorker(threading.Thread):
         _, max_val, _, _ = cv2.minMaxLoc(result)
 
         return max_val >= threshold
+

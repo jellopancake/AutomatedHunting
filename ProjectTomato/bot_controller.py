@@ -22,7 +22,6 @@ class BotController:
         self._thread = None
 
         # internal control flags
-        self._stop_requested = False
         self._last_reset_time = 0
         self._reset_interval = 5.0
 
@@ -37,20 +36,17 @@ class BotController:
         self._thread = threading.Thread(target=self.run, daemon=True)
         self._thread.start()
 
-    def stop(self):
-        with self._lock:
-            self._stop_requested = True
-
+    def stop(self):    
         self._running = False
+
+        if self._thread and self._thread.is_alive():
+            self._thread.join(timeout=2)
 
     # -----------------------------
     # MAIN LOOP
     # -----------------------------
     def run(self):
         while self._running:
-            # hard stop
-            if self._stop_requested:
-                break
 
             # pause from CV / GUI
             if self.state.is_stopped() or self.state.is_gui_stopped():
@@ -70,7 +66,6 @@ class BotController:
             
             self.load_and_run_current_rotation()            
 
-        self._shutdown()
 
     # -----------------------------
     # ROTATION EXECUTION
@@ -116,14 +111,14 @@ class BotController:
             
         self._wait()
         self.rotation.next_rotation_step()
+    
     # -----------------------------
-    # MOVEMENT / STATE CHECKS
+    # INTERRUPT BOOL
     # -----------------------------
     def _should_interrupt(self):
         return (
             self.state.is_stopped()
             or self.state.is_gui_stopped()
-            or self._stop_requested
         )
 
     # =========================

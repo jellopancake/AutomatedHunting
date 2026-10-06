@@ -294,8 +294,9 @@ class MovementController:
     def _calc_hold(self, diff, mult, offset):
         return max(0, (diff - offset) * mult)
 
+    # Aborts the current rotation
     def _should_abort(self):
-        return self.state.is_stopped() or self.state.is_gui_stopped() or not self.is_rotation_synced()
+        return self._should_interrupt() or not self.is_rotation_synced()
 
     # -------------------------
     # Core helpers
@@ -393,6 +394,15 @@ class MovementController:
         self.end_glide(direction)
         time.sleep(0.35)
 
+    # -----------------------------
+    # INTERRUPT BOOL
+    # -----------------------------
+    def _should_interrupt(self):
+        return (
+            self.state.is_stopped()
+            or self.state.is_gui_stopped()
+        )
+
     # =========================
     # Timing (non-blocking safe)
     # =========================
@@ -400,7 +410,7 @@ class MovementController:
         start = time.time()
 
         while (time.time() - start) < timeout:
-            if self.state.is_stopped() or self.state.is_gui_stopped() or self.state.is_queue_empty():
+            if self._should_interrupt() or self.state.is_queue_empty():
                 return
             time.sleep(0.01)
 

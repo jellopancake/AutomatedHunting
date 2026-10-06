@@ -1,0 +1,123 @@
+{
+  "className": "Demon Slayer",
+  "doubleJumpDelay": 80,
+  "shortDoubleJumpDelay": 200,
+  "horizontalMovementDistance": 33,
+  "walkMultiplier": 0.071,
+  "horizontalMovement": "Glide",
+  "verticalMovement": "Glide",
+  "mobbingRotations": {
+    "Carcion": {
+      "Area Name": "Carcion",
+      "Calm Beach 1": {  
+        "Steps" : 1,      
+        "Rotation 1": {
+          "startingLocation": { "x": -1, "y": -1, "x tolerance": 2},
+          "commands": [
+            {"command": "Use Skill", "parameter": 2, "wait": 900},
+            {"command": "Use Skill", "parameter": 3, "wait": 1000},
+            {"command": "Start Hold Attack", "parameter": 4, "wait": 54000},
+            {"command": "End Hold Attack", "parameter": 4, "wait": 300}
+          ]
+        }
+      }  
+    },
+    "Arteria": {
+      "Area Name": "Arteria",
+        "Top Deck 1": {
+          "Steps" : 1,      
+          "Rotation 1": {
+            "startingLocation": { "x": -1, "y": -1, "x tolerance": 2},
+            "commands": [
+              {"command": "Use Skill", "parameter": 2, "wait": 900},
+              {"command": "Use Skill", "parameter": 3, "wait": 1000},
+              {"command": "Start Hold Attack", "parameter": 4, "wait": 54000},
+              {"command": "End Hold Attack", "parameter": 4, "wait": 300}
+            ]
+          }
+        }
+      },
+    "Shangrila": {
+      "Area Name": "Shangrila",
+      "Summer 1": { 
+        "Steps" : 1,      
+        "Rotation 1": {
+          "startingLocation": { "x": -1, "y": -1, "x tolerance": 2},
+          "commands": [
+            {"command": "Use Skill", "parameter": 2, "wait": 900},
+            {"command": "Use Skill", "parameter": 3, "wait": 1000},
+            {"command": "Start Hold Attack", "parameter": 4, "wait": 54000},
+            {"command": "End Hold Attack", "parameter": 4, "wait": 300}
+          ]
+        }
+      },
+      "Autumn 5": { 
+        "Steps" : 2,      
+        "Rotation 1": {
+          "startingLocation": { "x": -1, "y": -1, "x tolerance": 2},
+          "commands": [
+            {"command": "Start Hold Attack", "parameter": 5, "wait": 3000},
+            {"command": "End Hold Attack", "parameter": 5, "wait": 0},
+            {"command": "Use Skill", "parameter": 3, "wait": 1100},
+            {"command": "Use Skill", "parameter": 2, "wait": 1400},
+            {"command": "Use Skill", "parameter": 8, "wait": 700}
+          ]
+        },
+        "Rotation 2":{
+          "startingLocation": { "x": -1, "y": -1, "x tolerance": 2},
+          "commands": [
+            {"command": "Start Hold Attack", "parameter": 4, "wait": 25000},
+            {"command": "End Hold Attack", "parameter": 4, "wait": 300}
+          ]
+        }
+      }
+    },
+    "Odium": {
+      "Area Name": "Odium",
+      "Gate 2": { 
+        "Steps" : 1,      
+        "Rotation 1": {
+          "startingLocation": { "x": -1, "y": -1, "x tolerance": 2},
+          "commands": [
+            {"command": "Use Skill", "parameter": 2, "wait": 900},
+            {"command": "Use Skill", "parameter": 3, "wait": 1000},
+            {"command": "Start Hold Attack", "parameter": 4, "wait": 54000},
+            {"command": "End Hold Attack", "parameter": 4, "wait": 300}
+          ]
+        }
+      }
+    },
+    "Arcus": {
+      "Area Name": "Arcus",
+      "Train 1": { 
+        "Steps" : 1,      
+        "Rotation 1": {
+          "startingLocation": { "x": -1, "y": -1, "x tolerance": 2},
+          "commands": [
+            {"command": "Use Skill", "parameter": 2, "wait": 900},
+            {"command": "Use Skill", "parameter": 3, "wait": 1000},
+            {"command": "Start Hold Attack", "parameter": 4, "wait": 54000},
+            {"command": "End Hold Attack", "parameter": 4, "wait": 300}
+          ]
+        }
+      }
+    },
+    "Burning Cernium": {
+      "Area Name": "Burning Cernium",
+      "Western City 4": { 
+        "Steps" : 1,      
+        "Rotation 1": {
+          "startingLocation": { "x": -1, "y": -1, "x tolerance": 2},
+          "commands": [
+            {"command": "Use Skill", "parameter": 2, "wait": 900},
+            {"command": "Use Skill", "parameter": 3, "wait": 1000},
+            {"command": "Start Hold Attack", "parameter": 4, "wait": 54000},
+            {"command": "End Hold Attack", "parameter": 4, "wait": 300}
+          ]
+        }
+      }
+    },
+    "Cernium": {}
+  }
+}
+

@@ -57,7 +57,7 @@ def main():
     bot_controller = BotController(
         state=state,
         serial=serial_executor,
-        rotation=rotation,
+        rotation=rotation, 
         movement_controller=movement_controller
     )
 
@@ -71,14 +71,15 @@ def main():
         serial=serial_executor
     )
 
-    vision_thread = threading.Thread(
-        target=vision_worker.run,
-        daemon=True
-    )
-
     # Start background systems BEFORE GUI
-    vision_thread.start()
-    vision_worker.loop_complete.wait()
+    vision_worker.start()
+    vision_worker.startup_complete.wait()
+    
+    if not vision_worker.startup_success:
+        print("[MAIN] Vision startup failed.")
+        return
+
+    print("[MAIN] Vision startup successful.")
 
     bot_controller.start()
 
@@ -87,7 +88,7 @@ def main():
     # =========================================================
     app = QApplication(sys.argv)
 
-    window = GUI(frame_state, state, rotation, bus)
+    window = GUI(frame_state, state, rotation, bus, bot_controller, vision_worker, serial_executor)
     window.show()
 
     sys.exit(app.exec())
@@ -95,3 +96,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

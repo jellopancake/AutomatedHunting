@@ -34,6 +34,13 @@ class VisionWorker(threading.Thread):
             for name in constants.area_list
         }
 
+        # ---- Rune and Player masks ----
+        self.player_mask_lower = np.array([25, 150, 200])
+        self.player_mask_upper = np.array([35, 220, 255])
+
+        self.rune_mask_lower = np.array([143, 100, 200])
+        self.rune_mask_upper = np.array([153, 200, 255])
+
         # ---- Run once before botcontroller check ----
         self.startup_complete = threading.Event()
         self.startup_success = False
@@ -174,10 +181,8 @@ class VisionWorker(threading.Thread):
 
     def find_player(self, hsv):
         # ---- player detection ----
-        lower_yellow = np.array([25, 150, 200])
-        upper_yellow = np.array([35, 220, 255])
-
-        mask = cv2.inRange(hsv, lower_yellow, upper_yellow)
+        mask = cv2.inRange(hsv, self.player_mask_lower, self.player_mask_upper)
+        self.frame_state.set_player_mask(mask)
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         if contours:
@@ -192,10 +197,8 @@ class VisionWorker(threading.Thread):
 
     def find_rune(self, hsv):
         # ---- rune detection ----
-        lower_pink = np.array([143, 100, 200])
-        upper_pink = np.array([153, 200, 255])
-
-        mask = cv2.inRange(hsv, lower_pink, upper_pink)
+        mask = cv2.inRange(hsv, self.rune_mask_lower, self.rune_mask_upper)
+        self.frame_state.set_rune_mask(mask)
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         rune_detected_now = False
@@ -239,6 +242,16 @@ class VisionWorker(threading.Thread):
         row = min(int(row), 2)
 
         return quadrants[row][col]
+
+    def set_player_hsv(self, lower, upper):
+        with self.lock:
+            self.player_mask_lower = np.array(lower)
+            self.player_mask_upper = np.array(upper)
+
+    def set_rune_hsv(self, lower, upper):
+        with self.lock:
+            self.rune_mask_lower = np.array(lower)
+            self.rune_mask_upper = np.array(upper)
 
     # =========================================================
     # Stop, Class, Area Detection

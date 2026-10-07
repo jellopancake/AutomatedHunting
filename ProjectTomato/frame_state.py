@@ -17,6 +17,8 @@ class FrameState:
 
         # Processed frames
         self._hsv_minimap = None
+        self._player_mask = None
+        self._rune_mask = None
 
         # Debug / display
         self._display_frame = None
@@ -111,7 +113,7 @@ class FrameState:
     # Getter
     def get_hsv_minimap(self):
         with self.lock:
-            return self._hsv_minimap.copy()
+            return None if self._hsv_minimap is None else self._hsv_minimap.copy()
 
     # Setter
     def set_hsv_minimap(self, frame):
@@ -119,6 +121,25 @@ class FrameState:
         
         with self.lock:
             self._hsv_minimap = hsv_frame
+
+    def set_player_mask(self, frame):
+        with self.lock:
+            self._player_mask = frame.copy()
+
+
+    def get_player_mask(self):
+        with self.lock:
+            return None if self._player_mask is None else self._player_mask.copy()
+
+
+    def set_rune_mask(self, frame):
+        with self.lock:
+            self._rune_mask = frame.copy()
+
+
+    def get_rune_mask(self):
+        with self.lock:
+            return None if self._rune_mask is None else self._rune_mask.copy()
 
     # =========================================================
     # GUI Frames

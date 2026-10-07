@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 from PyQt6.QtWidgets import (
-    QWidget, QLabel, QVBoxLayout, QHBoxLayout, QTextEdit, QPushButton, QSizePolicy, QGridLayout
+    QWidget, QLabel, QVBoxLayout, QHBoxLayout, QTextEdit, QPushButton, QSizePolicy, QGridLayout, QSlider
 )
 from PyQt6.QtGui import QImage, QPixmap, QFont
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
@@ -24,13 +24,71 @@ class GUI(QWidget):
         self.vision_worker = vision_worker
         self.serial_executor = serial_executor
 
+        self.cv_adjustment_mode = False
+
         self.setWindowTitle("Monitor")
         self.resize(800, 600)
         self.setMinimumSize(800, 600)
+
+        self.normal_ui_widget = QWidget()
+        self.cv_adjustment_widget = QWidget()
+
+        self.setup_main_ui()
+        self.setup_CV_ui()
+
+        # ==========================================
+        # Main Window Layout
+        # ==========================================
+        window_layout = QVBoxLayout()
+
+        window_layout.addWidget(self.normal_ui_widget)
+        window_layout.addWidget(self.cv_adjustment_widget)
+
+        self.setLayout(window_layout)
+
+        self.cv_adjustment_widget.hide()
+
+        # subscribe to events
+        self.bus.subscribe("rune_detected", self.on_rune_detected)
+        self.bus.subscribe("gui_message", self.on_gui_message)
+
+        # ---- Timer ----
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.update_ui)
+        self.timer.start(30)  # ~30 FPS
+
+    def closeEvent(self, event):
+        self.state.set_gui_stopped(True)
+        time.sleep(2)
+
+        self.bot_controller.stop()
+
+        self.vision_worker.stop()
+        self.vision_worker.join(timeout=2)
+
+        self.serial_executor.stop()
+
+        event.accept()
+
+    # =========================================================
+    # UI UPDATE
+    # =========================================================
+    def update_ui(self):
+        if self.cv_adjustment_mode:
+            self.update_cv_ui()
+        else:
+            self.update_main_ui()
+
+    # =========================================================
+    # MAIN GUI
+    # =========================================================
+
+    def setup_main_ui(self):
         self.gui_message_signal.connect(self.display_gui_message)
         self.gui_paused = False
 
         # ---- UI Elements ----
+        # Minimap frame
         self.display_label = QLabel()
         self.display_label.setMinimumSize(300, 300)
         self.display_label.setSizePolicy(
@@ -39,9 +97,15 @@ class GUI(QWidget):
         )
         self.display_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
+        # Class, Area, Stop frames
         self.class_label = QLabel()
         self.area_label = QLabel()
         self.stop_label = QLabel()
+
+        # Minimap CV toggle
+        self.cv_adjust_button = QPushButton("CV")
+        self.cv_adjust_button.setCheckable(True)
+        self.cv_adjust_button.clicked.connect(self.enter_cv_adjustment)
 
         self.state_text = QTextEdit()
         self.state_text.setReadOnly(True)
@@ -90,6 +154,14 @@ class GUI(QWidget):
         mini_layout.addWidget(self.class_label)
         mini_layout.addWidget(self.area_label)
         mini_layout.addWidget(self.stop_label)
+
+        top_right_layout = QVBoxLayout()
+
+        top_right_layout.addWidget(self.cv_adjust_button)
+        top_right_layout.addStretch()
+
+        mini_layout.addStretch()
+        mini_layout.addLayout(top_right_layout)
 
         mini_layout.setSpacing(10)
         mini_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -147,7 +219,7 @@ class GUI(QWidget):
         # Main Layout
         # ==========================================
 
-        main_layout = QVBoxLayout()
+        main_layout = QVBoxLayout(self.normal_ui_widget)
 
         main_layout.addLayout(top_layout, 4)
         main_layout.addLayout(bottom_layout, 1)
@@ -158,9 +230,6 @@ class GUI(QWidget):
         button_layout.addWidget(self.next_button)
 
         main_layout.addLayout(button_layout)
-
-        self.setLayout(main_layout)
-        self.setWindowTitle("Monitor")
 
         self.setStyleSheet("""
         QWidget {
@@ -199,16 +268,7 @@ class GUI(QWidget):
         """)
 
         self.setAutoFillBackground(True)
-
-        # subscribe to events
-        self.bus.subscribe("rune_detected", self.on_rune_detected)
-        self.bus.subscribe("gui_message", self.on_gui_message)
-
-        # ---- Timer ----
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.update_ui)
-        self.timer.start(30)  # ~30 FPS
-
+    
     # =========================================================
     # BUTTONS
     # =========================================================
@@ -229,9 +289,9 @@ class GUI(QWidget):
         self.rotation.next_rotation_step()
 
     # =========================================================
-    # UI UPDATE
+    # MAIN UI UPDATE
     # =========================================================
-    def update_ui(self):
+    def update_main_ui(self):
         # ---- Frames ----
         display = self.frame_state.get_display_frame()
 
@@ -242,7 +302,6 @@ class GUI(QWidget):
         self.set_label_image(self.class_label, class_frame)
         self.set_label_image(self.area_label, area_frame)
         self.set_label_image(self.stop_label, stop_frame)
-
 
         # ---- Bot State ----
         player_pos = self.state.get_player_position()
@@ -439,15 +498,270 @@ class GUI(QWidget):
             self.message_text.verticalScrollBar().maximum()
         )
 
-    def closeEvent(self, event):
-        self.state.set_gui_stopped(True)
-        time.sleep(2)
+    # =========================================================
+    # CV GUI
+    # =========================================================
 
-        self.bot_controller.stop()
+    def setup_CV_ui(self):
+        self.player_mask_label = QLabel()
+        self.player_mask_label.setMinimumSize(200, 200)
+        self.player_mask_label.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Expanding
+        )
+        self.player_mask_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.vision_worker.stop()
-        self.vision_worker.join(timeout=2)
+        self.rune_mask_label = QLabel()
+        self.rune_mask_label.setMinimumSize(200, 200)
+        self.rune_mask_label.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Expanding
+        )
+        self.rune_mask_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.serial_executor.stop()
+        # ---- Player Mask Sliders ----
+        self.player_h_min_label, self.player_h_min = \
+            self.create_hsv_slider("H Min", 0, 179, 25)
 
-        event.accept()
+        self.player_h_max_label, self.player_h_max = \
+            self.create_hsv_slider("H Max", 0, 179, 35)
+
+        self.player_s_min_label, self.player_s_min = \
+            self.create_hsv_slider("S Min", 0, 255, 150)
+
+        self.player_s_max_label, self.player_s_max = \
+            self.create_hsv_slider("S Max", 0, 255, 220)
+
+        self.player_v_min_label, self.player_v_min = \
+            self.create_hsv_slider("V Min", 0, 255, 200)
+
+        self.player_v_max_label, self.player_v_max = \
+            self.create_hsv_slider("V Max", 0, 255, 255)
+
+        # ---- Rune Mask Sliders ----
+        self.rune_h_min_label, self.rune_h_min = \
+            self.create_hsv_slider("H Min", 0, 179, 143)
+
+        self.rune_h_max_label, self.rune_h_max = \
+            self.create_hsv_slider("H Max", 0, 179, 153)
+
+        self.rune_s_min_label, self.rune_s_min = \
+            self.create_hsv_slider("S Min", 0, 255, 100)
+
+        self.rune_s_max_label, self.rune_s_max = \
+            self.create_hsv_slider("S Max", 0, 255, 200)
+
+        self.rune_v_min_label, self.rune_v_min = \
+            self.create_hsv_slider("V Min", 0, 255, 200)
+
+        self.rune_v_max_label, self.rune_v_max = \
+            self.create_hsv_slider("V Max", 0, 255, 255)
+
+        # Return button
+        self.cv_return_button = QPushButton("Back")
+        self.cv_return_button.clicked.connect(self.exit_cv_adjustment)
+
+        # -----------------------------
+        # LAYOUT
+        # -----------------------------
+        cv_layout = QVBoxLayout()
+
+        # Top-right button layout
+        cv_top_bar = QHBoxLayout()
+        cv_top_bar.addStretch()
+        cv_top_bar.addWidget(self.cv_return_button)
+
+        # Mask previews
+        top_layout = QHBoxLayout()
+        top_layout.addWidget(self.player_mask_label, 4)
+        top_layout.addWidget(self.rune_mask_label, 4)
+
+        player_slider_layout = QVBoxLayout()
+        rune_slider_layout = QVBoxLayout()
+
+        # ---- Player Mask Sliders ----
+        player_slider_layout = QVBoxLayout()
+
+        player_h_layout = QHBoxLayout()
+        player_h_layout.addWidget(self.player_h_min_label)
+        player_h_layout.addWidget(self.player_h_min)
+        player_slider_layout.addLayout(player_h_layout)
+
+        player_h_layout = QHBoxLayout()
+        player_h_layout.addWidget(self.player_h_max_label)
+        player_h_layout.addWidget(self.player_h_max)
+        player_slider_layout.addLayout(player_h_layout)
+
+        player_h_layout = QHBoxLayout()
+        player_h_layout.addWidget(self.player_s_min_label)
+        player_h_layout.addWidget(self.player_s_min)
+        player_slider_layout.addLayout(player_h_layout)
+
+        player_h_layout = QHBoxLayout()
+        player_h_layout.addWidget(self.player_s_max_label)
+        player_h_layout.addWidget(self.player_s_max)
+        player_slider_layout.addLayout(player_h_layout)
+
+        player_h_layout = QHBoxLayout()
+        player_h_layout.addWidget(self.player_v_min_label)
+        player_h_layout.addWidget(self.player_v_min)
+        player_slider_layout.addLayout(player_h_layout)
+
+        player_h_layout = QHBoxLayout()
+        player_h_layout.addWidget(self.player_v_max_label)
+        player_h_layout.addWidget(self.player_v_max)
+        player_slider_layout.addLayout(player_h_layout)
+
+        # ---- Rune Mask Sliders ----
+        rune_slider_layout = QVBoxLayout()
+
+        rune_h_layout = QHBoxLayout()
+        rune_h_layout.addWidget(self.rune_h_min_label)
+        rune_h_layout.addWidget(self.rune_h_min)
+        rune_slider_layout.addLayout(rune_h_layout)
+
+        rune_h_layout = QHBoxLayout()
+        rune_h_layout.addWidget(self.rune_h_max_label)
+        rune_h_layout.addWidget(self.rune_h_max)
+        rune_slider_layout.addLayout(rune_h_layout)
+
+        rune_h_layout = QHBoxLayout()
+        rune_h_layout.addWidget(self.rune_s_min_label)
+        rune_h_layout.addWidget(self.rune_s_min)
+        rune_slider_layout.addLayout(rune_h_layout)
+
+        rune_h_layout = QHBoxLayout()
+        rune_h_layout.addWidget(self.rune_s_max_label)
+        rune_h_layout.addWidget(self.rune_s_max)
+        rune_slider_layout.addLayout(rune_h_layout)
+
+        rune_h_layout = QHBoxLayout()
+        rune_h_layout.addWidget(self.rune_v_min_label)
+        rune_h_layout.addWidget(self.rune_v_min)
+        rune_slider_layout.addLayout(rune_h_layout)
+
+        rune_h_layout = QHBoxLayout()
+        rune_h_layout.addWidget(self.rune_v_max_label)
+        rune_h_layout.addWidget(self.rune_v_max)
+        rune_slider_layout.addLayout(rune_h_layout)
+
+        bottom_layout = QHBoxLayout()
+        bottom_layout.addLayout(player_slider_layout)
+        bottom_layout.addLayout(rune_slider_layout)
+
+        # ---- CV Layout ----
+        cv_layout = QVBoxLayout(self.cv_adjustment_widget)
+
+        cv_layout.addLayout(cv_top_bar)
+        cv_layout.addLayout(top_layout)
+        cv_layout.addLayout(bottom_layout)
+        
+        self.setup_slider_constraints()
+
+
+    def enter_cv_adjustment(self):
+        self.cv_adjustment_mode = True
+
+        self.normal_ui_widget.setVisible(False)
+        self.cv_adjustment_widget.setVisible(True)
+
+    def exit_cv_adjustment(self):
+        self.cv_adjustment_mode = False
+        
+        self.normal_ui_widget.setVisible(True)
+        self.cv_adjustment_widget.setVisible(False)
+
+    def create_hsv_slider(self, name, minimum, maximum, value):
+        label = QLabel(f"{name}: {value}")
+
+        slider = QSlider(Qt.Orientation.Horizontal)
+        slider.setMinimum(minimum)
+        slider.setMaximum(maximum)
+        slider.setValue(value)
+
+        slider.valueChanged.connect(
+            lambda value: label.setText(f"{name}: {value}")
+        )
+
+        return label, slider
+
+    def setup_slider_constraints(self):
+        # Player
+        self.player_h_min.valueChanged.connect(
+            lambda value: self.player_h_max.setMinimum(value)
+        )
+        self.player_h_max.valueChanged.connect(
+            lambda value: self.player_h_min.setMaximum(value)
+        )
+
+        self.player_s_min.valueChanged.connect(
+            lambda value: self.player_s_max.setMinimum(value)
+        )
+        self.player_s_max.valueChanged.connect(
+            lambda value: self.player_s_min.setMaximum(value)
+        )
+
+        self.player_v_min.valueChanged.connect(
+            lambda value: self.player_v_max.setMinimum(value)
+        )
+        self.player_v_max.valueChanged.connect(
+            lambda value: self.player_v_min.setMaximum(value)
+        )
+
+        # Rune
+        self.rune_h_min.valueChanged.connect(
+            lambda value: self.rune_h_max.setMinimum(value)
+        )
+        self.rune_h_max.valueChanged.connect(
+            lambda value: self.rune_h_min.setMaximum(value)
+        )
+
+        self.rune_s_min.valueChanged.connect(
+            lambda value: self.rune_s_max.setMinimum(value)
+        )
+        self.rune_s_max.valueChanged.connect(
+            lambda value: self.rune_s_min.setMaximum(value)
+        )
+
+        self.rune_v_min.valueChanged.connect(
+            lambda value: self.rune_v_max.setMinimum(value)
+        )
+        self.rune_v_max.valueChanged.connect(
+            lambda value: self.rune_v_min.setMaximum(value)
+        )
+
+    # =========================================================
+    # CV UI UPDATE
+    # =========================================================
+
+    def update_cv_ui(self):
+        player_mask = self.frame_state.get_player_mask()
+        rune_mask = self.frame_state.get_rune_mask()
+
+        self.set_mask_image(self.player_mask_label, player_mask)
+        self.set_mask_image(self.rune_mask_label, rune_mask)
+
+    def set_mask_image(self, label, mask):
+        if mask is None:
+            return
+
+        h, w = mask.shape
+
+        qt_img = QImage(
+            mask.data,
+            w,
+            h,
+            w,
+            QImage.Format.Format_Grayscale8
+        )
+
+        pixmap = QPixmap.fromImage(qt_img)
+
+        label.setPixmap(
+            pixmap.scaled(
+                label.width(),
+                label.height(),
+                Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation
+            )
+        )

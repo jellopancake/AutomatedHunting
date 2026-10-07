@@ -20,6 +20,9 @@ class FrameState:
         self._player_mask = None
         self._rune_mask = None
 
+        self._player_contour_size = 0
+        self._rune_contour_size = 0
+
         # Debug / display
         self._display_frame = None
 
@@ -140,6 +143,23 @@ class FrameState:
     def get_rune_mask(self):
         with self.lock:
             return None if self._rune_mask is None else self._rune_mask.copy()
+
+    def set_player_contour_size(self, size):
+        with self.lock:
+            self._player_contour_size = size
+
+    def get_player_contour_size(self):
+        with self.lock:
+            return self._player_contour_size
+
+
+    def set_rune_contour_size(self, size):
+        with self.lock:
+            self._rune_contour_size = size
+
+    def get_rune_contour_size(self):
+        with self.lock:
+            return self._rune_contour_size
 
     # =========================================================
     # GUI Frames

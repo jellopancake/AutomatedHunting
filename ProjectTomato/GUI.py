@@ -13,16 +13,14 @@ import time
 class GUI(QWidget):
     gui_message_signal = pyqtSignal(str)
 
-    def __init__(self, frame_state, state, rotation, bus, bot_controller, vision_worker, serial_executor):
+    def __init__(self, frame_state, state, rotation, bus, vision_worker):
         super().__init__()
 
         self.bus = bus
         self.frame_state = frame_state
         self.state = state
         self.rotation = rotation
-        self.bot_controller = bot_controller
         self.vision_worker = vision_worker
-        self.serial_executor = serial_executor
 
         self.cv_adjustment_mode = False
 
@@ -79,9 +77,9 @@ class GUI(QWidget):
         else:
             self.update_main_ui()
 
-    # =========================================================
+    # ======================================================================================
     # MAIN GUI
-    # =========================================================
+    # ======================================================================================
 
     def setup_main_ui(self):
         self.gui_message_signal.connect(self.display_gui_message)
@@ -498,9 +496,9 @@ class GUI(QWidget):
             self.message_text.verticalScrollBar().maximum()
         )
 
-    # =========================================================
+    # ======================================================================================
     # CV GUI
-    # =========================================================
+    # ======================================================================================
 
     def setup_CV_ui(self):
         self.player_mask_label = QLabel()
@@ -520,46 +518,77 @@ class GUI(QWidget):
         self.rune_mask_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # ---- Player Mask Sliders ----
+        player_lower, player_upper = self.vision_worker.get_player_hsv()
+
         self.player_h_min_label, self.player_h_min = \
-            self.create_hsv_slider("H Min", 0, 179, 25)
+            self.create_hsv_slider("H Min", 0, 179, player_lower[0])
 
         self.player_h_max_label, self.player_h_max = \
-            self.create_hsv_slider("H Max", 0, 179, 35)
+            self.create_hsv_slider("H Max", 0, 179, player_upper[0])
 
         self.player_s_min_label, self.player_s_min = \
-            self.create_hsv_slider("S Min", 0, 255, 150)
+            self.create_hsv_slider("S Min", 0, 255, player_lower[1])
 
         self.player_s_max_label, self.player_s_max = \
-            self.create_hsv_slider("S Max", 0, 255, 220)
+            self.create_hsv_slider("S Max", 0, 255, player_upper[1])
 
         self.player_v_min_label, self.player_v_min = \
-            self.create_hsv_slider("V Min", 0, 255, 200)
+            self.create_hsv_slider("V Min", 0, 255, player_lower[2])
 
         self.player_v_max_label, self.player_v_max = \
-            self.create_hsv_slider("V Max", 0, 255, 255)
+            self.create_hsv_slider("V Max", 0, 255, player_upper[2])
 
         # ---- Rune Mask Sliders ----
+        rune_lower, rune_upper = self.vision_worker.get_rune_hsv()
+
         self.rune_h_min_label, self.rune_h_min = \
-            self.create_hsv_slider("H Min", 0, 179, 143)
+            self.create_hsv_slider("H Min", 0, 179, rune_lower[0])
 
         self.rune_h_max_label, self.rune_h_max = \
-            self.create_hsv_slider("H Max", 0, 179, 153)
+            self.create_hsv_slider("H Max", 0, 179, rune_upper[0])
 
         self.rune_s_min_label, self.rune_s_min = \
-            self.create_hsv_slider("S Min", 0, 255, 100)
+            self.create_hsv_slider("S Min", 0, 255, rune_lower[1])
 
         self.rune_s_max_label, self.rune_s_max = \
-            self.create_hsv_slider("S Max", 0, 255, 200)
+            self.create_hsv_slider("S Max", 0, 255, rune_upper[1])
 
         self.rune_v_min_label, self.rune_v_min = \
-            self.create_hsv_slider("V Min", 0, 255, 200)
+            self.create_hsv_slider("V Min", 0, 255, rune_lower[2])
 
         self.rune_v_max_label, self.rune_v_max = \
-            self.create_hsv_slider("V Max", 0, 255, 255)
+            self.create_hsv_slider("V Max", 0, 255, rune_upper[2])
+
+        # Player HSV updates
+        self.player_h_min.valueChanged.connect(self.update_player_hsv)
+        self.player_h_max.valueChanged.connect(self.update_player_hsv)
+        self.player_s_min.valueChanged.connect(self.update_player_hsv)
+        self.player_s_max.valueChanged.connect(self.update_player_hsv)
+        self.player_v_min.valueChanged.connect(self.update_player_hsv)
+        self.player_v_max.valueChanged.connect(self.update_player_hsv)
+
+        # Rune HSV updates
+        self.rune_h_min.valueChanged.connect(self.update_rune_hsv)
+        self.rune_h_max.valueChanged.connect(self.update_rune_hsv)
+        self.rune_s_min.valueChanged.connect(self.update_rune_hsv)
+        self.rune_s_max.valueChanged.connect(self.update_rune_hsv)
+        self.rune_v_min.valueChanged.connect(self.update_rune_hsv)
+        self.rune_v_max.valueChanged.connect(self.update_rune_hsv)
 
         # Return button
         self.cv_return_button = QPushButton("Back")
         self.cv_return_button.clicked.connect(self.exit_cv_adjustment)
+
+        # Contour Size Labels
+        self.player_contour_label = QLabel("Player Contour: 0")
+        self.rune_contour_label = QLabel("Rune Contour: 0")
+
+        # Reset CV masks to defaults
+        self.cv_player_reset_button = QPushButton("Reset Player Defaults")
+        self.cv_player_reset_button.clicked.connect(self.reset_cv_player_defaults)
+
+        self.cv_rune_reset_button = QPushButton("Reset Rune Defaults")
+        self.cv_rune_reset_button.clicked.connect(self.reset_cv_rune_defaults)
 
         # -----------------------------
         # LAYOUT
@@ -572,9 +601,17 @@ class GUI(QWidget):
         cv_top_bar.addWidget(self.cv_return_button)
 
         # Mask previews
+        player_preview_layout = QVBoxLayout()
+        player_preview_layout.addWidget(self.player_mask_label)
+        player_preview_layout.addWidget(self.player_contour_label)
+
+        rune_preview_layout = QVBoxLayout()
+        rune_preview_layout.addWidget(self.rune_mask_label)
+        rune_preview_layout.addWidget(self.rune_contour_label)
+
         top_layout = QHBoxLayout()
-        top_layout.addWidget(self.player_mask_label, 4)
-        top_layout.addWidget(self.rune_mask_label, 4)
+        top_layout.addLayout(player_preview_layout, 4)
+        top_layout.addLayout(rune_preview_layout, 4)
 
         player_slider_layout = QVBoxLayout()
         rune_slider_layout = QVBoxLayout()
@@ -645,6 +682,9 @@ class GUI(QWidget):
         rune_h_layout.addWidget(self.rune_v_max)
         rune_slider_layout.addLayout(rune_h_layout)
 
+        player_slider_layout.addWidget(self.cv_player_reset_button)
+        rune_slider_layout.addWidget(self.cv_rune_reset_button)
+
         bottom_layout = QHBoxLayout()
         bottom_layout.addLayout(player_slider_layout)
         bottom_layout.addLayout(rune_slider_layout)
@@ -655,21 +695,30 @@ class GUI(QWidget):
         cv_layout.addLayout(cv_top_bar)
         cv_layout.addLayout(top_layout)
         cv_layout.addLayout(bottom_layout)
-        
+
         self.setup_slider_constraints()
 
+    # =========================================================
+    # BUTTONS
+    # =========================================================
 
     def enter_cv_adjustment(self):
         self.cv_adjustment_mode = True
 
+        self.state.set_gui_stopped(True)
         self.normal_ui_widget.setVisible(False)
         self.cv_adjustment_widget.setVisible(True)
 
     def exit_cv_adjustment(self):
         self.cv_adjustment_mode = False
-        
+
+        self.state.set_gui_stopped(self.gui_paused)
         self.normal_ui_widget.setVisible(True)
         self.cv_adjustment_widget.setVisible(False)
+
+    # =========================================================
+    # SLIDERS
+    # =========================================================
 
     def create_hsv_slider(self, name, minimum, maximum, value):
         label = QLabel(f"{name}: {value}")
@@ -731,15 +780,8 @@ class GUI(QWidget):
         )
 
     # =========================================================
-    # CV UI UPDATE
+    # MASKS
     # =========================================================
-
-    def update_cv_ui(self):
-        player_mask = self.frame_state.get_player_mask()
-        rune_mask = self.frame_state.get_rune_mask()
-
-        self.set_mask_image(self.player_mask_label, player_mask)
-        self.set_mask_image(self.rune_mask_label, rune_mask)
 
     def set_mask_image(self, label, mask):
         if mask is None:
@@ -765,3 +807,65 @@ class GUI(QWidget):
                 Qt.TransformationMode.SmoothTransformation
             )
         )
+
+    # =========================================================
+    # CV UI UPDATE
+    # =========================================================
+
+    def update_cv_ui(self):
+        player_mask = self.frame_state.get_player_mask()
+        rune_mask = self.frame_state.get_rune_mask()
+
+        self.set_mask_image(self.player_mask_label, player_mask)
+        self.set_mask_image(self.rune_mask_label, rune_mask)
+
+        player_size = self.frame_state.get_player_contour_size()
+        rune_size = self.frame_state.get_rune_contour_size()
+
+        self.player_contour_label.setText(
+            f"Player Contour: {player_size}"
+        )
+
+        self.rune_contour_label.setText(
+            f"Rune Contour: {rune_size}"
+        )
+
+    def update_player_hsv(self):
+        lower = [
+            self.player_h_min.value(),
+            self.player_s_min.value(),
+            self.player_v_min.value()
+        ]
+
+        upper = [
+            self.player_h_max.value(),
+            self.player_s_max.value(),
+            self.player_v_max.value()
+        ]
+
+        self.vision_worker.set_player_hsv(lower, upper)
+
+    def update_rune_hsv(self):
+        lower = [
+            self.rune_h_min.value(),
+            self.rune_s_min.value(),
+            self.rune_v_min.value()
+        ]
+
+        upper = [
+            self.rune_h_max.value(),
+            self.rune_s_max.value(),
+            self.rune_v_max.value()
+        ]
+
+        self.vision_worker.set_rune_hsv(lower, upper)
+
+    def reset_cv_player_defaults(self):
+        self.vision_worker.reset_player_hsv()
+
+    def reset_cv_rune_defaults(self):
+        self.vision_worker.reset_rune_hsv()
+
+
+
+

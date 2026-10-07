@@ -35,11 +35,17 @@ class VisionWorker(threading.Thread):
         }
 
         # ---- Rune and Player masks ----
-        self.player_mask_lower = np.array([25, 150, 200])
-        self.player_mask_upper = np.array([35, 220, 255])
+        self.default_player_mask_lower = np.array([29, 183, 186])
+        self.default_player_mask_upper = np.array([35, 255, 255])
 
-        self.rune_mask_lower = np.array([143, 100, 200])
-        self.rune_mask_upper = np.array([153, 200, 255])
+        self.default_rune_mask_lower = np.array([140, 100, 200])
+        self.default_rune_mask_upper = np.array([156, 220, 255])
+
+        self.player_mask_lower = self.default_player_mask_lower.copy()
+        self.player_mask_upper = self.default_player_mask_upper.copy()
+
+        self.rune_mask_lower = self.default_rune_mask_lower.copy()
+        self.rune_mask_upper = self.default_rune_mask_upper.copy()
 
         # ---- Run once before botcontroller check ----
         self.startup_complete = threading.Event()
@@ -189,6 +195,9 @@ class VisionWorker(threading.Thread):
             c = max(contours, key=cv2.contourArea)
             x, y, w, h = cv2.boundingRect(c)
 
+            contour_size = cv2.contourArea(c)
+            self.frame_state.set_player_contour_size(contour_size)
+
             self.state.set_player_position(x + w // 2, y + h // 2)
 
     # =========================================================
@@ -206,8 +215,11 @@ class VisionWorker(threading.Thread):
         if contours:
             c = max(contours, key=cv2.contourArea)
             x, y, w, h = cv2.boundingRect(c)
-            contours_size = w*h
-            rune_size = 14
+            
+            contours_size = cv2.contourArea(c)
+            self.frame_state.set_rune_contour_size(contours_size)
+
+            rune_size = 11
 
             if (contours_size > rune_size):
                 self.state.set_rune_position(x,y)
@@ -215,6 +227,8 @@ class VisionWorker(threading.Thread):
                 self.state.set_rune_cardinal_location(rune_cardinal_pos)
 
                 rune_detected_now = True
+        else:
+            self.frame_state.set_rune_contour_size(0)
                 
         self.state.update_rune_observation(rune_detected_now)
 
@@ -243,6 +257,20 @@ class VisionWorker(threading.Thread):
 
         return quadrants[row][col]
 
+    def get_player_hsv(self):
+        with self.lock:
+            return (
+                self.player_mask_lower.copy(),
+                self.player_mask_upper.copy()
+            )
+
+    def get_rune_hsv(self):
+        with self.lock:
+            return (
+                self.rune_mask_lower.copy(),
+                self.rune_mask_upper.copy()
+            )    
+
     def set_player_hsv(self, lower, upper):
         with self.lock:
             self.player_mask_lower = np.array(lower)
@@ -252,6 +280,18 @@ class VisionWorker(threading.Thread):
         with self.lock:
             self.rune_mask_lower = np.array(lower)
             self.rune_mask_upper = np.array(upper)
+
+    def reset_player_hsv(self):
+        self.set_player_hsv(
+            self.default_player_mask_lower,
+            self.default_player_mask_upper
+        )
+
+    def reset_rune_hsv(self):
+        self.set_rune_hsv(
+            self.default_rune_mask_lower,
+            self.default_rune_mask_upper
+        )
 
     # =========================================================
     # Stop, Class, Area Detection

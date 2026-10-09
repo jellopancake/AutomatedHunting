@@ -33,11 +33,11 @@
  - Classes can have their own rotations for each map
  - Self corrects player positioning when it is thrown off due to lag spikes or special event monsters
 
-# Program in action
-https://github.com/user-attachments/assets/13b29be0-05f6-47a5-8e27-85fe71b21c6b
+# Rotation Execution + Character Swapping
+https://github.com/user-attachments/assets/97d45c78-bd0c-48e2-a24d-061145292eb2
 
-# Character Swapping in action
-https://github.com/user-attachments/assets/6e2d8c7e-4736-4469-a6dd-de1c93196348
+# HSV Mask Adjustment
+https://github.com/user-attachments/assets/6c73cf96-6584-4801-b8d1-53febcd2cdbc
 
 # Arduino Setup
 ![20260225_162108](https://github.com/user-attachments/assets/1bd40d1f-9142-4527-bb42-1e6892d01a60)

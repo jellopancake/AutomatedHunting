@@ -34,10 +34,10 @@
  - Self corrects player positioning when it is thrown off due to lag spikes or special event monsters
 
 # Rotation Execution + Character Swapping
-https://github.com/user-attachments/assets/97d45c78-bd0c-48e2-a24d-061145292eb2
+https://github.com/user-attachments/assets/6c73cf96-6584-4801-b8d1-53febcd2cdbc
 
 # HSV Mask Adjustment
-https://github.com/user-attachments/assets/6c73cf96-6584-4801-b8d1-53febcd2cdbc
+https://github.com/user-attachments/assets/97d45c78-bd0c-48e2-a24d-061145292eb2
 
 # Arduino Setup
 ![20260225_162108](https://github.com/user-attachments/assets/1bd40d1f-9142-4527-bb42-1e6892d01a60)

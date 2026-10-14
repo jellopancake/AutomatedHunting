@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 from PyQt6.QtWidgets import (
-    QWidget, QLabel, QVBoxLayout, QHBoxLayout, QTextEdit, QPushButton, QSizePolicy, QGridLayout, QSlider
+    QWidget, QLabel, QVBoxLayout, QHBoxLayout, QTextEdit, QPushButton, QSizePolicy, QGridLayout, QSlider, QGroupBox
 )
 from PyQt6.QtGui import QImage, QPixmap, QFont
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
@@ -9,18 +9,28 @@ import threading
 import textwrap
 from playsound import playsound
 import time
+import constants
+
 
 class GUI(QWidget):
     gui_message_signal = pyqtSignal(str)
+    key_adjust_requested = pyqtSignal(str, int)
 
-    def __init__(self, frame_state, state, rotation, bus, vision_worker):
+    def __init__(self, frame_state, state, rotation, bus, bot_controller, serial, vision_worker):
         super().__init__()
 
         self.bus = bus
         self.frame_state = frame_state
         self.state = state
         self.rotation = rotation
+        self.bot_controller = bot_controller
+        self.serial = serial
         self.vision_worker = vision_worker
+
+        self.ADJUSTMENTS = [-5, -4, -3, -2, -1, 1, 2, 3, 4, 5]
+
+        self.key_buttons = {}
+        self.selected_key = None
 
         self.cv_adjustment_mode = False
 
@@ -30,9 +40,11 @@ class GUI(QWidget):
 
         self.normal_ui_widget = QWidget()
         self.cv_adjustment_widget = QWidget()
+        self.servo_calibration_widget = QWidget()
 
         self.setup_main_ui()
         self.setup_CV_ui()
+        self.setup_calibration_ui()
 
         # ==========================================
         # Main Window Layout
@@ -41,14 +53,17 @@ class GUI(QWidget):
 
         window_layout.addWidget(self.normal_ui_widget)
         window_layout.addWidget(self.cv_adjustment_widget)
+        window_layout.addWidget(self.servo_calibration_widget)
 
         self.setLayout(window_layout)
 
         self.cv_adjustment_widget.hide()
+        self.servo_calibration_widget.hide()
 
         # subscribe to events
         self.bus.subscribe("rune_detected", self.on_rune_detected)
         self.bus.subscribe("gui_message", self.on_gui_message)
+        self.key_adjust_requested.connect(self.on_key_adjust_requested)        
 
         # ---- Timer ----
         self.timer = QTimer()
@@ -64,7 +79,7 @@ class GUI(QWidget):
         self.vision_worker.stop()
         self.vision_worker.join(timeout=2)
 
-        self.serial_executor.stop()
+        self.serial.stop()
 
         event.accept()
 
@@ -104,6 +119,11 @@ class GUI(QWidget):
         self.cv_adjust_button = QPushButton("CV")
         self.cv_adjust_button.setCheckable(True)
         self.cv_adjust_button.clicked.connect(self.enter_cv_adjustment)
+
+        # Calibration toggle
+        self.calibration_mode_button = QPushButton("KB")
+        self.calibration_mode_button.setCheckable(True)
+        self.calibration_mode_button.clicked.connect(self.enter_calibration)
 
         self.state_text = QTextEdit()
         self.state_text.setReadOnly(True)
@@ -156,6 +176,7 @@ class GUI(QWidget):
         top_right_layout = QVBoxLayout()
 
         top_right_layout.addWidget(self.cv_adjust_button)
+        top_right_layout.addWidget(self.calibration_mode_button)
         top_right_layout.addStretch()
 
         mini_layout.addStretch()
@@ -593,8 +614,6 @@ class GUI(QWidget):
         # -----------------------------
         # LAYOUT
         # -----------------------------
-        cv_layout = QVBoxLayout()
-
         # Top-right button layout
         cv_top_bar = QHBoxLayout()
         cv_top_bar.addStretch()
@@ -866,6 +885,96 @@ class GUI(QWidget):
     def reset_cv_rune_defaults(self):
         self.vision_worker.reset_rune_hsv()
 
+    # ======================================================================================
+    # CALIBRATION GUI
+    # ======================================================================================
 
+    def setup_calibration_ui(self):
+        calibration_layout = QVBoxLayout(self.servo_calibration_widget)
 
+        # Return button
+        self.calibration_return_button = QPushButton("Back")
+        self.calibration_return_button.clicked.connect(self.exit_calibration)
 
+        calibration_layout.addWidget(self.calibration_return_button)
+
+        # Key selection grid
+        key_group = QGroupBox("Select Key")
+        key_layout = QGridLayout(key_group)
+
+        for index, key in enumerate(constants.KEYS):
+            row = index // 3
+            col = index % 3
+
+            button = QPushButton(key)
+            button.setMinimumHeight(40)
+            button.clicked.connect(
+                lambda checked=False, k=key: self.select_key(k)
+            )
+
+            key_layout.addWidget(button, row, col)
+            self.key_buttons[key] = button
+
+        calibration_layout.addWidget(key_group)
+
+        # Selected key label
+        self.selected_label = QLabel("Selected key: None")
+        calibration_layout.addWidget(self.selected_label)
+
+        # Angle adjustment buttons
+        adjustment_group = QGroupBox("Adjust Angle")
+        adjustment_layout = QGridLayout(adjustment_group)
+
+        for index, amount in enumerate(self.ADJUSTMENTS):
+            button = QPushButton(f"{amount:+d}")
+            button.setMinimumHeight(40)
+            button.clicked.connect(
+                lambda checked=False, a=amount: self.adjust_key(a)
+            )
+
+            adjustment_layout.addWidget(button, 0, index)
+
+        calibration_layout.addWidget(adjustment_group)
+
+        # Make key buttons checkable so selection is visible.
+        for button in self.key_buttons.values():
+            button.setCheckable(True)
+    
+
+    def select_key(self, key):
+        self.selected_key = key
+        self.selected_label.setText(f"Selected key: {key}")
+
+        for name, button in self.key_buttons.items():
+            button.setChecked(name == key)
+
+    def adjust_key(self, amount):
+        if self.selected_key is None:
+            self.selected_label.setText(
+                "Select a key before adjusting its angle."
+            )
+            return
+
+        self.key_adjust_requested.emit(
+            self.selected_key, amount
+        )
+
+    def on_key_adjust_requested(self, key, amount):
+        self.bus.emit("calibrate_key", {
+            "key": key,
+            "amount": amount,
+        })
+
+    # =========================================================
+    # BUTTONS
+    # =========================================================
+
+    def enter_calibration(self):
+        self.state.set_gui_stopped(True)
+        self.normal_ui_widget.setVisible(False)
+        self.servo_calibration_widget.setVisible(True)
+
+    def exit_calibration(self):
+        self.state.set_gui_stopped(self.gui_paused)
+        self.normal_ui_widget.setVisible(True)
+        self.servo_calibration_widget.setVisible(False)

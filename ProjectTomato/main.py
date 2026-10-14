@@ -88,7 +88,7 @@ def main():
     # =========================================================
     app = QApplication(sys.argv)
 
-    window = GUI(frame_state, state, rotation, bus, vision_worker)
+    window = GUI(frame_state, state, rotation, bus, bot_controller, serial_executor, vision_worker)
     window.show()
 
     sys.exit(app.exec())

@@ -19,6 +19,11 @@ class SerialCommandExecutor:
         self._last_gen = self.state.get_generation()
         self._last_reset_gen = None
 
+        self.bus.subscribe(
+            "calibrate_key",
+            self.handle_key_calibration,
+            )
+
         self.worker = threading.Thread(target=self._run, daemon=True)
         self.worker.start()
 
@@ -89,50 +94,83 @@ class SerialCommandExecutor:
     # =========================
     # Core Execution
     # =========================
-    def _execute(self, command_text, param, wait_ms):
+    def _execute(self, command_text, param1, param2):
         # =========================
-        # CONFIG PACKET
+        # CONFIG PACKET (CMD TYPE, PARAM 1, PARAM 2)
         # =========================
         if command_text == "CONFIG_SETUP":
-            if len(param) != 1 or len(wait_ms) != 1:
+            if len(param1) != 1 or len(param2) != 1:
                 raise ValueError("CONFIG_SETUP requires 2 single-digit chars (param, wait_ms)")
 
-            packet = bytes([
-                ord('*'),
-                ord(param),
-                ord(wait_ms)
-            ])
+            self._handshake()
 
-            with self.lock:
-                self.ser.write(packet)
+            self.send_packet('*', param1, param2)
 
-            print(f"[Serial CONFIG] * {param}{wait_ms}")
+            print(f"[Serial CONFIG] * {param1}{param2}")
 
             return
 
         # =========================
-        # NORMAL COMMAND PACKET
+        # CALIBRATION PACKET (CMD TYPE, PARAM1, PARAM2)
         # =========================
+
+        if command_text == "CALIBRATION":
+            key_number = int(param1)
+            encoded_amount = int(param2)
+
+            if not 0 <= key_number < 15:
+                raise ValueError(f"Invalid key number: {key_number}")
+
+            if not 0 <= encoded_amount <= 9:
+                raise ValueError(f"Invalid adjustment: {encoded_amount}")
+
+            if key_number >= 10:
+                calibration_key = '>'
+                calibration_param = str(key_number - 10)
+            else:
+                calibration_key = '<'
+                calibration_param = str(key_number)
+
+            self._handshake()
+
+            self.send_packet(
+                calibration_key,
+                calibration_param,
+                str(encoded_amount)
+            )
+
+            print(
+                f"[Serial CALIBRATION] key={key_number}, "
+                f"adjustment_code={encoded_amount}"
+            )
+            return
+
+        # =========================
+        # NORMAL COMMAND PACKET (CMD TYPE, CMD CHAR, WAIT MS)
+        # =========================
+        # param2 is wait_ms
 
         cmd_char = self.encode(command_text)
 
-        if len(cmd_char) != 1 or len(param) != 1:
+        if len(cmd_char) != 1 or len(param1) != 1:
             raise ValueError("Commands and params must be single characters")
 
         self._handshake()
 
+        self.send_packet('+', cmd_char, param1)
+
+        self.printToGUI(cmd_char, param1, param2)
+        self._smart_delay(param2)
+
+    def send_packet(self, param1, param2, param3):
         packet = bytes([
-            ord('+'),
-            ord(cmd_char),
-            ord(param)
+            ord(param1),
+            ord(param2),
+            ord(param3)
         ])
 
         with self.lock:
             self.ser.write(packet)
-
-        self.printToGUI(cmd_char, param, wait_ms)
-        self._smart_delay(wait_ms)
-
 
     # =========================
     # Handshake Protocol
@@ -253,3 +291,28 @@ class SerialCommandExecutor:
                     return "incorrect param type(skill)"
         else:
             return "no param"
+
+    # =========================
+    # Calibration Event
+    # =========================    
+
+    def handle_key_calibration(self, data):
+        key = data["key"]
+        amount = data["amount"]
+
+        key_number = constants.KEYS.index(key)
+
+        # Map -5..-1 and +1..+5 to 0..9.
+        encoded_amount = amount + 5
+        if amount > 0:
+            encoded_amount -= 1
+
+        # Use the existing queue and worker thread.
+        self.submit(
+            "CALIBRATION",
+            str(key_number),
+            str(encoded_amount)
+        )
+
+
+    

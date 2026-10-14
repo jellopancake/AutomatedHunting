@@ -101,3 +101,9 @@ favourite_map_key = {
 
 jump_delay = 40
 short_jump_delay = 160
+
+KEYS = [
+	"LEFT", "RIGHT", "DOWN", "F", "G",
+	"H", "J", "COLON", "APOS", "ALT",
+	"CTRL", "SPACE", "SPACE2", "DEL", "ENTER"
+]

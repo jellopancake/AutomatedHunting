@@ -590,7 +590,7 @@ void pressDownButton(Key key){
 
 void releaseButton(Key key){
    Servo servo = keyToServo(key);
-   
+
    servo.write(90);
 }
 
